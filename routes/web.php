@@ -20,11 +20,10 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Dashboard
-Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return view('welcome');
     })->name('dashboard');
-});
+
 
 Route::get('/{any}', function () {
     return view('welcome');

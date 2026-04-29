@@ -11,7 +11,9 @@ class AuthController extends Controller
     // Redirect ke halaman login Google
     public function redirectToGoogle()
     {
-    return Socialite::driver('google')->with(['hd' => 'student.itera.ac.id'])->redirect();
+    return Socialite::driver('google')
+    ->with(['hd' => 'student.itera.ac.id', 'prompt' => 'select_account'])
+    ->redirect();
     }
 
     // Handle callback dari Google setelah user login
@@ -28,11 +30,17 @@ class AuthController extends Controller
         }
 
         // Cari user berdasarkan google_id, kalau belum ada buat baru
+        // Extract NIM dari email
+        // Format: nama.nim@student.itera.ac.id
+        $nimPart = explode('@', $email)[0]; // hasil: nama.nim
+        $nim = explode('.', $nimPart)[1]; // hasil: nim
+
         $user = User::updateOrCreate(
             ['google_id' => $googleUser->getId()],
             [
                 'name'   => $googleUser->getName(),
                 'email'  => $email,
+                'nim'    => $nim,
                 'role'   => 'anggota',
                 'status' => 'aktif',
             ]
@@ -44,7 +52,7 @@ class AuthController extends Controller
 
         // Redirect ke React dengan token di query param
         // React akan ambil token ini dan simpan di localStorage
-        return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token);
+        return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token . '&role=' . $user->role . '&email=' . $email . '&name=' . urlencode($user->name));
     }
 
     // Logout — hapus semua token Sanctum user

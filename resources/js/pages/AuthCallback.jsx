@@ -19,9 +19,14 @@ export default function AuthCallback() {
             // Simpan token di localStorage
             // Token ini akan dipakai untuk semua request ke API Laravel selanjutnya
             localStorage.setItem("auth_token", token);
-
-            // Redirect ke dashboard setelah token tersimpan
-            window.location.href = "/dashboard";
+            localStorage.setItem("role", params.get("role"));
+            
+            // Extract nama dari email
+            // Format: nama.nim@student.itera.ac.id
+            const namaParam = params.get("name");
+            localStorage.setItem("name", namaParam || "User");
+            
+            window.location.href = "/";
         } else {
             // Kalau ga ada token sama sekali, balik ke login
             window.location.href = "/login";

@@ -7,6 +7,7 @@ import MainLayout from "./layout/MainLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
     return (
@@ -15,6 +16,7 @@ function App() {
                 <Route path="/" element={<MainLayout><Home /></MainLayout>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
             </Routes>
         </BrowserRouter>
     );
