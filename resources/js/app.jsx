@@ -13,7 +13,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-                <Route path="/login" element={<MainLayout><Login /></MainLayout>} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
             </Routes>
         </BrowserRouter>
