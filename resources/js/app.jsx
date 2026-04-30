@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute"; // tambah ini
 
 function App() {
     return (
@@ -16,7 +17,11 @@ function App() {
                 <Route path="/" element={<MainLayout><Home /></MainLayout>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+                <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                        <MainLayout><Dashboard /></MainLayout>
+                    </ProtectedRoute>
+                } />
             </Routes>
         </BrowserRouter>
     );
