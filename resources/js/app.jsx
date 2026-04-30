@@ -8,7 +8,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute"; // tambah ini
+import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 function App() {
     return (
@@ -20,6 +21,11 @@ function App() {
                 <Route path="/dashboard" element={
                     <ProtectedRoute>
                         <MainLayout><Dashboard /></MainLayout>
+                    </ProtectedRoute>
+                } />
+                <Route path="/dashboard/profile" element={
+                    <ProtectedRoute>
+                        <MainLayout><Profile /></MainLayout>
                     </ProtectedRoute>
                 } />
             </Routes>
