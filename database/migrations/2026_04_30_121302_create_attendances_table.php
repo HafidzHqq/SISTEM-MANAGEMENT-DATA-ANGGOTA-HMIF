@@ -13,7 +13,8 @@ return new class extends Migration
     {
     Schema::create('attendances', function (Blueprint $table) {
         $table->id('attendance_id');
-        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->unsignedBigInteger('user_id');
+        $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
         $table->foreignId('event_id')->constrained('events', 'event_id')->onDelete('cascade');
         $table->dateTime('checkin_time')->nullable();
         $table->decimal('user_latitude', 10, 7)->nullable();
