@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('member_profiles', function (Blueprint $table) {
             $table->id('profile_id');
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
-            $table->integer('angkatan')->notNull();
-            $table->string('Departemen')->notNull();
-            $table->string('jabatan')->notNull();
-            $table->string('status_keanggotaan')->notNull();
+            $table->integer('angkatan')->nullable();
+            $table->string('departemen')->nullable();
+            $table->string('jabatan')->nullable();
+            $table->string('status_keanggotaan')->nullable();
+            $table->string('no_telepon', 20)->nullable();
             $table->timestamp('updated_at')->useCurrent();
         });
     }

@@ -12,6 +12,7 @@ class AuthController extends Controller
     public function redirectToGoogle()
     {
     return Socialite::driver('google')
+    ->stateless()
     ->with(['hd' => 'student.itera.ac.id', 'prompt' => 'select_account'])
     ->redirect();
     }
@@ -20,7 +21,7 @@ class AuthController extends Controller
     public function handleGoogleCallback()
     {
         // Ambil data user dari Google
-        $googleUser = Socialite::driver('google')->user();
+        $googleUser = Socialite::driver('google')->stateless()->user();
 
         // Validasi domain email, hanya @student.itera.ac.id yang boleh
         $email = $googleUser->getEmail();
