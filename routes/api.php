@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AttendanceController;
 
 // Endpoint yang butuh login (protected by Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
@@ -30,4 +31,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Event routes (protected)
     Route::apiResource('events', EventController::class);
+});
+Route::apiResource('events', EventController::class)->only(['index', 'show']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
+    Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn']);
 });
