@@ -6,11 +6,12 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\MemberController;
 
 // Public routes
 Route::apiResource('events', EventController::class)->only(['index', 'show']);
 
-// Protected routes
+// Protected routes (semua user login)
 Route::middleware('auth:sanctum')->group(function () {
 
     // User
@@ -32,9 +33,22 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Events (protected)
-    Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
-
-    // Attendance
+    // Attendance (semua anggota bisa check-in)
     Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn']);
 });
+
+    // Protected routes (khusus admin dan super_admin)
+    Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
+
+    // Events - hanya admin yang bisa buat, edit, hapus
+    Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
+});
+
+    // Khusus admin dan super_admin
+    Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
+        Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
+        Route::get('/members', [MemberController::class, 'index']);
+        Route::get('/members/{id}', [MemberController::class, 'show']);
+        Route::put('/members/{id}', [MemberController::class, 'update']);
+        Route::delete('/members/{id}', [MemberController::class, 'destroy']);
+    });
