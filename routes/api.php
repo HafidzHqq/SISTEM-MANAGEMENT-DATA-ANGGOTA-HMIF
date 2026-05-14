@@ -47,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Khusus admin dan super_admin
     Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
         Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
+
+        Route::get('/events/{eventId}/attendances', [AttendanceController::class, 'monitorByEvent']);
+        
         Route::get('/members', [MemberController::class, 'index']);
         Route::get('/members/{id}', [MemberController::class, 'show']);
         Route::put('/members/{id}', [MemberController::class, 'update']);
