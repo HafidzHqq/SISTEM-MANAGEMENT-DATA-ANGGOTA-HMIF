@@ -42,10 +42,14 @@ class AuthController extends Controller
                 'name'   => $googleUser->getName(),
                 'email'  => $email,
                 'nim'    => $nim,
-                'role'   => 'anggota',
                 'status' => 'aktif',
             ]
         );
+
+        // Set role anggota hanya kalau user baru (belum punya role)
+        if (!$user->role) {
+            $user->update(['role' => 'anggota']);
+        }
 
         // Generate Sanctum token untuk user ini
         // Token ini yang akan dipakai React untuk request ke API selanjutnya
