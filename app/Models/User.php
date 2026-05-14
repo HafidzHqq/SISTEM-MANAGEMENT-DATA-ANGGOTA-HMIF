@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Attendance;
 
 class User extends Authenticatable
 {
@@ -34,6 +35,10 @@ class User extends Authenticatable
 
     public function auditLogs() {
         return $this->hasOne(AuditLog::class, 'actor_id', 'user_id');
+    }
+
+    public function attendances() {
+        return $this->hasMany(Attendance::class, 'user_id', 'user_id');
     }
 
     protected function casts(): array

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Attendance;
 
 class Event extends Model
 {
@@ -20,4 +21,9 @@ class Event extends Model
         'radius_meter', 
         'created_by'
     ];
+
+    // ambil data kehadiran
+    public function attendances() {
+        return $this->hasMany(Attendance::class, 'event_id', 'event_id');
+    }
 }

@@ -102,6 +102,63 @@ class AttendanceController extends Controller
         ], 201);
     }
 
+    // Fitur: Monitoring Kehadiran Event
+    // Deskripsi: Menampilkan daftar kehadiran anggota pada event tertentu untuk dashboard admin.
+    public function monitorByEvent($eventId)
+    {
+        $event = Event::find($eventId);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event tidak ditemukan'
+            ], 404);
+        }
+
+        $attendances = Attendance::with(['user.memberProfile'])
+            ->where('event_id', $event->event_id)
+            ->orderByDesc('checkin_time')
+            ->get();
+
+        $totalPresent = $attendances->count();
+        $totalInRadius = $attendances->where('is_in_radius', true)->count();
+        $totalOutRadius = $attendances->where('is_in_radius', false)->count();
+
+        $attendanceData = $attendances->map(function ($attendance) {
+            $user = $attendance->user;
+            $profile = $user?->memberProfile;
+
+            return [
+                'attendance_id' => $attendance->attendance_id,
+                'user_id' => $user?->user_id,
+                'name' => $user?->name,
+                'nim' => $user?->nim,
+                'departemen' => $profile?->departemen,
+                'jabatan' => $profile?->jabatan,
+                'status_keanggotaan' => $profile?->status_keanggotaan,
+                'checkin_time' => $attendance->checkin_time,
+                'status' => $attendance->status,
+                'is_in_radius' => (bool) $attendance->is_in_radius,
+                'remarks' => $attendance->remarks,
+            ];
+        });
+
+        return response()->json([
+            'event' => [
+                'event_id' => $event->event_id,
+                'title' => $event->title,
+                'date_time' => $event->date_time,
+                'attendance_window_start' => $event->attendance_window_start,
+                'attendance_window_end' => $event->attendance_window_end,
+            ],
+            'summary' => [
+                'total_present' => $totalPresent,
+                'total_in_radius' => $totalInRadius,
+                'total_out_radius' => $totalOutRadius,
+            ],
+            'attendances' => $attendanceData,
+        ]);
+    }
+
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 6371000; // meter

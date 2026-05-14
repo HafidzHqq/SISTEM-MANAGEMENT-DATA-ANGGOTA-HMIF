@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use App\Models\Event;
 
 class Attendance extends Model
 {
@@ -18,4 +20,14 @@ class Attendance extends Model
         'status', 
         'remarks'
     ];
+
+    // ambil data user
+    public function user() {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    // ambil data event
+    public function event() {
+        return $this->belongsTo(Event::class, 'event_id', 'event_id');
+    }
 }
