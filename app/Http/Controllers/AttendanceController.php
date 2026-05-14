@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -104,59 +105,87 @@ class AttendanceController extends Controller
 
     // Fitur: Monitoring Kehadiran Event
     // Deskripsi: Menampilkan daftar kehadiran anggota pada event tertentu untuk dashboard admin.
-    public function monitorByEvent($eventId)
+    public function monitorByEvent(Request $request, $eventId)
     {
-        $event = Event::find($eventId);
-
-        if (!$event) {
-            return response()->json([
-                'message' => 'Event tidak ditemukan'
-            ], 404);
-        }
-
-        $attendances = Attendance::with(['user.memberProfile'])
-            ->where('event_id', $event->event_id)
-            ->orderByDesc('checkin_time')
-            ->get();
-
-        $totalPresent = $attendances->count();
-        $totalInRadius = $attendances->where('is_in_radius', true)->count();
-        $totalOutRadius = $attendances->where('is_in_radius', false)->count();
-
-        $attendanceData = $attendances->map(function ($attendance) {
-            $user = $attendance->user;
-            $profile = $user?->memberProfile;
-
-            return [
-                'attendance_id' => $attendance->attendance_id,
-                'user_id' => $user?->user_id,
-                'name' => $user?->name,
-                'nim' => $user?->nim,
-                'departemen' => $profile?->departemen,
-                'jabatan' => $profile?->jabatan,
-                'status_keanggotaan' => $profile?->status_keanggotaan,
-                'checkin_time' => $attendance->checkin_time,
-                'status' => $attendance->status,
-                'is_in_radius' => (bool) $attendance->is_in_radius,
-                'remarks' => $attendance->remarks,
-            ];
-        });
-
-        return response()->json([
-            'event' => [
-                'event_id' => $event->event_id,
-                'title' => $event->title,
-                'date_time' => $event->date_time,
-                'attendance_window_start' => $event->attendance_window_start,
-                'attendance_window_end' => $event->attendance_window_end,
-            ],
-            'summary' => [
-                'total_present' => $totalPresent,
-                'total_in_radius' => $totalInRadius,
-                'total_out_radius' => $totalOutRadius,
-            ],
-            'attendances' => $attendanceData,
+        $validated = $request->validate([
+            'per_page' => 'sometimes|integer|min:1|max:100',
         ]);
+
+        $perPage = $validated['per_page'] ?? 20;
+
+        try {
+            $event = Event::find($eventId);
+
+            if (!$event) {
+                return response()->json([
+                    'message' => 'Event tidak ditemukan'
+                ], 404);
+            }
+
+            $baseQuery = Attendance::where('event_id', $event->event_id);
+
+            $totalPresent = (clone $baseQuery)->count();
+            $totalInRadius = (clone $baseQuery)->where('is_in_radius', true)->count();
+            $totalOutRadius = (clone $baseQuery)->where('is_in_radius', false)->count();
+
+            $attendances = (clone $baseQuery)
+                ->with([
+                    'user:user_id,name,nim',
+                    'user.memberProfile:profile_id,user_id,Departemen,jabatan,status_keanggotaan',
+                ])
+                ->orderByDesc('checkin_time')
+                ->paginate($perPage);
+
+            $attendanceData = $attendances->getCollection()->map(function ($attendance) {
+                $user = $attendance->user;
+                $profile = $user?->memberProfile;
+
+                return [
+                    'attendance_id' => $attendance->attendance_id,
+                    'user_id' => $user?->user_id,
+                    'name' => $user?->name,
+                    'nim' => $user?->nim,
+                    'departemen' => $profile?->getAttribute('Departemen'),
+                    'jabatan' => $profile?->jabatan,
+                    'status_keanggotaan' => $profile?->status_keanggotaan,
+                    'checkin_time' => $attendance->checkin_time,
+                    'status' => $attendance->status,
+                    'is_in_radius' => (bool) $attendance->is_in_radius,
+                    'remarks' => $attendance->remarks,
+                ];
+            });
+
+            return response()->json([
+                'event' => [
+                    'event_id' => $event->event_id,
+                    'title' => $event->title,
+                    'date_time' => $event->date_time,
+                    'attendance_window_start' => $event->attendance_window_start,
+                    'attendance_window_end' => $event->attendance_window_end,
+                ],
+                'summary' => [
+                    'total_present' => $totalPresent,
+                    'total_in_radius' => $totalInRadius,
+                    'total_out_radius' => $totalOutRadius,
+                ],
+                'attendances' => $attendanceData,
+                'pagination' => [
+                    'current_page' => $attendances->currentPage(),
+                    'per_page' => $attendances->perPage(),
+                    'total' => $attendances->total(),
+                    'last_page' => $attendances->lastPage(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Gagal memuat monitoring kehadiran', [
+                'event_id' => $eventId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Gagal memuat monitoring kehadiran'
+            ], 500);
+        }
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
