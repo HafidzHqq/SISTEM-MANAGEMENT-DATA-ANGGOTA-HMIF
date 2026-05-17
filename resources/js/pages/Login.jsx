@@ -19,121 +19,143 @@ export default function Login() {
         : "";
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-[#02050f] font-sans text-white">
-            <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -left-24 top-[26%] h-80 w-80 rounded-full bg-[#2b4074]/25 blur-3xl md:hidden" />
-                <div className="absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-[#15203c]/30 blur-3xl md:hidden" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,48,90,0.25)_0%,rgba(2,5,15,0.9)_48%,#02050f_100%)] md:hidden" />
+        <div className="min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4 font-sans">
 
-                <div className="hidden md:block xl:hidden absolute inset-0 bg-[linear-gradient(150deg,#0b1129_0%,#070b1a_45%,#040712_100%)]" />
-                <div className="hidden md:block xl:hidden absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#31457e]/22 blur-3xl" />
-                <div className="hidden md:block xl:hidden absolute -right-16 bottom-10 h-80 w-80 rounded-full bg-[#1b2b57]/20 blur-3xl" />
-                <div className="hidden md:block xl:hidden absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(40,58,106,0.2)_0%,rgba(5,9,21,0.88)_58%,#040712_100%)]" />
+            {/* ── CARD WRAPPER ── */}
+            <div className="w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
 
-                <div className="hidden xl:block absolute -left-24 top-[26%] h-80 w-80 rounded-full bg-[#2b4074]/25 blur-3xl" />
-                <div className="hidden xl:block absolute -right-24 bottom-0 h-[28rem] w-[28rem] rounded-full bg-[#15203c]/30 blur-3xl" />
-                <div className="hidden xl:block absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(29,48,90,0.25)_0%,rgba(2,5,15,0.9)_48%,#02050f_100%)]" />
-            </div>
+                <div
+                    className="hidden md:flex relative flex-col justify-between p-10 md:w-[42%]"
+                    style={{
+                        background: "linear-gradient(160deg, #3db53d 0%, #2ea02e 35%, #228b22 100%)",
+                    }}
+                >
+                    {/* Subtle light blobs */}
+                    <div className="pointer-events-none absolute -top-12 -left-12 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+                    <div className="pointer-events-none absolute bottom-0 right-0 h-64 w-64 rounded-full bg-black/10 blur-3xl" />
 
-            <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-6xl px-6 py-8 sm:px-9 md:items-center md:px-10 md:py-10 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)] xl:items-center xl:gap-10 xl:px-12">
-                <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[390px] flex-col items-center justify-between md:min-h-[44rem] md:max-w-[560px] md:rounded-[34px] md:border md:border-white/10 md:bg-[#050917]/72 md:px-10 md:py-11 md:shadow-[0_28px_80px_rgba(0,0,0,0.45)] md:backdrop-blur-xl xl:min-h-[44rem] xl:max-w-none xl:px-9 xl:py-10">
-                    <div />
-
-                    <div className="w-full">
-                        <div className="flex flex-col items-center">
-                            <img
-                                src={hmifLogo}
-                                alt="Logo HMIF"
-                                className="h-28 w-28 object-contain sm:h-32 sm:w-32 md:h-36 md:w-36 xl:h-32 xl:w-32"
-                            />
-                            <h1 className="mt-4 text-center text-[2.8rem] font-semibold tracking-tight text-[#f3f5fa] sm:mt-5 sm:text-[3.15rem] md:mt-6 md:text-[3.35rem] xl:text-[3.15rem]">
-                                WELCOME
-                            </h1>
-                            <p className="mt-6 max-w-[20rem] text-center text-[1.04rem] leading-relaxed text-slate-300 sm:max-w-[21rem] sm:text-[1.1rem]">
-                                Log in with your credentials or{" "}
-                                <span className="font-semibold text-[#9bb1ff]">
-                                    @student.itera.ac.id
-                                </span>{" "}
-                                account.
-                            </p>
-                        </div>
-
-                        {errorMessage && (
-                            <p className="mt-5 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-100">
-                                {errorMessage}
-                            </p>
-                        )}
-
-                        <button
-                            onClick={handleGoogleLogin}
-                            className="mt-9 flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-[#020611]/60 px-5 py-4 text-[1.08rem] font-medium text-[#f4f7ff] transition duration-200 hover:border-white/20 hover:bg-[#091127] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#92a8ff]/60 md:mt-10 md:py-[1.05rem]"
-                        >
-                            <img
-                                src={googleLogo}
-                                alt="Google"
-                                className="h-6 w-6 object-contain"
-                            />
-                            <span>Login with Google</span>
-                        </button>
-
-                        <a
-                            href="#admin-portal"
-                            className="mt-7 inline-flex w-full items-center justify-center gap-2 text-[1rem] text-slate-500 transition hover:text-slate-300"
-                        >
-                            <span>Sign in to Admin portal</span>
-                            <span aria-hidden>{"->"}</span>
-                        </a>
-                    </div>
-
-                    <div className="w-full pb-2 pt-14 text-center md:pb-0 md:pt-10 xl:pt-14">
-                        <div className="flex items-center justify-center gap-4 text-[0.98rem] text-slate-400">
-                            <a href="#" className="transition hover:text-slate-200">
-                                Help &amp; Support
-                            </a>
-                            <span className="text-slate-600">|</span>
-                            <a href="#" className="transition hover:text-slate-200">
-                                Privacy Policy
-                            </a>
-                        </div>
-                        <p className="mt-6 text-[0.78rem] tracking-[0.35em] text-slate-600 md:mt-4 md:text-[0.72rem] md:tracking-[0.26em] xl:mt-6 xl:text-[0.78rem] xl:tracking-[0.35em]">
-                            (c) 2026 HMIF
-                        </p>
-                    </div>
-                </section>
-
-                <section className="relative hidden h-[44rem] overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(160deg,rgba(13,20,40,0.88),rgba(5,9,23,0.95))] p-12 shadow-[0_28px_80px_rgba(0,0,0,0.35)] xl:flex xl:flex-col xl:justify-between">
-                    <div className="pointer-events-none absolute -right-20 top-8 h-64 w-64 rounded-full bg-[#405a9e]/30 blur-3xl" />
-                    <div className="pointer-events-none absolute -left-16 bottom-6 h-52 w-52 rounded-full bg-[#1c2d5b]/35 blur-3xl" />
-
-                    <div className="relative">
-                        <p className="text-sm uppercase tracking-[0.35em] text-[#93a7e8]">
+                    {/* Top section */}
+                    <div className="relative z-10">
+                        <p className="text-[0.68rem] font-semibold tracking-[0.3em] uppercase text-white/60 mb-7">
                             HMIF ITERA
                         </p>
-                        <h2 className="mt-5 max-w-md text-5xl font-semibold leading-tight text-white">
-                            Sistem Management Data Anggota
-                        </h2>
-                        <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-300">
-                            Platform untuk autentikasi cepat dan aman menggunakan
-                            akun resmi kampus agar proses administrasi HMIF
-                            menjadi lebih efisien.
+                        <h1 className="text-[2.5rem] font-extrabold leading-[1.1] text-white mb-6">
+                            Sistem<br />
+                            Management<br />
+                            Data<br />
+                            Anggota
+                        </h1>
+                        <p className="text-[0.82rem] leading-relaxed text-white/75 max-w-[240px]">
+                            Platform untuk autentikasi cepat dan aman
+                            menggunakan akun resmi kampus agar proses
+                            administrasi HMIF menjadi lebih efisien.
                         </p>
                     </div>
 
-                    <div className="relative grid grid-cols-2 gap-4 text-sm text-slate-300">
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                            <p className="text-[#9bb1ff]">Akses cepat</p>
-                            <p className="mt-2 leading-relaxed">
+                    {/* Feature Cards */}
+                    <div className="relative z-10 mt-8 space-y-3">
+                        <div
+                            className="rounded-2xl p-4"
+                            style={{ background: "rgba(255,255,255,0.13)" }}
+                        >
+                            <p className="text-[0.68rem] font-bold tracking-[0.2em] uppercase text-white mb-1">
+                                AKSES CEPAT
+                            </p>
+                            <p className="text-[0.78rem] text-white/72 leading-relaxed">
                                 Login satu klik dengan akun Google kampus.
                             </p>
                         </div>
-                        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                            <p className="text-[#9bb1ff]">Terverifikasi</p>
-                            <p className="mt-2 leading-relaxed">
+                        <div
+                            className="rounded-2xl p-4"
+                            style={{ background: "rgba(255,255,255,0.13)" }}
+                        >
+                            <p className="text-[0.68rem] font-bold tracking-[0.2em] uppercase text-white mb-1">
+                                TERVERIFIKASI
+                            </p>
+                            <p className="text-[0.78rem] text-white/72 leading-relaxed">
                                 Membatasi login untuk domain resmi mahasiswa.
                             </p>
                         </div>
                     </div>
-                </section>
+                </div>
+
+
+                <div className="flex flex-col bg-white md:w-[58%] flex-1">
+
+                    {/* ── Main Content (centered) ── */}
+                    <div className="flex flex-col items-center flex-1 px-8 sm:px-14 pt-16 pb-8">
+
+                        {/* Logo */}
+                        <img
+                            src={hmifLogo}
+                            alt="Logo HMIF"
+                            className="h-40 w-40 object-contain rounded-full"
+                        />
+
+                        {/* Heading */}
+                        <h2 className="mt-1 text-[1.9rem] font-extrabold tracking-tight text-gray-900">
+                            WELCOME
+                        </h2>
+
+                        {/* Subtitle */}
+                        <p className="mt-2 text-center text-[0.9rem] text-gray-500 leading-relaxed">
+                            Log in with your credentials or{" "}
+                            <span className="font-bold text-green-600">
+                                @student.itera.ac.id
+                            </span>{" "}
+                            accounts.
+                        </p>
+
+                        {/* Error Message */}
+                        {errorMessage && (
+                            <p className="mt-5 w-full max-w-sm rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-center text-sm text-red-600">
+                                {errorMessage}
+                            </p>
+                        )}
+
+                        {/* Google Login Button */}
+                        <button
+                            onClick={handleGoogleLogin}
+                            className="mt-8 flex w-full max-w-sm items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-[0.85rem] text-[0.95rem] font-semibold text-gray-700 shadow-sm transition duration-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                        >
+                            <img
+                                src={googleLogo}
+                                alt="Google"
+                                className="h-5 w-5 object-contain"
+                            />
+                            <span>Login with Google</span>
+                        </button>
+
+                        {/* Support link */}
+                        <a
+                            href="#support"
+                            className="mt-5 text-[0.88rem] text-gray-400 transition hover:text-gray-600"
+                        >
+                            Unable to sign in?{" "}
+                            <span className="underline underline-offset-2">
+                                Contact support
+                            </span>
+                        </a>
+                    </div>
+
+                    {/* ── Footer ── */}
+                    <div className="px-8 pb-8 text-center">
+                        <hr className="border-gray-100 mb-5" />
+                        <div className="flex items-center justify-center gap-3 text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-gray-400">
+                            <a href="#" className="transition hover:text-gray-600">
+                                Help &amp; Support
+                            </a>
+                            <span className="text-gray-300">•</span>
+                            <a href="#" className="transition hover:text-gray-600">
+                                Privacy Policy
+                            </a>
+                        </div>
+                        <p className="mt-3 text-[0.72rem] text-gray-400">
+                            © 2026 HMIF
+                        </p>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

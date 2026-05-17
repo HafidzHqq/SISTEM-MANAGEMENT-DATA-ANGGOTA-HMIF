@@ -10,6 +10,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import History from "./pages/History";
 
 function App() {
     return (
@@ -20,12 +21,17 @@ function App() {
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/dashboard" element={
                     <ProtectedRoute>
-                        <MainLayout><Dashboard /></MainLayout>
+                        <Dashboard />
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/profile" element={
                     <ProtectedRoute>
-                        <MainLayout><Profile /></MainLayout>
+                        <Profile />
+                    </ProtectedRoute>
+                } />
+                <Route path="/dashboard/history" element={
+                    <ProtectedRoute>
+                        <History />
                     </ProtectedRoute>
                 } />
             </Routes>

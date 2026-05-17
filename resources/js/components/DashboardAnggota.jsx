@@ -1,4 +1,289 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import hmifLogo from "../assets/logo-hmif.png";
+import fotoProfile from "../assets/fotoprofile.png";
+import lockIcon from "../assets/lock.png";
+import sqanQr from "../assets/sqanqr.png";
+import techSeminar from "../assets/techseminar.png";
+import campusWorkshop from "../assets/campusworkshop.png";
+import monthlyAssembly from "../assets/mothlyassembly.png";
+import iconDashboard from "../assets/icon-dashboard.png";
+import iconHistory from "../assets/icon-history.png";
+import iconProfile from "../assets/icon-profile.png";
+
+const ACTIVITIES = [
+    { icon: techSeminar, name: "Tech Seminar 2024", location: "Main Auditorium", date: "Oct 12", time: "14:30" },
+    { icon: campusWorkshop, name: "Campus Workshop", location: "Lab Room B2", date: "Oct 10", time: "09:15" },
+    { icon: monthlyAssembly, name: "Monthly Assembly", location: "Student Hall", date: "Oct 05", time: "13:00" },
+];
+
+const DIVISION_PROGRESS = [
+    { label: "Project Milestone A", value: 75 },
+    { label: "Member Development", value: 42 },
+];
+
 export default function DashboardAnggota() {
-    return <div>Dashboard Anggota</div>
+    const navigate = useNavigate();
+
+    const name = localStorage.getItem("name") || "Anggota HMIF";
+    const nim = localStorage.getItem("nim") || "124140056";
+    const division = localStorage.getItem("division") || "Technopreneur";
+    const firstName = name.split(" ")[0];
+    const attendance = 94;
+
+    const handleLogout = () => {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        navigate("/login");
+    };
+
+    /* ─── NAV ITEMS ─── */
+    const navItems = [
+        { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+        { label: "History", icon: iconHistory, to: "/dashboard/history" },
+        { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
+    ];
+
+    return (
+        <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
+
+            {/* ════════ DESKTOP SIDEBAR ════════ */}
+            <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
+                {/* Logo */}
+                <div className="flex flex-col items-center pt-8 pb-5 px-4">
+                    <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full object-contain border-4 border-white/20" />
+                    <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
+                    <p className="text-[0.62rem] text-white/55 text-center leading-snug mt-0.5">
+                        Himpunan Mahasiswa Informatika ITERA
+                    </p>
+                </div>
+
+                <hr className="border-white/10 mx-4" />
+
+                {/* Navigation */}
+                <nav className="flex-1 px-3 pt-4 space-y-1">
+                    {navItems.map((item) => {
+                        const isActive = window.location.pathname === item.to;
+                        return (
+                            <Link
+                                key={item.label}
+                                to={item.to}
+                                className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${isActive
+                                    ? "bg-white/15 text-white"
+                                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                                    }`}
+                            >
+                                <img src={item.icon} alt="" className="h-[18px] w-[18px] object-contain brightness-[10] opacity-90" />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {/* User + Logout */}
+                <div className="p-4">
+                    <div className="bg-white/10 rounded-2xl px-4 py-3">
+                        <p className="text-sm font-semibold text-white truncate">{name}</p>
+                        <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
+                        <button
+                            onClick={handleLogout}
+                            className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1"
+                        >
+                            ⤷ Logout
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            {/* ════════ MAIN AREA ════════ */}
+            <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
+
+                {/* Mobile Header */}
+                <header className="md:hidden flex items-center justify-between bg-white px-5 py-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                        <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
+                        <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                    </div>
+                    <Link to="/dashboard/profile">
+                        <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </Link>
+                </header>
+
+                {/* Desktop Topbar */}
+                <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
+                    <h2 className="text-[1.05rem] font-bold text-gray-800">Member Dashboard</h2>
+                    <div className="flex items-center gap-4">
+                        <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">
+                            {division}
+                        </span>
+                        <div className="h-5 w-px bg-gray-200" />
+                        <button className="text-gray-400 hover:text-gray-600 transition">
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </button>
+                        <img src={fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                    </div>
+                </header>
+
+                {/* ── PAGE CONTENT ── */}
+                <main className="flex-1 px-5 py-7 md:px-8 md:py-8 pb-28 md:pb-10">
+
+                    {/* Welcome */}
+                    <p className="text-[0.65rem] font-bold tracking-[0.22em] uppercase text-gray-400 mb-1">
+                        Member Dashboard
+                    </p>
+                    <h1 className="text-[1.85rem] md:text-[2.1rem] font-extrabold text-gray-900 mb-6">
+                        Welcome, {firstName}.
+                    </h1>
+
+                    {/* ROW 1 — Member Card + QR Card */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] xl:grid-cols-[1fr_450px] gap-4 mb-5">
+
+                        {/* Member Status Card */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm relative">
+                            {/* Photo — pinned to top-right corner */}
+                            <img
+                                src={fotoProfile}
+                                alt="Profile"
+                                className="absolute top-4 right-4 h-14 w-14 rounded-xl object-cover shadow"
+                            />
+
+                            {/* Label + Badge */}
+                            <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2">
+                                Member Status
+                            </p>
+                            <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-4">
+                                Anggota Muda
+                            </span>
+
+                            {/* Name & Division */}
+                            <h3 className="text-lg font-extrabold text-gray-900 pr-16">{name}</h3>
+                            <p className="text-sm text-gray-400 mt-0.5 mb-4">{division}</p>
+
+                            {/* NIM — full width */}
+                            <div className="flex items-center justify-between bg-[#1c5e22] rounded-xl px-4 py-3 max-w-[250px]">
+                                <div>
+                                    <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white">NIM</p>
+                                    <p className="text-[1rem] font-bold text-white tracking-widest">{nim}</p>
+                                </div>
+                                <img src={lockIcon} alt="lock" className="h-5 w-5 object-contain brightness-[10] opacity-60" />
+                            </div>
+                        </div>
+
+                        {/* Scan QR Card */}
+                        <button
+                            className="flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-white text-center w-full cursor-pointer hover:opacity-90 active:scale-95 transition-all duration-200"
+                            style={{ background: "linear-gradient(160deg, #3db53d 0%, #228b22 100%)" }}
+                        >
+                            <img src={sqanQr} alt="QR" className="h-12 w-12 object-contain brightness-[10]" />
+                            <p className="text-[1rem] font-bold leading-snug">Scan QR Attendance</p>
+                            <p className="text-[0.75rem] text-white/75 leading-snug hidden md:block">
+                                Quick check-in for events and daily assembly
+                            </p>
+                        </button>
+                    </div>
+
+                    {/* ROW 2 — Recent Activity + Right Column */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_600px] gap-4">
+
+                        {/* Recent Activity */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-base font-bold text-gray-900">Recent Activity</h3>
+                                <button className="text-sm font-semibold text-green-600 hover:text-green-700 transition">
+                                    View All
+                                </button>
+                            </div>
+                            <div className="divide-y divide-gray-100">
+                                {ACTIVITIES.map((a, i) => (
+                                    <div key={i} className="flex items-center justify-between py-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+                                                <img src={a.icon} alt="" className="h-5 w-5 object-contain" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-800">{a.name}</p>
+                                                <p className="text-[0.75rem] text-green-600/80">{a.location}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right flex-shrink-0 ml-3">
+                                            <p className="text-sm font-bold text-gray-800">{a.date}</p>
+                                            <p className="text-[0.75rem] text-gray-400 mt-0.5">{a.time}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="flex flex-col gap-4">
+
+                            {/* Overall Attendance */}
+                            <div className="bg-white rounded-2xl p-5 shadow-sm">
+                                <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-7">
+                                    Overall Attendance
+                                </p>
+                                <div className="flex items-baseline gap-2 mb-7">
+                                    <span className="text-[2.6rem] font-extrabold text-green-600 leading-none">
+                                        {attendance}%
+                                    </span>
+                                    <span className="text-sm text-gray-400 font-medium">Excellent</span>
+                                </div>
+                                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-2 rounded-full bg-green-500 transition-all duration-700"
+                                        style={{ width: `${attendance}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Division Progress — desktop only */}
+                            <div className="hidden md:block bg-white rounded-2xl p-5 shadow-sm">
+                                <h3 className="text-base font-bold text-gray-900 mb-4">Division Progress</h3>
+                                <div className="space-y-4">
+                                    {DIVISION_PROGRESS.map((item, i) => (
+                                        <div key={i}>
+                                            <div className="flex justify-between mb-2">
+                                                <span className="text-[0.82rem] text-gray-600">{item.label}</span>
+                                                <span className="text-[0.82rem] font-bold text-green-600">{item.value}%</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-1.5 rounded-full bg-green-500"
+                                                    style={{ width: `${item.value}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </main>
+            </div>
+
+            {/* ════════ MOBILE BOTTOM NAV ════════ */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1c5e22] flex z-50">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.label}
+                        to={item.to}
+                        className="flex-1 flex flex-col items-center justify-center py-3 gap-1"
+                    >
+                        <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-[10]" />
+                        <span className="text-[0.58rem] font-bold tracking-[0.12em] text-white/80 uppercase">
+                            {item.label}
+                        </span>
+                    </Link>
+                ))}
+            </nav>
+        </div>
+    );
 }
