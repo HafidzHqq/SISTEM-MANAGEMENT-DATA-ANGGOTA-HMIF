@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\MemberProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\AuditLog;
 
 class MemberController extends Controller
 {
@@ -88,14 +89,17 @@ class MemberController extends Controller
             $request->only(['departemen', 'jabatan', 'status_keanggotaan'])
         );
 
+        AuditLog::catat($request->user()->user_id, 'update', 'member', $id);
+
         return response()->json([
             'message' => 'Data anggota berhasil diperbarui',
             'data'    => $user->fresh()->load('memberProfile'),
         ]);
+
     }
 
     // DELETE /api/members/{id} — hapus anggota
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::where('user_id', $id)->where('role', 'anggota')->first();
 
@@ -103,8 +107,11 @@ class MemberController extends Controller
             return response()->json(['message' => 'Anggota tidak ditemukan'], 404);
         }
 
+        AuditLog::catat($request->user()->user_id, 'delete', 'member', $id);
+
         $user->delete();
 
         return response()->json(['message' => 'Anggota berhasil dihapus']);
+
     }
 }

@@ -46,6 +46,19 @@ class AuthController extends Controller
             ]
         );
 
+        // Set role anggota hanya kalau user baru
+        if ($user->wasRecentlyCreated) {
+            $user->update(['role' => 'anggota']);
+        }
+
+        // Jangan overwrite role kalau user sudah ada
+        if ($user->wasRecentlyCreated) {
+            // user baru, role sudah di-set anggota di atas
+        } else {
+            // user lama, jangan ubah role
+            $user->refresh();
+        }
+
         // Set role anggota hanya kalau user baru (belum punya role)
         if (!$user->role) {
             $user->update(['role' => 'anggota']);

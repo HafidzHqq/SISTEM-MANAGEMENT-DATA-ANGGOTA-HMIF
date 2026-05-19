@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\AuditLogController;
 
 // Public routes
 Route::apiResource('events', EventController::class)->only(['index', 'show']);
@@ -55,3 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/members/{id}', [MemberController::class, 'update']);
         Route::delete('/members/{id}', [MemberController::class, 'destroy']);
     });
+
+    Route::middleware(['auth:sanctum', 'role:super_admin'])->group(function () {
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+});
