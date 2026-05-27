@@ -20,21 +20,41 @@ class AuthController extends Controller
     // Handle callback dari Google setelah user login
     public function handleGoogleCallback()
     {
-        // Ambil data user dari Google
         $googleUser = Socialite::driver('google')->stateless()->user();
 
-        // Validasi domain email, hanya @student.itera.ac.id yang boleh
         $email = $googleUser->getEmail();
         if (!str_ends_with($email, '@student.itera.ac.id')) {
-            // Redirect ke React dengan error query param
             return redirect(env('FRONTEND_URL') . '/login?error=domain_tidak_valid');
         }
 
-        // Cari user berdasarkan google_id, kalau belum ada buat baru
         // Extract NIM dari email
-        // Format: nama.nim@student.itera.ac.id
-        $nimPart = explode('@', $email)[0]; // hasil: nama.nim
-        $nim = explode('.', $nimPart)[1]; // hasil: nim
+        $nimPart = explode('@', $email)[0];
+        $nim = explode('.', $nimPart)[1];
+
+        // Validasi format NIM
+        $nimDigits = preg_replace('/\D/', '', $nim);
+
+        // Cek jenjang (digit 1 = sarjana)
+        if (substr($nimDigits, 0, 1) !== '1') {
+            return redirect(env('FRONTEND_URL') . '/login?error=bukan_sarjana');
+        }
+
+        // Cek angkatan (digit 2-3 = 23 atau 24)
+        $angkatan = substr($nimDigits, 1, 2);
+        if (!in_array($angkatan, ['23', '24'])) {
+            return redirect(env('FRONTEND_URL') . '/login?error=angkatan_tidak_valid');
+        }
+
+        // Cek prodi (digit 4-5 = 14, informatika)
+        $prodi = substr($nimDigits, 3, 2);
+        if ($prodi !== '14') {
+            return redirect(env('FRONTEND_URL') . '/login?error=bukan_informatika');
+        }
+
+        // Cek NIM terdaftar di database
+        if (!User::where('nim', $nim)->exists()) {
+            return redirect(env('FRONTEND_URL') . '/login?error=nim_tidak_terdaftar');
+        }
 
         $user = User::updateOrCreate(
             ['google_id' => $googleUser->getId()],
@@ -51,25 +71,8 @@ class AuthController extends Controller
             $user->update(['role' => 'anggota']);
         }
 
-        // Jangan overwrite role kalau user sudah ada
-        if ($user->wasRecentlyCreated) {
-            // user baru, role sudah di-set anggota di atas
-        } else {
-            // user lama, jangan ubah role
-            $user->refresh();
-        }
-
-        // Set role anggota hanya kalau user baru (belum punya role)
-        if (!$user->role) {
-            $user->update(['role' => 'anggota']);
-        }
-
-        // Generate Sanctum token untuk user ini
-        // Token ini yang akan dipakai React untuk request ke API selanjutnya
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Redirect ke React dengan token di query param
-        // React akan ambil token ini dan simpan di localStorage
         return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token . '&role=' . $user->role . '&email=' . $email . '&name=' . urlencode($user->name));
     }
 

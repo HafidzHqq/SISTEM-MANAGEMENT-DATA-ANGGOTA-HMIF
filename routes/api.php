@@ -53,6 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/members', [MemberController::class, 'index']);
         Route::get('/members/{id}', [MemberController::class, 'show']);
+        Route::post('/members', [MemberController::class, 'store']);
+        Route::post('/members/import', [MemberController::class, 'import']);
         Route::put('/members/{id}', [MemberController::class, 'update']);
         Route::delete('/members/{id}', [MemberController::class, 'destroy']);
     });
