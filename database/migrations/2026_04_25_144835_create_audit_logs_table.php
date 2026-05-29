@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('actor_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->string('action', 255)->notNull();
             $table->string('target_type', 100)->notNull();
-            $table->integer('target_id')->notNull();
+            $table->unsignedBigInteger('target_id')->notNull();
             $table->timestamp('created_at')->useCurrent();
         });
     }

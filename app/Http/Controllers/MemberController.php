@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\MemberProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\AuditLog;
 
 class MemberController extends Controller
 {
@@ -88,14 +89,17 @@ class MemberController extends Controller
             $request->only(['departemen', 'jabatan', 'status_keanggotaan'])
         );
 
+        AuditLog::catat($request->user()->user_id, 'update', 'member', $id);
+
         return response()->json([
             'message' => 'Data anggota berhasil diperbarui',
             'data'    => $user->fresh()->load('memberProfile'),
         ]);
+
     }
 
     // DELETE /api/members/{id} — hapus anggota
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::where('user_id', $id)->where('role', 'anggota')->first();
 
@@ -103,8 +107,119 @@ class MemberController extends Controller
             return response()->json(['message' => 'Anggota tidak ditemukan'], 404);
         }
 
+        AuditLog::catat($request->user()->user_id, 'delete', 'member', $id);
+
         $user->delete();
 
         return response()->json(['message' => 'Anggota berhasil dihapus']);
+
     }
+
+            // POST /api/members — tambah 1 anggota manual
+        public function store(Request $request)
+        {
+            $validator = Validator::make($request->all(), [
+                'nim'   => 'required|string|max:15|unique:users,nim',
+                'name'  => 'required|string|max:150',
+                'email' => 'required|email|unique:users,email',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validasi gagal',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+
+            // Validasi format NIM
+            $nimDigits = preg_replace('/\D/', '', $request->nim);
+            if (
+                substr($nimDigits, 0, 1) !== '1' ||
+                !in_array(substr($nimDigits, 1, 2), ['23', '24']) ||
+                substr($nimDigits, 3, 2) !== '14'
+            ) {
+                return response()->json(['message' => 'Gagal memasukan data'], 422);
+            }
+
+            $user = User::create([
+                'nim'    => $request->nim,
+                'name'   => $request->name,
+                'email'  => $request->email,
+                'role'   => 'anggota',
+                'status' => 'aktif',
+            ]);
+
+            AuditLog::catat($request->user()->user_id, 'create', 'member', $user->user_id);
+
+            return response()->json([
+                'message' => 'Anggota berhasil ditambahkan',
+                'data'    => $user,
+            ], 201);
+        }
+
+        // POST /api/members/import — import bulk via CSV
+        public function import(Request $request)
+        {
+            $validator = Validator::make($request->all(), [
+                'file' => 'required|file|mimes:csv,txt|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'File tidak valid',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
+
+            $file = $request->file('file');
+            $rows = array_map('str_getcsv', file($file->getRealPath()));
+            $header = array_shift($rows); // ambil baris pertama sebagai header
+
+            $berhasil = 0;
+            $gagal = [];
+
+            foreach ($rows as $index => $row) {
+                $data = array_combine($header, $row);
+
+                // Cek kolom wajib
+                if (empty($data['nim']) || empty($data['name']) || empty($data['email'])) {
+                    $gagal[] = "Baris " . ($index + 2) . ": kolom nim, name, email wajib ada";
+                    continue;
+                }
+
+                // Cek duplikat
+                if (User::where('nim', $data['nim'])->orWhere('email', $data['email'])->exists()) {
+                    $gagal[] = "Baris " . ($index + 2) . ": NIM atau email sudah terdaftar";
+                    continue;
+                }
+
+                // Validasi format NIM
+                $nimDigits = preg_replace('/\D/', '', $data['nim']);
+                if (
+                    substr($nimDigits, 0, 1) !== '1' ||
+                    !in_array(substr($nimDigits, 1, 2), ['23', '24']) ||
+                    substr($nimDigits, 3, 2) !== '14'
+                ) {
+                    $gagal[] = "Baris " . ($index + 2) . ": gagal memasukan data";
+                    continue;
+                }
+
+                User::create([
+                    'nim'    => $data['nim'],
+                    'name'   => $data['name'],
+                    'email'  => $data['email'],
+                    'role'   => 'anggota',
+                    'status' => 'aktif',
+                ]);
+
+                $berhasil++;
+            }
+
+            AuditLog::catat($request->user()->user_id, 'import', 'member', 0);
+
+            return response()->json([
+                'message'  => "$berhasil anggota berhasil diimport",
+                'gagal'    => $gagal,
+            ]);
+        }
 }
