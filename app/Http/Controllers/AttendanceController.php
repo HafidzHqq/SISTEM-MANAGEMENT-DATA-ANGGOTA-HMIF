@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
@@ -103,6 +104,70 @@ class AttendanceController extends Controller
         ], 201);
     }
 
+
+    // Fitur: Export CSV Kehadiran Event
+    // Deskripsi: Mengunduh rekap kehadiran anggota pada event tertentu dalam format CSV.
+    public function exportCsv($eventId)
+    {
+        $event = Event::find($eventId);
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event tidak ditemukan'
+            ], 404);
+        }
+
+        $attendances = Attendance::with([
+                'user:user_id,name,nim',
+                'user.memberProfile:profile_id,user_id,Departemen,jabatan,status_keanggotaan',
+            ])
+            ->where('event_id', $event->event_id)
+            ->orderBy('checkin_time')
+            ->get();
+
+        $fileName = 'rekap-kehadiran-event-' . $event->event_id . '.csv';
+
+        return new StreamedResponse(function () use ($attendances) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'No',
+                'Nama',
+                'NIM',
+                'Departemen',
+                'Jabatan',
+                'Status Keanggotaan',
+                'Waktu Check-in',
+                'Status',
+                'Validasi Radius',
+                'Keterangan',
+            ]);
+
+            foreach ($attendances as $index => $attendance) {
+                $user = $attendance->user;
+                $profile = $user?->memberProfile;
+
+                fputcsv($handle, [
+                    $index + 1,
+                    $this->sanitizeCsvValue($user?->name),
+                    $this->sanitizeCsvValue($user?->nim),
+                    $this->sanitizeCsvValue($profile?->getAttribute('Departemen')),
+                    $this->sanitizeCsvValue($profile?->jabatan),
+                    $this->sanitizeCsvValue($profile?->status_keanggotaan),
+                    $attendance->checkin_time,
+                    $this->sanitizeCsvValue($attendance->status),
+                    $attendance->is_in_radius ? 'Valid' : 'Tidak Valid',
+                    $this->sanitizeCsvValue($attendance->remarks),
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
+    }
+
     // Fitur: Monitoring Kehadiran Event
     // Deskripsi: Menampilkan daftar kehadiran anggota pada event tertentu untuk dashboard admin.
     public function monitorByEvent(Request $request, $eventId)
@@ -186,6 +251,21 @@ class AttendanceController extends Controller
                 'message' => 'Gagal memuat monitoring kehadiran'
             ], 500);
         }
+    }
+
+    private function sanitizeCsvValue($value)
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = (string) $value;
+
+        if (preg_match('/^\s*[=+\-@]/', $value)) {
+            return "'" . $value;
+        }
+
+        return $value;
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
