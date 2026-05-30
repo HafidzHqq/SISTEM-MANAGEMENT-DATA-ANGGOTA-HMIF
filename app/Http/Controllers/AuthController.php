@@ -56,6 +56,12 @@ class AuthController extends Controller
             return redirect(env('FRONTEND_URL') . '/login?error=nim_tidak_terdaftar');
         }
 
+        // Cek status akun
+        $existingUser = User::where('nim', $nim)->first();
+        if ($existingUser && $existingUser->status === 'non-aktif') {
+            return redirect(env('FRONTEND_URL') . '/login?error=akun_nonaktif');
+        }
+
         $user = User::updateOrCreate(
             ['google_id' => $googleUser->getId()],
             [
