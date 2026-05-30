@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
 
         Route::get('/events/{eventId}/attendances', [AttendanceController::class, 'monitorByEvent']);
+        Route::get('/events/{eventId}/attendances/export-csv', [AttendanceController::class, 'exportCsv']);
         
         Route::get('/members', [MemberController::class, 'index']);
         Route::get('/members/{id}', [MemberController::class, 'show']);
