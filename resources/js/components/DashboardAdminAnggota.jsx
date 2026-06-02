@@ -15,11 +15,61 @@ const METRICS = [
 ];
 
 const SAMPLE_ROWS = [
-    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "Eksternal", jabatan: "Ketua Divisi", status: "TETAP" },
-    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "Internal", jabatan: "Staff", status: "MUDA" },
-    { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA" },
-    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP" },
-    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA" },
+    {
+        id: 1,
+        nim: "121140090",
+        nama: "Aditya Kusuma",
+        kontak: "0812-3456-7890",
+        angkatan: 2021,
+        divisi: "Eksternal",
+        jabatan: "Ketua Divisi",
+        status: "TETAP",
+        email: "aditya.k@hmif.org",
+    },
+    {
+        id: 2,
+        nim: "123140152",
+        nama: "Siti Pertiwi",
+        kontak: "0812-3456-7891",
+        angkatan: 2023,
+        divisi: "Internal",
+        jabatan: "Staff",
+        status: "MUDA",
+        email: "siti.p@hmif.org",
+    },
+    {
+        id: 3,
+        nim: "122140032",
+        nama: "Rizky Ramadhan",
+        kontak: "0812-3456-7892",
+        angkatan: 2022,
+        divisi: "-",
+        jabatan: "Alumni",
+        status: "LUAR BIASA",
+        email: "rizky.r@hmif.org",
+    },
+    {
+        id: 4,
+        nim: "124140051",
+        nama: "Farhan Naufal",
+        kontak: "0812-3456-7893",
+        angkatan: 2024,
+        divisi: "Minat Bakat",
+        jabatan: "Sekretaris",
+        status: "TETAP",
+        email: "farhan.n@hmif.org",
+    },
+    {
+        id: 5,
+        nim: "123140014",
+        nama: "Luthfi Wijaya",
+        kontak: "0812-3456-7894",
+        angkatan: 2023,
+        divisi: "Eksternal",
+        jabatan: "Staff",
+        status: "MUDA",
+        email: "luthfi.w@hmif.org",
+    },
 ];
 
 const NAV_ITEMS = [
@@ -44,6 +94,21 @@ export default function DashboardAdminAnggota() {
     const [year, setYear] = useState("Semua Angkatan");
     const [status, setStatus] = useState("Semua Status");
     const [selectedIds, setSelectedIds] = useState([]);
+    const [detailMember, setDetailMember] = useState(null);
+    const [memberStatus, setMemberStatus] = useState("");
+
+    const handleOpenDetail = (member) => {
+        setDetailMember(member);
+        setMemberStatus(member.status === "TETAP" ? "Anggota Tetap" : member.status === "MUDA" ? "Anggota Muda" : "Luar Biasa");
+    };
+
+    const handleCloseDetail = () => {
+        setDetailMember(null);
+    };
+
+    const handleMemberStatusChange = (value) => {
+        setMemberStatus(value);
+    };
 
     const filteredRows = useMemo(() => {
         return SAMPLE_ROWS.filter((row) => {
@@ -225,7 +290,7 @@ export default function DashboardAdminAnggota() {
 
                         <div className="bg-white rounded-3xl p-4 shadow-sm ring-1 ring-slate-200/70 overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[900px] text-sm">
+                                <table className="w-full min-w-max text-sm">
                                     <thead>
                                         <tr className="text-left text-xs uppercase text-slate-500 tracking-[0.12em]">
                                             <th className="w-10 py-3 pl-4 pr-2">
@@ -278,14 +343,14 @@ export default function DashboardAdminAnggota() {
                                                 </td>
                                                 <td className="py-3 px-3">
                                                     <div className="flex items-center gap-2">
-                                                        <button className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
+                                                        <button type="button" onClick={() => handleOpenDetail(row)} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
                                                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         </button>
-                                                        <button className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
-                                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6-6 3 3-6 6H9v-3z" />
+                                                        <button type="button" onClick={() => handleOpenDetail(row)} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
+                                                            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                             </svg>
                                                         </button>
                                                         <button className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
@@ -312,6 +377,103 @@ export default function DashboardAdminAnggota() {
                                 </div>
                             </div>
                         </div>
+                        {detailMember && (
+                            <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 backdrop-blur-sm px-4 py-6">
+                                <div className="mx-auto w-full max-w-4xl rounded-4xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+                                    <button
+                                        type="button"
+                                        onClick={handleCloseDetail}
+                                        className="absolute right-6 top-6 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200 transition"
+                                    >
+                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+
+                                    <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-100 text-3xl font-bold text-slate-700">
+                                                    {detailMember.nama
+                                                        .split(" ")
+                                                        .map((part) => part[0])
+                                                        .slice(0, 2)
+                                                        .join("")}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Detail Anggota</p>
+                                                    <h2 className="mt-3 text-3xl font-semibold text-slate-900">{detailMember.nama}</h2>
+                                                    <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
+                                                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-slate-700">
+                                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                                                                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+                                                                <circle cx="9" cy="7" r="4" />
+                                                            </svg>
+                                                            {detailMember.nim}
+                                                        </span>
+                                                    </div>
+                                                    <span className="mt-4 inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
+                                                        {memberStatus}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Division</div>
+                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.divisi}</p>
+                                                </div>
+                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Position</div>
+                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.jabatan}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Email Address</div>
+                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.email}</p>
+                                                </div>
+                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Phone Number</div>
+                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.kontak}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+                                            <div className="mb-6">
+                                                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status Keanggotaan</div>
+                                                <select
+                                                    value={memberStatus}
+                                                    onChange={(e) => handleMemberStatusChange(e.target.value)}
+                                                    className="mt-3 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+                                                >
+                                                    <option>Anggota Tetap</option>
+                                                    <option>Anggota Muda</option>
+                                                    <option>Luar Biasa</option>
+                                                </select>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                className="inline-flex w-full items-center justify-center gap-2 rounded-3xl bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-600 transition"
+                                            >
+                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                                Delete Member
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 grid gap-3 sm:grid-cols-2 border-t border-slate-200 pt-5 text-xs uppercase tracking-[0.24em] text-slate-400">
+                                        <span>HMIF ITERA • MEMBER RECORDS DIVISION</span>
+                                        <span className="text-right text-slate-500">Last updated: Oct 24, 2023</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </main>
                 </div>
             </div>
