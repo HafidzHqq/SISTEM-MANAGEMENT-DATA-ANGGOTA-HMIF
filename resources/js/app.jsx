@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
+import QrScanner from "./components/QrScanner";
+import Anggota from "./pages/Anggota";
 
 function App() {
     return (
@@ -24,6 +26,11 @@ function App() {
                         <Dashboard />
                     </ProtectedRoute>
                 } />
+                <Route path="/dashboard/anggota" element={
+                    <ProtectedRoute>
+                        <Anggota />
+                    </ProtectedRoute>
+                } />
                 <Route path="/dashboard/profile" element={
                     <ProtectedRoute>
                         <Profile />
@@ -32,6 +39,16 @@ function App() {
                 <Route path="/dashboard/history" element={
                     <ProtectedRoute>
                         <History />
+                    </ProtectedRoute>
+                } />
+                <Route path="/scan" element={
+                    <ProtectedRoute>
+                        <QrScanner />
+                    </ProtectedRoute>
+                } />
+                <Route path="/anggota" element={
+                    <ProtectedRoute>
+                        <Anggota />
                     </ProtectedRoute>
                 } />
             </Routes>
