@@ -9,6 +9,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\DashboardController;
 
 // Public routes
 Route::apiResource('events', EventController::class)->only(['index', 'show']);
@@ -40,6 +41,7 @@ Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function ()
 
     Route::get('/events/{eventId}/attendances', [AttendanceController::class, 'monitorByEvent']);
     Route::get('/events/{eventId}/attendances/export-csv', [AttendanceController::class, 'exportCsv']);
+    Route::get('/dashboard/attendance-statistics', [DashboardController::class, 'attendanceStatistics']);
 
     Route::get('/members', [MemberController::class, 'index']);
     Route::get('/members/{id}', [MemberController::class, 'show']);
