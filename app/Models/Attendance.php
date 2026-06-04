@@ -30,4 +30,9 @@ class Attendance extends Model
     public function event() {
         return $this->belongsTo(Event::class, 'event_id', 'event_id');
     }
+    
+    public function archive(){
+        return $this->hasOne(Archive::class, 'attendance_id', 'attendance_id');
+    }
 }
+

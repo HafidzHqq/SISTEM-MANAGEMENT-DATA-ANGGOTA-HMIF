@@ -12,4 +12,8 @@ class Archive extends Model
         'attendance_id', 
         'archived_at'
     ];
+
+    public function attendance() {
+        return $this->belongsTo(Attendance::class, 'attendance_id', 'attendance_id');
+    }
 }
