@@ -14,6 +14,7 @@ class ProfileController extends Controller
             'departemen'         => 'nullable|string|max:100',
             'jabatan'            => 'nullable|string|max:100',
             'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
+            'no_telepon'         => 'nullable|string|max:20'
         ]);
 
         if ($validator->fails()) {
@@ -36,7 +37,7 @@ class ProfileController extends Controller
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
             array_merge(
-                $request->only(['departemen', 'jabatan', 'status_keanggotaan']),
+                $request->only(['departemen', 'jabatan', 'status_keanggotaan', 'no_telepon']),
                 ['angkatan' => $angkatan]
             )
         );
