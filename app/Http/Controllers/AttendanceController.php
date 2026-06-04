@@ -288,4 +288,32 @@ class AttendanceController extends Controller
         return $earthRadius * $angle;
     }
 
+    // Fitur: Riwayat Presensi Anggota
+// Deskripsi: Menampilkan riwayat kehadiran user yang sedang login
+public function myHistory(Request $request)
+{
+    $user = $request->user();
+
+    $attendances = Attendance::with('event')
+        ->where('user_id', $user->user_id)
+        ->orderByDesc('checkin_time')
+        ->get()
+        ->map(function ($attendance) {
+            return [
+                'attendance_id' => $attendance->attendance_id,
+                'event_name'    => $attendance->event?->title,
+                'location'      => $attendance->event?->location_name,
+                'date'          => $attendance->checkin_time
+                    ? \Carbon\Carbon::parse($attendance->checkin_time)->format('d M Y')
+                    : null,
+                'time'          => $attendance->checkin_time
+                    ? \Carbon\Carbon::parse($attendance->checkin_time)->format('H:i') . ' WIB'
+                    : null,
+                'method'        => $attendance->method ?? 'QR Scan',
+                'status'        => $attendance->status === 'present' ? 'hadir' : 'tidak_hadir',
+            ];
+        });
+
+    return response()->json($attendances);
+}
 }

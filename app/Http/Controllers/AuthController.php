@@ -63,12 +63,12 @@ class AuthController extends Controller
         }
 
         $user = User::updateOrCreate(
-            ['google_id' => $googleUser->getId()],
+            ['nim' => $nim],
             [
-                'name'   => $googleUser->getName(),
-                'email'  => $email,
-                'nim'    => $nim,
-                'status' => 'aktif',
+                'google_id' => $googleUser->getId(),
+                'name'      => $googleUser->getName(),
+                'email'     => $email,
+                'status'    => 'aktif',
             ]
         );
 

@@ -25,11 +25,27 @@ const DIVISION_PROGRESS = [
 export default function DashboardAnggota() {
     const navigate = useNavigate();
 
-    const name = localStorage.getItem("name") || "Anggota HMIF";
-    const nim = localStorage.getItem("nim") || "124140056";
-    const division = localStorage.getItem("division") || "Technopreneur";
-    const firstName = name.split(" ")[0];
-    const attendance = 94;
+    const [user, setUser] = React.useState(null);
+
+React.useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    fetch("/api/me", {
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+        }
+    })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(err => console.error("Gagal fetch user:", err));
+}, []);
+
+const name = user?.name || localStorage.getItem("name") || "Anggota HMIF";
+const nim = user?.nim || "-";
+const division = user?.profile?.departemen || "-";
+const statusKeanggotaan = user?.profile?.status_keanggotaan || "Anggota Muda";
+const firstName = name.split(" ")[0];
+const attendance = 94;
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");

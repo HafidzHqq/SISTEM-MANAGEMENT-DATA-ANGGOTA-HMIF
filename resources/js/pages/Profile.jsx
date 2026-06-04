@@ -20,11 +20,29 @@ const UPCOMING_ACTIVITIES = [
 
 export default function Profile() {
     const navigate = useNavigate();
-    const name = localStorage.getItem("name") || "Anggota HMIF";
-    const nim = localStorage.getItem("nim") || "124140056";
-    const division = localStorage.getItem("division") || "Technopreneur";
-    const email = localStorage.getItem("email") || `${nim}@student.itera.ac.id`;
-    const angkatan = nim.length >= 5 ? "20" + nim.substring(2, 4) : "2024";
+    const [profile, setProfile] = React.useState(null);
+
+    // Ambil data dari /api/me
+    React.useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        fetch("/api/me", {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            }
+        })
+        .then(res => res.json())
+        .then(data => setProfile(data))
+        .catch(err => console.error("Gagal fetch profil:", err));
+    }, []);
+
+    const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
+    const nim = profile?.nim || localStorage.getItem("nim") || "-";
+    const division = profile?.profile?.departemen || "-";
+    const jabatan = profile?.profile?.jabatan || "-";
+    const statusKeanggotaan = profile?.profile?.status_keanggotaan || "Anggota Muda";
+    const email = profile?.email || localStorage.getItem("email") || "-";
+    const angkatan = nim.length >= 3 ? "20" + nim.replace(/\D/g, "").substring(1, 3) : "-";
 
     const handleLogout = () => {
         ["auth_token", "role", "name"].forEach(k => localStorage.removeItem(k));
@@ -114,7 +132,7 @@ export default function Profile() {
                                 </button>
                             </div>
                             <h2 className="text-xl font-extrabold text-gray-900">{name}</h2>
-                            <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">Anggota Muda</span>
+                            <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusKeanggotaan}</span>
                         </div>
                         {/* Desktop: horizontal layout */}
                         <div className="hidden md:flex items-center gap-6">
@@ -153,7 +171,7 @@ export default function Profile() {
                         </div>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                             <p className="text-[0.65rem] text-gray-400 mb-0.5">Jabatan</p>
-                            <p className="text-sm font-semibold text-gray-800">Staff</p>
+                            <p className="text-sm font-semibold text-gray-800">{jabatan}</p>
                         </div>
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 pt-1">Kontak</p>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
@@ -192,7 +210,7 @@ export default function Profile() {
                                 <Field label="NIM" value={nim} half />
                                 <Field label="Angkatan" value={angkatan} half />
                                 <Field label="Divisi" value={division} half />
-                                <Field label="Jabatan" value="Staff" half />
+                                <Field label="Jabatan" value={jabatan} half />
                             </div>
                         </div>
 

@@ -23,12 +23,34 @@ const HISTORY_DATA = [
 
 export default function DashboardHistory() {
     const navigate = useNavigate();
-    const [filter, setFilter] = useState("semua");
-    const [search, setSearch] = useState("");
+const [filter, setFilter] = useState("semua");
+const [search, setSearch] = useState("");
+const [user, setUser] = useState(null);
+const [historyData, setHistoryData] = useState([]);
 
-    const name = localStorage.getItem("name") || "Anggota HMIF";
-    const nim = localStorage.getItem("nim") || "124140056";
-    const division = localStorage.getItem("division") || "Technopreneur";
+const name = user?.name || localStorage.getItem("name") || "Anggota HMIF";
+const nim = user?.nim || "-";
+const division = user?.profile?.departemen || "-";
+
+React.useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+    };
+
+    // Fetch user data
+    fetch("/api/me", { headers })
+        .then(res => res.json())
+        .then(data => setUser(data))
+        .catch(err => console.error("Gagal fetch user:", err));
+
+    // Fetch history
+    fetch("/api/attendances/me", { headers })
+        .then(res => res.json())
+        .then(data => setHistoryData(data))
+        .catch(err => console.error("Gagal fetch history:", err));
+}, []);
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -43,10 +65,10 @@ export default function DashboardHistory() {
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];
 
-    const filtered = HISTORY_DATA.filter((item) => {
-        const matchFilter = filter === "semua" || (filter === "hadir" && item.status === "hadir") || (filter === "tidak_hadir" && item.status === "tidak_hadir");
-        const matchSearch = item.name.toLowerCase().includes(search.toLowerCase());
-        return matchFilter && matchSearch;
+    const filtered = historyData.filter((item) => {
+    const matchFilter = filter === "semua" || (filter === "hadir" && item.status === "hadir") || (filter === "tidak_hadir" && item.status === "tidak_hadir");
+    const matchSearch = (item.event_name || "").toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
     });
 
     const StatusBadge = ({ status }) => (
