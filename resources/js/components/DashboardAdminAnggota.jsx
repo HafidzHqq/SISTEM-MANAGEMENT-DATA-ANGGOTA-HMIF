@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
-import iconAdd from "../assets/icon-gantiprofile.png";
 import iconSearch from "../assets/icon-search.png";
 import iconTotalAnggota from "../assets/assets dash admin/Icon-totalanggota.png";
 import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
@@ -65,12 +64,77 @@ const SAMPLE_ROWS = [
     { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "rizky.r@hmif.org" },
     { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
     { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
+    { id: 6, nim: "124140090", nama: "Ridho Maulana Saputa", kontak: "0813-6728-9083", angkatan: 2024, divisi: "Technopreneur", jabatan: "Staff", status: "MUDA", email: "ridho.124140090@student.itera.ac.id" },
+    { id: 7, nim: "121140011", nama: "Nadia Putri", kontak: "0812-3456-7895", angkatan: 2021, divisi: "Internal", jabatan: "Bendahara", status: "TETAP", email: "nadia.p@hmif.org" },
+    { id: 8, nim: "122140078", nama: "Bagas Pratama", kontak: "0812-3456-7896", angkatan: 2022, divisi: "Eksternal", jabatan: "Staff", status: "TETAP", email: "bagas.p@hmif.org" },
+    { id: 9, nim: "123140044", nama: "Dewi Kartika", kontak: "0812-3456-7897", angkatan: 2023, divisi: "Minat Bakat", jabatan: "Staff", status: "MUDA", email: "dewi.k@hmif.org" },
+    { id: 10, nim: "120140066", nama: "Raka Mahendra", kontak: "0812-3456-7898", angkatan: 2020, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "raka.m@hmif.org" },
+    { id: 11, nim: "124140099", nama: "Maya Salsabila", kontak: "0812-3456-7899", angkatan: 2024, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "maya.s@hmif.org" },
+    { id: 12, nim: "121140073", nama: "Aldi Firmansyah", kontak: "0812-3456-7900", angkatan: 2021, divisi: "Technopreneur", jabatan: "Koordinator", status: "TETAP", email: "aldi.f@hmif.org" },
 ];
 
 const statusClasses = {
     TETAP: "bg-emerald-100 text-emerald-700",
     MUDA: "bg-amber-100 text-amber-700",
     "LUAR BIASA": "bg-blue-100 text-blue-600",
+};
+
+const ITEMS_PER_PAGE = 5;
+
+const getPaginationPages = (currentPage, totalPages) => {
+    if (totalPages <= 5) {
+        return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (currentPage <= 3) {
+        return [1, 2, 3, "...", totalPages];
+    }
+
+    if (currentPage >= totalPages - 2) {
+        return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, "...", currentPage - 1, currentPage, currentPage + 1, "...", totalPages];
+};
+
+const csvEscape = (value) => {
+    const normalized = String(value ?? "");
+    const safeValue = /^[=+\-@]/.test(normalized.trimStart()) ? `'${normalized}` : normalized;
+    return `"${safeValue.replace(/"/g, '""')}"`;
+};
+
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("auth_token");
+    return {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+};
+
+const normalizeMemberStatus = (value) => {
+    const normalized = String(value ?? "").trim().toUpperCase();
+
+    if (normalized.includes("TETAP")) return "TETAP";
+    if (normalized.includes("LUAR")) return "LUAR BIASA";
+    if (normalized.includes("MUDA")) return "MUDA";
+
+    return "MUDA";
+};
+
+const mapMemberRow = (member, index) => {
+    const profile = member.member_profile || member.memberProfile || member.profile || {};
+
+    return {
+        id: member.user_id ?? member.id ?? index + 1,
+        nim: member.nim ?? "-",
+        nama: member.name ?? member.nama ?? "-",
+        kontak: profile.no_telepon ?? profile.no_telp ?? profile.phone ?? member.no_telepon ?? "-",
+        angkatan: profile.angkatan ?? member.angkatan ?? "-",
+        divisi: profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-",
+        jabatan: profile.jabatan ?? member.jabatan ?? "-",
+        status: normalizeMemberStatus(profile.status_keanggotaan ?? member.status_keanggotaan),
+        email: member.email ?? "-",
+    };
 };
 
 function MetricCard({ metric }) {
@@ -114,9 +178,14 @@ export default function DashboardAdminAnggota() {
     const [division, setDivision] = useState("Semua Divisi");
     const [year, setYear] = useState("Semua Angkatan");
     const [status, setStatus] = useState("Semua Status");
+    const [rows, setRows] = useState(SAMPLE_ROWS);
     const [selectedIds, setSelectedIds] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [detailMember, setDetailMember] = useState(null);
     const [memberStatus, setMemberStatus] = useState("");
+    const [isApiBacked, setIsApiBacked] = useState(false);
+    const [isLoadingMembers, setIsLoadingMembers] = useState(false);
+    const [memberActionError, setMemberActionError] = useState("");
 
     const userName = localStorage.getItem("name") || "Admin User";
     const nim = localStorage.getItem("nim") || "124140056";
@@ -130,25 +199,197 @@ export default function DashboardAdminAnggota() {
     };
 
     const filteredRows = useMemo(() => {
-        return SAMPLE_ROWS.filter((row) => {
+        return rows.filter((row) => {
             const matchesSearch = search ? `${row.nama} ${row.nim}`.toLowerCase().includes(search.toLowerCase()) : true;
             const matchesDivision = division === "Semua Divisi" || row.divisi === division;
             const matchesYear = year === "Semua Angkatan" || String(row.angkatan) === String(year);
             const matchesStatus = status === "Semua Status" || row.status === status;
             return matchesSearch && matchesDivision && matchesYear && matchesStatus;
         });
+    }, [rows, search, division, year, status]);
+
+    React.useEffect(() => {
+        let isActive = true;
+
+        const fetchMembers = async () => {
+            const token = localStorage.getItem("auth_token");
+            if (!token) return;
+
+            setIsLoadingMembers(true);
+            setMemberActionError("");
+
+            try {
+                const response = await fetch("/api/members", {
+                    headers: getAuthHeaders(),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Gagal mengambil data anggota.");
+                }
+
+                const data = await response.json();
+                if (!isActive) return;
+
+                setRows(Array.isArray(data) ? data.map(mapMemberRow) : []);
+                setSelectedIds([]);
+                setCurrentPage(1);
+                setIsApiBacked(true);
+            } catch (error) {
+                if (!isActive) return;
+                setIsApiBacked(false);
+                setMemberActionError(`${error.message || "Gagal mengambil data anggota."} Menampilkan data contoh.`);
+            } finally {
+                if (isActive) {
+                    setIsLoadingMembers(false);
+                }
+            }
+        };
+
+        fetchMembers();
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
+
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / ITEMS_PER_PAGE));
+    const safePage = Math.min(currentPage, totalPages);
+    const startIndex = filteredRows.length === 0 ? 0 : (safePage - 1) * ITEMS_PER_PAGE + 1;
+    const endIndex = Math.min(safePage * ITEMS_PER_PAGE, filteredRows.length);
+    const paginatedRows = filteredRows.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
+    const paginationPages = getPaginationPages(safePage, totalPages);
+    const visibleIds = paginatedRows.map((row) => row.id);
+    const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
+
+    React.useEffect(() => {
+        setCurrentPage(1);
+        setSelectedIds([]);
     }, [search, division, year, status]);
+
+    React.useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     const handleToggleRow = (id) => {
         setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
     };
 
     const handleToggleAll = () => {
-        if (selectedIds.length === filteredRows.length) {
-            setSelectedIds([]);
-        } else {
-            setSelectedIds(filteredRows.map((row) => row.id));
+        if (visibleIds.length === 0) return;
+
+        setSelectedIds((current) => {
+            const allVisibleSelected = visibleIds.every((id) => current.includes(id));
+            return allVisibleSelected
+                ? current.filter((id) => !visibleIds.includes(id))
+                : Array.from(new Set([...current, ...visibleIds]));
+        });
+    };
+
+    const handleExportCsv = () => {
+        const headers = ["No", "NIM", "Nama", "Kontak", "Email", "Angkatan", "Divisi", "Jabatan", "Status"];
+        const csvRows = [
+            headers.map(csvEscape).join(","),
+            ...filteredRows.map((row, index) =>
+                [
+                    index + 1,
+                    row.nim,
+                    row.nama,
+                    row.kontak,
+                    row.email,
+                    row.angkatan,
+                    row.divisi,
+                    row.jabatan,
+                    row.status,
+                ].map(csvEscape).join(",")
+            ),
+        ];
+        const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "data-anggota-hmif.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleDeleteMember = async (id) => {
+        const member = rows.find((row) => row.id === id);
+        if (!member) return;
+
+        const confirmed = window.confirm(`Hapus anggota ${member.nama}?`);
+        if (!confirmed) return;
+
+        setMemberActionError("");
+
+        if (isApiBacked) {
+            try {
+                const response = await fetch(`/api/members/${id}`, {
+                    method: "DELETE",
+                    headers: getAuthHeaders(),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || "Gagal menghapus anggota.");
+                }
+            } catch (error) {
+                setMemberActionError(error.message || "Gagal menghapus anggota.");
+                return;
+            }
         }
+
+        setRows((current) => current.filter((row) => row.id !== id));
+        setSelectedIds((current) => current.filter((item) => item !== id));
+
+        if (detailMember?.id === id) {
+            setDetailMember(null);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.length === 0) return;
+
+        const confirmed = window.confirm(`Hapus ${selectedIds.length} anggota terpilih?`);
+        if (!confirmed) return;
+
+        setMemberActionError("");
+
+        if (isApiBacked) {
+            const failedIds = [];
+
+            for (const id of selectedIds) {
+                try {
+                    const response = await fetch(`/api/members/${id}`, {
+                        method: "DELETE",
+                        headers: getAuthHeaders(),
+                    });
+
+                    if (!response.ok) {
+                        failedIds.push(id);
+                    }
+                } catch {
+                    failedIds.push(id);
+                }
+            }
+
+            const deletedIds = selectedIds.filter((id) => !failedIds.includes(id));
+            setRows((current) => current.filter((row) => !deletedIds.includes(row.id)));
+            setSelectedIds(failedIds);
+
+            if (failedIds.length > 0) {
+                setMemberActionError(`${failedIds.length} anggota gagal dihapus. Coba ulangi untuk data yang masih terpilih.`);
+            }
+
+            return;
+        }
+
+        setRows((current) => current.filter((row) => !selectedIds.includes(row.id)));
+        setSelectedIds([]);
     };
 
     const handleOpenDetail = (member) => {
@@ -254,7 +495,15 @@ export default function DashboardAdminAnggota() {
                                 <p className="mt-2 text-[1rem] text-slate-700">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
                             </div>
                             <button className="inline-flex items-center justify-center gap-3 rounded-[14px] bg-[#f5bf17] px-5 py-3.5 text-[0.98rem] font-semibold text-slate-900 shadow-[0_10px_22px_rgba(245,191,23,0.28)] transition hover:bg-[#ffd033]">
-                                <img src={iconAdd} alt="Tambah" className="h-4.5 w-4.5" />
+                                <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path
+                                        d="M15 19a6 6 0 0 0-12 0M9 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10-6v6m3-3h-6"
+                                        stroke="currentColor"
+                                        strokeWidth="2.2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
                                 Tambah Anggota
                             </button>
                         </div>
@@ -266,80 +515,92 @@ export default function DashboardAdminAnggota() {
                         </div>
 
                         <div className="mb-8 rounded-[10px] bg-[#4faa19] p-4 shadow-sm">
-                            <div className="grid gap-3 xl:grid-cols-[1.85fr_1fr] items-center">
-                                <div className="grid gap-3 sm:grid-cols-[1.7fr_1fr]">
-                                    <div className="relative">
-                                        <img src={iconSearch} alt="" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60" />
-                                        <input
-                                            type="text"
-                                            value={search}
-                                            onChange={(e) => setSearch(e.target.value)}
-                                            placeholder="Cari nama atau NIM..."
-                                            className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 pl-12 pr-4 text-[0.95rem] text-slate-700 shadow-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-white/40"
-                                        />
-                                    </div>
-                                    <select
-                                        value={division}
-                                        onChange={(e) => setDivision(e.target.value)}
-                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
-                                    >
-                                        <option>Semua Divisi</option>
-                                        <option>Eksternal</option>
-                                        <option>Internal</option>
-                                        <option>Minat Bakat</option>
-                                    </select>
+                            <div className="grid items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.45fr)_minmax(180px,0.85fr)_minmax(190px,0.85fr)_minmax(175px,0.8fr)_auto]">
+                                <div className="relative min-w-0">
+                                    <img src={iconSearch} alt="" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Cari nama atau NIM..."
+                                        className="h-12 w-full rounded-[6px] border border-white/20 bg-white/95 pl-12 pr-4 text-[0.95rem] text-slate-700 shadow-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-white/40"
+                                    />
                                 </div>
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                                    <select
-                                        value={year}
-                                        onChange={(e) => setYear(e.target.value)}
-                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
-                                    >
-                                        <option>Semua Angkatan</option>
-                                        <option>2021</option>
-                                        <option>2022</option>
-                                        <option>2023</option>
-                                        <option>2024</option>
-                                    </select>
-                                    <select
-                                        value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
-                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
-                                    >
-                                        <option>Semua Status</option>
-                                        <option>TETAP</option>
-                                        <option>MUDA</option>
-                                        <option>LUAR BIASA</option>
-                                    </select>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSearch("");
-                                            setDivision("Semua Divisi");
-                                            setYear("Semua Angkatan");
-                                            setStatus("Semua Status");
-                                        }}
-                                        className="inline-flex h-[44px] items-center gap-2 px-3 text-[0.95rem] font-semibold text-white transition hover:text-white/90"
-                                    >
-                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M6 12h12M10 19h4" />
-                                        </svg>
-                                        Reset
-                                    </button>
-                                </div>
+                                <select
+                                    value={division}
+                                    onChange={(e) => setDivision(e.target.value)}
+                                    className="h-12 w-full min-w-0 rounded-[6px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
+                                >
+                                    <option>Semua Divisi</option>
+                                    <option>Technopreneur</option>
+                                    <option>Eksternal</option>
+                                    <option>Internal</option>
+                                    <option>Minat Bakat</option>
+                                </select>
+                                <select
+                                    value={year}
+                                    onChange={(e) => setYear(e.target.value)}
+                                    className="h-12 w-full min-w-0 rounded-[6px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
+                                >
+                                    <option>Semua Angkatan</option>
+                                    <option>2020</option>
+                                    <option>2021</option>
+                                    <option>2022</option>
+                                    <option>2023</option>
+                                    <option>2024</option>
+                                </select>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value)}
+                                    className="h-12 w-full min-w-0 rounded-[6px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
+                                >
+                                    <option>Semua Status</option>
+                                    <option>TETAP</option>
+                                    <option>MUDA</option>
+                                    <option>LUAR BIASA</option>
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearch("");
+                                        setDivision("Semua Divisi");
+                                        setYear("Semua Angkatan");
+                                        setStatus("Semua Status");
+                                        setCurrentPage(1);
+                                        setSelectedIds([]);
+                                    }}
+                                    className="inline-flex h-12 min-w-[112px] items-center justify-center gap-2 rounded-[6px] px-4 text-[0.95rem] font-semibold text-white transition hover:bg-white/10"
+                                >
+                                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M6 12h12M10 19h4" />
+                                    </svg>
+                                    Reset
+                                </button>
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-4 rounded-[10px] bg-white px-5 py-4 shadow-sm ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between mb-4">
-                            <div className="text-sm text-slate-700">Terpilih: {selectedIds.length} baris</div>
+                            <div className="text-sm text-slate-700">
+                                {isLoadingMembers ? "Memuat data anggota..." : `Terpilih: ${selectedIds.length} baris`}
+                            </div>
                             <div className="flex items-center gap-3">
-                                <button className="inline-flex items-center gap-2 rounded-[6px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+                                <button
+                                    type="button"
+                                    onClick={handleExportCsv}
+                                    disabled={isLoadingMembers || filteredRows.length === 0}
+                                    className="inline-flex items-center gap-2 rounded-[6px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M6 11v6m6-6v6m6-6v6M5 19h14" />
                                     </svg>
                                     Export CSV
                                 </button>
-                                <button className="inline-flex items-center gap-2 rounded-[6px] border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm hover:bg-red-50 transition">
+                                <button
+                                    type="button"
+                                    onClick={handleBulkDelete}
+                                    disabled={isLoadingMembers || selectedIds.length === 0}
+                                    className="inline-flex items-center gap-2 rounded-[6px] border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
                                     </svg>
@@ -347,6 +608,12 @@ export default function DashboardAdminAnggota() {
                                 </button>
                             </div>
                         </div>
+
+                        {memberActionError && (
+                            <div className="mb-4 rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                                {memberActionError}
+                            </div>
+                        )}
 
                         <div className="overflow-hidden rounded-[10px] bg-white shadow-sm ring-1 ring-slate-200/70">
                             <div className="overflow-x-auto">
@@ -357,7 +624,7 @@ export default function DashboardAdminAnggota() {
                                                 <input
                                                     type="checkbox"
                                                     className="h-4 w-4 rounded border-slate-300 text-emerald-600"
-                                                    checked={selectedIds.length === filteredRows.length && filteredRows.length > 0}
+                                                    checked={isAllVisibleSelected}
                                                     onChange={handleToggleAll}
                                                 />
                                             </th>
@@ -373,7 +640,14 @@ export default function DashboardAdminAnggota() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredRows.map((row) => (
+                                        {paginatedRows.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="10" className="px-6 py-12 text-center text-slate-500">
+                                                    Tidak ada anggota yang cocok dengan filter.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            paginatedRows.map((row, index) => (
                                             <tr key={row.id} className="border-b border-slate-100 bg-white hover:bg-slate-50/80">
                                                 <td className="py-5 pl-5 pr-2 align-middle">
                                                     <input
@@ -383,7 +657,7 @@ export default function DashboardAdminAnggota() {
                                                         onChange={() => handleToggleRow(row.id)}
                                                     />
                                                 </td>
-                                                <td className="py-5 px-4 align-middle text-slate-700">{row.id}</td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">{startIndex + index}</td>
                                                 <td className="py-5 px-4 align-middle font-medium text-[#a8c8ff]">{row.nim}</td>
                                                 <td className="py-5 px-4 align-middle font-semibold text-slate-800">{row.nama}</td>
                                                 <td className="py-5 px-4 align-middle text-slate-600">
@@ -412,6 +686,7 @@ export default function DashboardAdminAnggota() {
                                                         </button>
                                                         <button
                                                             type="button"
+                                                            onClick={() => handleDeleteMember(row.id)}
                                                             className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-red-50 transition"
                                                             aria-label={`Hapus ${row.nama}`}
                                                         >
@@ -422,21 +697,55 @@ export default function DashboardAdminAnggota() {
                                                     </div>
                                                 </td>
                                             </tr>
-                                        ))}
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
 
                             <div className="flex flex-col gap-4 border-t border-slate-100 px-6 py-5 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-                                <div>Menampilkan 1 - 5 dari 1,248 data</div>
+                                <div>Menampilkan {startIndex} - {endIndex} dari {filteredRows.length} data</div>
                                 <div className="flex items-center gap-2">
-                                    <button className="text-slate-300 hover:text-slate-500">‹</button>
-                                    <button className="h-8 w-8 rounded-[4px] bg-[#1f5e22] text-white font-semibold">1</button>
-                                    <button className="h-8 w-8 rounded-[4px] text-slate-600 hover:bg-slate-100">2</button>
-                                    <button className="h-8 w-8 rounded-[4px] text-slate-600 hover:bg-slate-100">3</button>
-                                    <span className="px-1 text-slate-400">...</span>
-                                    <button className="h-8 w-10 rounded-[4px] text-slate-600 hover:bg-slate-100">250</button>
-                                    <button className="text-slate-300 hover:text-slate-500">›</button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
+                                        disabled={safePage === 1}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-[4px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                        aria-label="Halaman sebelumnya"
+                                    >
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m15 18-6-6 6-6" />
+                                        </svg>
+                                    </button>
+                                    {paginationPages.map((page, index) =>
+                                        page === "..." ? (
+                                            <span key={`ellipsis-${index}`} className="px-1 text-slate-400">...</span>
+                                        ) : (
+                                            <button
+                                                key={page}
+                                                type="button"
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`h-8 min-w-8 rounded-[4px] px-2 font-semibold transition ${
+                                                    safePage === page
+                                                        ? "bg-[#1f5e22] text-white"
+                                                        : "text-slate-600 hover:bg-slate-100"
+                                                }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        )
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+                                        disabled={safePage === totalPages}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-[4px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                        aria-label="Halaman berikutnya"
+                                    >
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m9 18 6-6-6-6" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -538,6 +847,7 @@ export default function DashboardAdminAnggota() {
 
                                             <button
                                                 type="button"
+                                                onClick={() => handleDeleteMember(detailMember.id)}
                                                 className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-[#ffd3d0] px-4 text-[0.95rem] font-semibold text-[#a30e0e] transition hover:bg-[#ffc5c0]"
                                             >
                                                 <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
