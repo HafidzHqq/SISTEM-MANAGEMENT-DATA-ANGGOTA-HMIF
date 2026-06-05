@@ -47,4 +47,24 @@ class ProfileController extends Controller
             'profile' => $user->fresh()->memberProfile,
         ]);
     }
+
+    public function uploadFoto(Request $request)
+    {
+        $request->validate([
+            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $user = $request->user();
+        $path = $request->file('foto')->store('profile-photos', 'public');
+
+        $user->memberProfile()->updateOrCreate(
+            ['user_id' => $user->user_id],
+            ['foto' => $path]
+        );
+
+        return response()->json([
+            'message' => 'Foto berhasil diperbarui',
+            'foto_url' => asset('storage/' . $path),
+        ]);
+    }
 }
