@@ -19,10 +19,10 @@ class MemberController extends Controller
         $query = User::with('memberProfile')
             ->where('role', 'anggota');
 
-        // Filter by divisi
-        if ($request->has('divisi')) {
+        // Filter by departemen
+        if ($request->has('departemen')) {
             $query->whereHas('memberProfile', function ($q) use ($request) {
-                $q->where('departemen', $request->divisi);
+                $q->where('departemen', $request->departemen);
             });
         }
 
