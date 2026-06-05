@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Archive;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -294,26 +295,96 @@ public function myHistory(Request $request)
 {
     $user = $request->user();
 
-    $attendances = Attendance::with('event')
+    $attendances = Attendance::with(['event', 'archive'])
         ->where('user_id', $user->user_id)
         ->orderByDesc('checkin_time')
         ->get()
         ->map(function ($attendance) {
+            $event = $attendance->event;
+            $eventDate = $event?->date_time ? Carbon::parse($event->date_time) : null;
+            $checkinTime = $attendance->checkin_time ? Carbon::parse($attendance->checkin_time) : null;
+            $eventTimeLabel = $eventDate ? $eventDate->format('H:i') . ' WIB' : null;
+            $checkinTimeLabel = $checkinTime ? $checkinTime->format('H:i') . ' WIB' : null;
+
             return [
                 'attendance_id' => $attendance->attendance_id,
-                'event_name'    => $attendance->event?->title,
-                'location'      => $attendance->event?->location_name,
-                'date'          => $attendance->checkin_time
-                    ? \Carbon\Carbon::parse($attendance->checkin_time)->format('d M Y')
-                    : null,
-                'time'          => $attendance->checkin_time
-                    ? \Carbon\Carbon::parse($attendance->checkin_time)->format('H:i') . ' WIB'
-                    : null,
+                'event_id'      => $event?->event_id,
+                'event_name'    => $event?->title,
+                'description'   => $event?->description,
+                'location'      => $this->eventLocation($event),
+                'date'          => $eventDate?->format('d M Y') ?? $checkinTime?->format('d M Y'),
+                'time'          => $eventTimeLabel ?? $checkinTimeLabel,
+                'checkin_time'  => $checkinTimeLabel,
                 'method'        => $attendance->method ?? 'QR Scan',
                 'status'        => $attendance->status === 'present' ? 'hadir' : 'tidak_hadir',
+                'is_archived'   => (bool) $attendance->archive,
+                'archived_at'   => $attendance->archive?->archived_at,
             ];
         });
 
     return response()->json($attendances);
+}
+
+public function archiveOldForUser(Request $request)
+{
+    $validated = $request->validate([
+        'days' => 'sometimes|integer|min:1|max:365',
+    ]);
+
+    $user = $request->user();
+    $days = $validated['days'] ?? 30;
+    $cutoff = now()->subDays($days);
+
+    $query = Attendance::where('user_id', $user->user_id)
+        ->where(function ($query) use ($cutoff) {
+            $query->whereHas('event', function ($eventQuery) use ($cutoff) {
+                $eventQuery->where('attendance_window_end', '<', $cutoff);
+            })->orWhere(function ($fallbackQuery) use ($cutoff) {
+                $fallbackQuery
+                    ->whereDoesntHave('event')
+                    ->where('checkin_time', '<', $cutoff);
+            });
+        })
+        ->whereDoesntHave('archive');
+
+    $candidateCount = $query->count();
+    $archivedCount = 0;
+
+    $query->chunkById(100, function ($attendances) use (&$archivedCount) {
+        foreach ($attendances as $attendance) {
+            Archive::firstOrCreate(
+                ['attendance_id' => $attendance->attendance_id],
+                ['archived_at' => now()]
+            );
+
+            $archivedCount++;
+        }
+    }, 'attendance_id');
+
+    return response()->json([
+        'message' => $archivedCount > 0
+            ? "Berhasil mengarsipkan {$archivedCount} log lama."
+            : "Tidak ada log lama yang perlu diarsipkan.",
+        'archived_count' => $archivedCount,
+        'candidate_count' => $candidateCount,
+        'days' => $days,
+    ]);
+}
+
+private function eventLocation($event): ?string
+{
+    if (!$event) {
+        return null;
+    }
+
+    foreach (['location_name', 'location', 'venue', 'place', 'room'] as $field) {
+        $value = $event->getAttribute($field);
+
+        if (!empty($value)) {
+            return $value;
+        }
+    }
+
+    return null;
 }
 }

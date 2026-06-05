@@ -4,18 +4,10 @@ import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import lockIcon from "../assets/lock.png";
 import sqanQr from "../assets/sqanqr.png";
-import techSeminar from "../assets/techseminar.png";
-import campusWorkshop from "../assets/campusworkshop.png";
-import monthlyAssembly from "../assets/mothlyassembly.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
-
-const ACTIVITIES = [
-    { icon: techSeminar, name: "Tech Seminar 2024", location: "Main Auditorium", date: "Oct 12", time: "14:30" },
-    { icon: campusWorkshop, name: "Campus Workshop", location: "Lab Room B2", date: "Oct 10", time: "09:15" },
-    { icon: monthlyAssembly, name: "Monthly Assembly", location: "Student Hall", date: "Oct 05", time: "13:00" },
-];
+import { calculateAttendanceSummary } from "../utils/attendanceHistory";
 
 const DIVISION_PROGRESS = [
     { label: "Project Milestone A", value: 75 },
@@ -26,26 +18,54 @@ export default function DashboardAnggota() {
     const navigate = useNavigate();
 
     const [user, setUser] = React.useState(null);
+    const [historyData, setHistoryData] = React.useState([]);
+    const [isHistoryLoading, setIsHistoryLoading] = React.useState(true);
 
 React.useEffect(() => {
     const token = localStorage.getItem("auth_token");
+
+    const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json",
+    };
+
     fetch("/api/me", {
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json",
-        }
+        headers
     })
     .then(res => res.json())
     .then(data => setUser(data))
     .catch(err => console.error("Gagal fetch user:", err));
+
+    fetch("/api/attendances/me", {
+        headers: {
+            ...headers,
+        }
+    })
+    .then(res => res.json())
+    .then(data => setHistoryData(Array.isArray(data) ? data : []))
+    .catch(err => console.error("Gagal fetch history:", err))
+    .finally(() => setIsHistoryLoading(false));
 }, []);
 
 const name = user?.name || localStorage.getItem("name") || "Anggota HMIF";
 const nim = user?.nim || "-";
-const division = user?.profile?.departemen || "-";
+const division = user?.profile?.departemen || user?.profile?.Departemen || "-";
 const statusKeanggotaan = user?.profile?.status_keanggotaan || "Anggota Muda";
+const statusLabel = statusKeanggotaan.toLowerCase().startsWith("anggota")
+    ? statusKeanggotaan
+    : `Anggota ${statusKeanggotaan}`;
 const firstName = name.split(" ")[0];
-const attendance = 94;
+const attendanceSummary = React.useMemo(() => calculateAttendanceSummary(historyData), [historyData]);
+const recentActivities = attendanceSummary.normalized.slice(0, 3);
+const attendance = attendanceSummary.rate;
+const attendanceLabel =
+    attendanceSummary.total === 0
+        ? "Belum ada data"
+        : attendance >= 85
+            ? "Excellent"
+            : attendance >= 70
+                ? "Good"
+                : "Needs Review";
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -175,7 +195,7 @@ const attendance = 94;
                                 Member Status
                             </p>
                             <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-4">
-                                Anggota Muda
+                                {statusLabel}
                             </span>
 
                             {/* Name & Division */}
@@ -194,6 +214,7 @@ const attendance = 94;
 
                         {/* Scan QR Card */}
                         <button
+                            onClick={() => navigate("/scan")}
                             className="flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-white text-center w-full cursor-pointer hover:opacity-90 active:scale-95 transition-all duration-200"
                             style={{ background: "linear-gradient(160deg, #3db53d 0%, #228b22 100%)" }}
                         >
@@ -212,16 +233,27 @@ const attendance = 94;
                         <div className="bg-white rounded-2xl p-5 shadow-sm">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="text-base font-bold text-gray-900">Recent Activity</h3>
-                                <button className="text-sm font-semibold text-green-600 hover:text-green-700 transition">
+                                <Link to="/dashboard/history" className="text-sm font-semibold text-green-600 hover:text-green-700 transition">
                                     View All
-                                </button>
+                                </Link>
                             </div>
                             <div className="divide-y divide-gray-100">
-                                {ACTIVITIES.map((a, i) => (
-                                    <div key={i} className="flex items-center justify-between py-3">
+                                {isHistoryLoading ? (
+                                    <div className="py-8 text-center text-sm text-gray-400">Memuat riwayat kehadiran...</div>
+                                ) : recentActivities.length === 0 ? (
+                                    <div className="py-8 text-center text-sm text-gray-400">Belum ada riwayat kehadiran.</div>
+                                ) : recentActivities.map((a) => (
+                                    <div key={a.id} className="flex items-center justify-between py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-                                                <img src={a.icon} alt="" className="h-5 w-5 object-contain" />
+                                            <div className={`h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0 ${a.status === "hadir" ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"}`}>
+                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2.4}
+                                                        d={a.status === "hadir" ? "M5 13l4 4L19 7" : "M6 18L18 6M6 6l12 12"}
+                                                    />
+                                                </svg>
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-800">{a.name}</p>
@@ -249,7 +281,7 @@ const attendance = 94;
                                     <span className="text-[2.6rem] font-extrabold text-green-600 leading-none">
                                         {attendance}%
                                     </span>
-                                    <span className="text-sm text-gray-400 font-medium">Excellent</span>
+                                    <span className="text-sm text-gray-400 font-medium">{attendanceLabel}</span>
                                 </div>
                                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                     <div
