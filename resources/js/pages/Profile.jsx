@@ -18,11 +18,43 @@ const UPCOMING_ACTIVITIES = [
     { name: "Internal Bonding Night", time: "Nov 02, 18:30", location: "Student Lounge" },
 ];
 
+const DEPARTEMEN_LIST = [
+    "Kesekjenan", "Senator", "DPA", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo",
+];
+
+const JABATAN_BY_DEPARTEMEN = {
+    "Kesekjenan": ["Ketua Himpunan", "Sekretaris Jenderal", "Sekretaris Umum", "Bendahara Umum"],
+    "Senator": ["Senator", "Sekretaris Umum", "Staff"],
+    "DPA": ["Koordinator DPA", "Sekretaris Jenderal", "Sekretaris Umum", "Ketua Komisi", "Staff Ahli", "Staff"],
+    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+};
+
 export default function Profile() {
     const navigate = useNavigate();
     const [profile, setProfile] = React.useState(null);
+    const [saving, setSaving] = React.useState(false);
+    const [toast, setToast] = React.useState(false);
+    const toastTimer = React.useRef(null);
 
-    // Ambil data dari /api/me
+    const showToast = () => {
+        setToast(true);
+        clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => setToast(false), 3000);
+    };
+
+    // Form state
+    const [form, setForm] = React.useState({
+        departemen: "",
+        jabatan: "",
+        no_telepon: "",
+    });
+    const [savedForm, setSavedForm] = React.useState({ ...form });
+    const [phoneError, setPhoneError] = React.useState("");
+
     React.useEffect(() => {
         const token = localStorage.getItem("auth_token");
         fetch("/api/me", {
@@ -32,17 +64,76 @@ export default function Profile() {
             }
         })
         .then(res => res.json())
-        .then(data => setProfile(data))
+        .then(data => {
+            setProfile(data);
+            const initial = {
+                departemen: data?.profile?.departemen || "",
+                jabatan: data?.profile?.jabatan || "",
+                no_telepon: data?.profile?.no_telepon || "",
+            };
+            setForm(initial);
+            setSavedForm(initial);
+        })
         .catch(err => console.error("Gagal fetch profil:", err));
     }, []);
 
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
-    const nim = profile?.nim || localStorage.getItem("nim") || "-";
-    const division = profile?.profile?.departemen || "-";
-    const jabatan = profile?.profile?.jabatan || "-";
+    const nim = profile?.nim || "-";
     const statusKeanggotaan = profile?.profile?.status_keanggotaan || "Anggota Muda";
-    const email = profile?.email || localStorage.getItem("email") || "-";
+    const email = profile?.email || "-";
     const angkatan = nim.length >= 3 ? "20" + nim.replace(/\D/g, "").substring(1, 3) : "-";
+
+    const hasChanges =
+        form.departemen !== savedForm.departemen ||
+        form.jabatan !== savedForm.jabatan ||
+        form.no_telepon !== savedForm.no_telepon;
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "no_telepon") {
+            if (!/^\d*$/.test(value)) {
+                setPhoneError("Nomor telepon hanya boleh berisi angka");
+                return;
+            }
+            setPhoneError("");
+        }
+        if (name === "departemen") {
+            setForm(prev => ({ ...prev, departemen: value, jabatan: "" }));
+            setAlert(null);
+            return;
+        }
+        setForm(prev => ({ ...prev, [name]: value }));
+        setAlert(null);
+    };
+
+    const handleSave = async () => {
+        if (!hasChanges || saving) return;
+        if (phoneError) return;
+
+        setSaving(true);
+        const token = localStorage.getItem("auth_token");
+        try {
+            const res = await fetch("/api/profile", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(form),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || "Gagal menyimpan");
+            }
+            setSavedForm({ ...form });
+            showToast();
+        } catch (err) {
+
+        } finally {
+            setSaving(false);
+        }
+    };
 
     const handleLogout = () => {
         ["auth_token", "role", "name"].forEach(k => localStorage.removeItem(k));
@@ -55,13 +146,16 @@ export default function Profile() {
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];
 
-    /* ── field box ── */
     const Field = ({ label, value, half }) => (
         <div className={`bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 ${half ? "" : "col-span-2"}`}>
             <p className="text-[0.6rem] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1">{label}</p>
             <p className="text-[0.92rem] font-semibold text-gray-800">{value || "-"}</p>
         </div>
     );
+
+    const btnClass = hasChanges && !saving
+        ? "bg-green-600 hover:bg-green-700 cursor-pointer"
+        : "bg-gray-300 cursor-not-allowed";
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
@@ -110,7 +204,7 @@ export default function Profile() {
                 <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
                     <h2 className="text-[1.05rem] font-bold text-gray-800">Profile</h2>
                     <div className="flex items-center gap-4">
-                        <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{division}</span>
+                        <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{form.departemen || "-"}</span>
                         <div className="h-5 w-px bg-gray-200" />
                         <button className="text-gray-400 hover:text-gray-600 transition">
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
@@ -121,9 +215,30 @@ export default function Profile() {
 
                 <main className="flex-1 px-5 py-6 md:px-8 md:py-8 pb-28 md:pb-10 space-y-5">
 
+                    {/* Alert */}
+                    {toast && (
+                    <div className="fixed bottom-6 right-6 z-999">
+                        <div className="bg-white border border-gray-200 rounded-2xl p-4 w-75 flex items-start gap-3 overflow-hidden relative">
+                            <div className="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                <svg className="h-5 w-5 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-semibold text-gray-900">Profil berhasil diperbarui</p>
+                                <p className="text-xs text-gray-400 mt-0.5">Perubahan kamu sudah tersimpan.</p>
+                            </div>
+                            <button onClick={() => setToast(false)} className="text-gray-300 hover:text-gray-500">
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                     {/* ── PROFILE HEADER CARD ── */}
                     <div className="bg-white rounded-2xl p-6 shadow-sm">
-                        {/* Mobile: centered layout */}
                         <div className="flex flex-col items-center md:hidden mb-2">
                             <div className="relative mb-3">
                                 <img src={fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
@@ -134,7 +249,6 @@ export default function Profile() {
                             <h2 className="text-xl font-extrabold text-gray-900">{name}</h2>
                             <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusKeanggotaan}</span>
                         </div>
-                        {/* Desktop: horizontal layout */}
                         <div className="hidden md:flex items-center gap-6">
                             <div className="relative">
                                 <img src={fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
@@ -145,14 +259,14 @@ export default function Profile() {
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
                                     <h2 className="text-2xl font-extrabold text-gray-900">{name}</h2>
-                                    <span className="bg-yellow-400 text-yellow-900 text-[0.72rem] font-bold px-3 py-0.5 rounded-full">Anggota Muda</span>
+                                    <span className="bg-yellow-400 text-yellow-900 text-[0.72rem] font-bold px-3 py-0.5 rounded-full">{statusKeanggotaan}</span>
                                 </div>
                                 <p className="text-gray-400 text-sm">{nim}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* ── MOBILE: INFORMASI IDENTITAS ── */}
+                    {/* ── MOBILE: FORM ── */}
                     <div className="md:hidden space-y-3">
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400">Informasi Identitas</p>
                         {[["Nama Lengkap", name], ["NIM", nim], ["Angkatan", angkatan]].map(([label, val]) => (
@@ -163,26 +277,37 @@ export default function Profile() {
                         ))}
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 pt-1">Informasi Organisasi</p>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                            <p className="text-[0.65rem] text-gray-400 mb-0.5">Divisi</p>
-                            <div className="flex items-center justify-between">
-                                <p className="text-sm font-semibold text-gray-800">{division}</p>
-                                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
+                            <p className="text-[0.65rem] text-gray-400 mb-1">Departemen</p>
+                            <select name="departemen" value={form.departemen} onChange={handleChange}
+                                className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none">
+                                <option value="">-- Pilih Departemen --</option>
+                                {DEPARTEMEN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
                         </div>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-                            <p className="text-[0.65rem] text-gray-400 mb-0.5">Jabatan</p>
-                            <p className="text-sm font-semibold text-gray-800">{jabatan}</p>
+                            <p className="text-[0.65rem] text-gray-400 mb-1">Jabatan</p>
+                            <select
+                            name="jabatan"
+                            value={form.jabatan}
+                            onChange={handleChange}
+                            disabled={!form.departemen}
+                            className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
+                        >
+                            {!form.departemen
+                                ? <option value="">Pilih departemen dulu</option>
+                                : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                    <option key={j} value={j}>{j}</option>
+                                ))
+                            }
+                        </select>
                         </div>
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 pt-1">Kontak</p>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                             <p className="text-[0.65rem] text-gray-400 mb-1">Nomor Telepon</p>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                    <span className="text-sm font-semibold text-gray-800">081234567890</span>
-                                </div>
-                                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                            </div>
+                            <input type="text" name="no_telepon" value={form.no_telepon}
+                                onChange={handleChange} placeholder="Contoh: 081234567890"
+                                className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none" />
+                            {phoneError && <p className="text-[0.65rem] text-red-500 mt-1">{phoneError}</p>}
                         </div>
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                             <p className="text-[0.65rem] text-gray-400 mb-1">Email</p>
@@ -191,9 +316,10 @@ export default function Profile() {
                                 <span className="text-sm font-semibold text-gray-800 truncate">{email}</span>
                             </div>
                         </div>
-                        <button className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-full py-4 text-sm transition mt-2">
+                        <button onClick={handleSave} disabled={!hasChanges || saving}
+                            className={`w-full flex items-center justify-center gap-2 text-white font-bold rounded-full py-4 text-sm transition mt-2 ${btnClass}`}>
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                            Update Profile
+                            {saving ? "Menyimpan..." : "Update Profile"}
                         </button>
                     </div>
 
@@ -209,8 +335,33 @@ export default function Profile() {
                                 <Field label="Nama Lengkap" value={name} />
                                 <Field label="NIM" value={nim} half />
                                 <Field label="Angkatan" value={angkatan} half />
-                                <Field label="Divisi" value={division} half />
-                                <Field label="Jabatan" value={jabatan} half />
+                                {/* Departemen dropdown */}
+                                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                                    <p className="text-[0.6rem] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1">Departemen</p>
+                                    <select name="departemen" value={form.departemen} onChange={handleChange}
+                                        className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none">
+                                        <option value="">-- Pilih --</option>
+                                        {DEPARTEMEN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
+                                    </select>
+                                </div>
+                                {/* Jabatan dropdown */}
+                                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                                    <p className="text-[0.6rem] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1">Jabatan</p>
+                                    <select
+                                    name="jabatan"
+                                    value={form.jabatan}
+                                    onChange={handleChange}
+                                    disabled={!form.departemen}
+                                    className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
+                                >
+                                    {!form.departemen
+                                        ? <option value="">Pilih departemen dulu</option>
+                                        : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                            <option key={j} value={j}>{j}</option>
+                                        ))
+                                    }
+                                </select>
+                                </div>
                             </div>
                         </div>
 
@@ -230,25 +381,27 @@ export default function Profile() {
                                 </div>
                                 <div>
                                     <p className="text-[0.6rem] font-bold tracking-[0.15em] uppercase text-gray-400 mb-1.5">Phone Number</p>
-                                    <div className="flex items-center justify-between border border-gray-200 rounded-xl px-4 py-3 bg-gray-50">
+                                    <div className="border border-gray-200 rounded-xl px-4 py-3 bg-gray-50">
                                         <div className="flex items-center gap-2">
-                                            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                            <span className="text-sm text-gray-700">+62 812-3456-7890</span>
+                                            <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                            <input type="text" name="no_telepon" value={form.no_telepon}
+                                                onChange={handleChange} placeholder="Contoh: 081234567890"
+                                                className="flex-1 text-sm text-gray-700 bg-transparent outline-none" />
                                         </div>
-                                        <svg className="h-4 w-4 text-gray-400 cursor-pointer hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        {phoneError && <p className="text-[0.65rem] text-red-500 mt-1">{phoneError}</p>}
                                     </div>
                                 </div>
                             </div>
-                            <button className="mt-5 w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl py-3.5 text-sm transition">
+                            <button onClick={handleSave} disabled={!hasChanges || saving}
+                                className={`mt-5 w-full flex items-center justify-center gap-2 text-white font-bold rounded-xl py-3.5 text-sm transition ${btnClass}`}>
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                Update Profile
+                                {saving ? "Menyimpan..." : "Update Profile"}
                             </button>
                         </div>
                     </div>
 
-                    {/* ── DESKTOP: EVENTS ROW — single card ── */}
+                    {/* ── DESKTOP: EVENTS ROW ── */}
                     <div className="hidden md:grid grid-cols-2 bg-white rounded-2xl shadow-sm divide-x divide-gray-100 overflow-hidden">
-                        {/* Attended Events */}
                         <div className="p-6">
                             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                                 <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -271,8 +424,6 @@ export default function Profile() {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Upcoming Activities */}
                         <div className="p-6">
                             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
                                 <svg className="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
