@@ -1,12 +1,85 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import iconQr from "../assets/icon-qrscan.png";
-import iconFlash from "../assets/icon-gantiphone.png";
-import iconGallery from "../assets/icon-print.png";
 import hmifLogo from "../assets/logo-hmif.png";
+
+function FlashIcon() {
+    return (
+        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+                d="M9 2h6l-1.2 6H17l-6 14 1.1-8H8l1-12Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+            />
+            <path d="M10 22h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    );
+}
+
+function UploadImageIcon() {
+    return (
+        <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+                d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinejoin="round"
+            />
+            <path
+                d="m6.5 17 3.2-3.3a1 1 0 0 1 1.4 0l1.2 1.2 2.3-2.8a1 1 0 0 1 1.5-.1l1.4 1.4"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path d="M9 9h.01" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+    );
+}
 
 export default function QrScanner() {
     const navigate = useNavigate();
+    const videoRef = React.useRef(null);
+    const [cameraError, setCameraError] = React.useState("");
+
+    React.useEffect(() => {
+        let stream;
+        let isMounted = true;
+
+        async function startCamera() {
+            try {
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    setCameraError("Browser belum mendukung akses kamera.");
+                    return;
+                }
+
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: "environment",
+                    },
+                    audio: false,
+                });
+
+                if (isMounted && videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play();
+                }
+            } catch (error) {
+                console.error("Gagal membuka kamera:", error);
+                setCameraError("Kamera tidak bisa dibuka. Aktifkan izin kamera lalu refresh halaman.");
+            }
+        }
+
+        startCamera();
+
+        return () => {
+            isMounted = false;
+            if (stream) {
+                stream.getTracks().forEach((track) => track.stop());
+            }
+        };
+    }, []);
 
     return (
         <div className="fixed inset-0 bg-black text-white z-50 flex flex-col">
@@ -16,7 +89,7 @@ export default function QrScanner() {
                     <span className="text-xl">✕</span>
                 </button>
                 <div className="flex items-center gap-3">
-                    <img src="../assets/logo-hmif.png" alt="HMIF" className="h-6 w-6 object-contain" />
+                    <img src={hmifLogo} alt="HMIF" className="h-6 w-6 object-contain" />
                     <span className="font-semibold">HMIF</span>
                 </div>
                 <div className="flex items-center gap-2 bg-green-700 px-3 py-1 rounded-full text-sm">
@@ -27,10 +100,16 @@ export default function QrScanner() {
 
             {/* Camera area */}
             <div className="flex-1 relative flex items-center justify-center">
-                <video id="qr-video" className="absolute inset-0 w-full h-full object-cover" playsInline autoPlay muted />
+                <video ref={videoRef} id="qr-video" className="absolute inset-0 w-full h-full object-cover" playsInline autoPlay muted />
 
                 {/* overlay dim */}
                 <div className="absolute inset-0 bg-black/60" />
+
+                {cameraError && (
+                    <div className="absolute top-8 left-1/2 z-30 w-[90%] max-w-md -translate-x-1/2 rounded-2xl bg-red-600/90 px-4 py-3 text-center text-sm font-semibold text-white">
+                        {cameraError}
+                    </div>
+                )}
 
                 {/* scanning frame */}
                 <div className="relative z-20">
@@ -50,13 +129,21 @@ export default function QrScanner() {
                 </div>
 
                 {/* action buttons */}
-                <div className="absolute bottom-28 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-6">
-                    <button className="bg-white/8 w-12 h-12 rounded-full flex items-center justify-center">
-                        <img src={iconFlash} alt="flash" className="h-6 w-6 object-contain filter brightness-200" />
+                <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 items-center gap-8 sm:bottom-10">
+                    <button
+                        type="button"
+                        aria-label="Nyalakan flash"
+                        className="flex h-16 w-16 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_35px_rgba(0,0,0,0.35)] backdrop-blur-md transition hover:bg-white/15 active:scale-95"
+                    >
+                        <FlashIcon />
                     </button>
-                    <button className="bg-white/8 w-12 h-12 rounded-full flex items-center justify-center">
-                        <img src={iconGallery} alt="gallery" className="h-6 w-6 object-contain filter brightness-200" />
-                    </button>
+                    <label
+                        aria-label="Upload gambar QR"
+                        className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-white/10 text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_16px_35px_rgba(0,0,0,0.35)] backdrop-blur-md transition hover:bg-white/15 active:scale-95"
+                    >
+                        <UploadImageIcon />
+                        <input type="file" accept="image/*" className="sr-only" />
+                    </label>
                 </div>
             </div>
 
