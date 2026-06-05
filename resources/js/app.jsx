@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import History from "./pages/History";
 import QrScanner from "./components/QrScanner";
 import Anggota from "./pages/Anggota";
+import DashboardAdminAcara from "./components/DashboardAdminAcara";
 
 function App() {
     return (
@@ -29,6 +30,11 @@ function App() {
                 <Route path="/dashboard/anggota" element={
                     <ProtectedRoute>
                         <Anggota />
+                    </ProtectedRoute>
+                } />
+                <Route path="/dashboard/acara" element={
+                    <ProtectedRoute>
+                        <DashboardAdminAcara />
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/profile" element={

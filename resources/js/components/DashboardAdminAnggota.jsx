@@ -1,76 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import hmifLogo from "../assets/logo-hmif.png";
+import fotoProfile from "../assets/fotoprofile.png";
 import iconAdd from "../assets/icon-gantiprofile.png";
+import iconSearch from "../assets/icon-search.png";
+import iconTotalAnggota from "../assets/assets dash admin/Icon-totalanggota.png";
+import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
+import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png";
+import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
-
-const METRICS = [
-    { label: "Total Anggota", value: "1,248", help: "+12% peningkatan" },
-    { label: "Anggota Muda", value: "420", help: "" },
-    { label: "Anggota Tetap", value: "712", help: "" },
-    { label: "Luar Biasa", value: "116", help: "" },
-];
-
-const SAMPLE_ROWS = [
-    {
-        id: 1,
-        nim: "121140090",
-        nama: "Aditya Kusuma",
-        kontak: "0812-3456-7890",
-        angkatan: 2021,
-        divisi: "Eksternal",
-        jabatan: "Ketua Divisi",
-        status: "TETAP",
-        email: "aditya.k@hmif.org",
-    },
-    {
-        id: 2,
-        nim: "123140152",
-        nama: "Siti Pertiwi",
-        kontak: "0812-3456-7891",
-        angkatan: 2023,
-        divisi: "Internal",
-        jabatan: "Staff",
-        status: "MUDA",
-        email: "siti.p@hmif.org",
-    },
-    {
-        id: 3,
-        nim: "122140032",
-        nama: "Rizky Ramadhan",
-        kontak: "0812-3456-7892",
-        angkatan: 2022,
-        divisi: "-",
-        jabatan: "Alumni",
-        status: "LUAR BIASA",
-        email: "rizky.r@hmif.org",
-    },
-    {
-        id: 4,
-        nim: "124140051",
-        nama: "Farhan Naufal",
-        kontak: "0812-3456-7893",
-        angkatan: 2024,
-        divisi: "Minat Bakat",
-        jabatan: "Sekretaris",
-        status: "TETAP",
-        email: "farhan.n@hmif.org",
-    },
-    {
-        id: 5,
-        nim: "123140014",
-        nama: "Luthfi Wijaya",
-        kontak: "0812-3456-7894",
-        angkatan: 2023,
-        divisi: "Eksternal",
-        jabatan: "Staff",
-        status: "MUDA",
-        email: "luthfi.w@hmif.org",
-    },
-];
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
@@ -79,16 +20,96 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
+const METRICS = [
+    {
+        label: "Total Anggota",
+        value: "1,248",
+        help: "+12% peningkatan",
+        icon: iconTotalAnggota,
+        valueClass: "text-[#1f5e22]",
+        accentClass: "bg-[#1f5e22]",
+        accentWidth: "w-[82px]",
+    },
+    {
+        label: "Anggota Muda",
+        value: "420",
+        help: "",
+        icon: iconAcaraAktif,
+        valueClass: "text-[#f5bf17]",
+        accentClass: "bg-[#f5bf17]",
+        accentWidth: "w-[82px]",
+    },
+    {
+        label: "Anggota Tetap",
+        value: "712",
+        help: "",
+        icon: iconHadirHariIni,
+        valueClass: "text-emerald-600",
+        accentClass: "bg-emerald-500",
+        accentWidth: "w-[145px]",
+    },
+    {
+        label: "Luar Biasa",
+        value: "116",
+        help: "",
+        icon: iconPersentaseKeaktifan,
+        valueClass: "text-blue-500",
+        accentClass: "bg-blue-500",
+        accentWidth: "w-[43px]",
+    },
+];
+
+const SAMPLE_ROWS = [
+    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "Eksternal", jabatan: "Ketua Divisi", status: "TETAP", email: "aditya.k@hmif.org" },
+    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "siti.p@hmif.org" },
+    { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "rizky.r@hmif.org" },
+    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
+    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
+];
+
 const statusClasses = {
-    TETAP: "bg-emerald-50 text-emerald-700",
+    TETAP: "bg-emerald-100 text-emerald-700",
     MUDA: "bg-amber-100 text-amber-700",
-    "LUAR BIASA": "bg-sky-100 text-sky-700",
+    "LUAR BIASA": "bg-blue-100 text-blue-600",
 };
+
+function MetricCard({ metric }) {
+    return (
+        <div className="rounded-[12px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
+            <div className="flex items-start justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
+                    <img src={metric.icon} alt={metric.label} className="h-5 w-5 object-contain" />
+                </div>
+                {metric.help ? (
+                    <span className="text-xs font-semibold text-emerald-600">{metric.help}</span>
+                ) : (
+                    <span className="text-xs text-transparent">.</span>
+                )}
+            </div>
+            <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{metric.label}</p>
+            <h2 className={`mt-1 text-[2.3rem] font-extrabold leading-none ${metric.valueClass}`}>{metric.value}</h2>
+            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass} ${metric.accentWidth}`} />
+        </div>
+    );
+}
+
+function InfoCard({ label, value, icon }) {
+    return (
+        <div className="rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+            <div className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">{label}</div>
+            <div className="mt-3 flex items-center gap-3">
+                <span className="flex h-5 w-5 items-center justify-center">{icon}</span>
+                <p className="text-[1rem] text-slate-800">{value}</p>
+            </div>
+        </div>
+    );
+}
 
 export default function DashboardAdminAnggota() {
     const navigate = useNavigate();
     const location = useLocation();
     const pathname = location.pathname;
+
     const [search, setSearch] = useState("");
     const [division, setDivision] = useState("Semua Divisi");
     const [year, setYear] = useState("Semua Angkatan");
@@ -97,24 +118,20 @@ export default function DashboardAdminAnggota() {
     const [detailMember, setDetailMember] = useState(null);
     const [memberStatus, setMemberStatus] = useState("");
 
-    const handleOpenDetail = (member) => {
-        setDetailMember(member);
-        setMemberStatus(member.status === "TETAP" ? "Anggota Tetap" : member.status === "MUDA" ? "Anggota Muda" : "Luar Biasa");
-    };
+    const userName = localStorage.getItem("name") || "Admin User";
+    const nim = localStorage.getItem("nim") || "124140056";
 
-    const handleCloseDetail = () => {
-        setDetailMember(null);
-    };
-
-    const handleMemberStatusChange = (value) => {
-        setMemberStatus(value);
+    const handleLogout = () => {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("role");
+        localStorage.removeItem("name");
+        localStorage.removeItem("nim");
+        navigate("/login");
     };
 
     const filteredRows = useMemo(() => {
         return SAMPLE_ROWS.filter((row) => {
-            const matchesSearch = search
-                ? `${row.nama} ${row.nim}`.toLowerCase().includes(search.toLowerCase())
-                : true;
+            const matchesSearch = search ? `${row.nama} ${row.nim}`.toLowerCase().includes(search.toLowerCase()) : true;
             const matchesDivision = division === "Semua Divisi" || row.divisi === division;
             const matchesYear = year === "Semua Angkatan" || String(row.angkatan) === String(year);
             const matchesStatus = status === "Semua Status" || row.status === status;
@@ -123,9 +140,7 @@ export default function DashboardAdminAnggota() {
     }, [search, division, year, status]);
 
     const handleToggleRow = (id) => {
-        setSelectedIds((current) =>
-            current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
-        );
+        setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
     };
 
     const handleToggleAll = () => {
@@ -136,101 +151,137 @@ export default function DashboardAdminAnggota() {
         }
     };
 
-    const selectedCount = selectedIds.length;
+    const handleOpenDetail = (member) => {
+        setDetailMember(member);
+        setMemberStatus(member.status === "TETAP" ? "Anggota Tetap" : member.status === "MUDA" ? "Anggota Muda" : "Luar Biasa");
+    };
+
+    const handleCloseDetail = () => {
+        setDetailMember(null);
+    };
 
     return (
-        <div className="min-h-screen bg-[#e8f6ea] font-sans text-gray-900">
+        <div className="min-h-screen overflow-x-hidden bg-[#e7f5e5] font-sans text-slate-900">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-55 min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
-                    <div className="flex flex-col items-center pt-8 pb-5 px-4">
-                        <img src={hmifLogo} alt="HMIF" className="h-18 w-18 rounded-full object-contain border-4 border-white/20" />
-                        <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
-                        <p className="text-[0.62rem] text-white/55 text-center leading-snug mt-0.5">
-                            Himpunan Mahasiswa Informatika ITERA
+                <aside className="hidden md:flex flex-col w-[252px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
+                    <div className="flex flex-col items-center pt-7 pb-5 px-4">
+                        <img
+                            src={hmifLogo}
+                            alt="HMIF"
+                            className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20"
+                        />
+                        <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
+                        <p className="text-[0.62rem] leading-snug text-white/65 text-center">
+                            Himpunan Mahasiswa Informatika<br />ITERA
                         </p>
                     </div>
-                    <hr className="border-white/10 mx-4" />
-                    <nav className="flex-1 px-3 pt-4 space-y-1">
+
+                    <nav className="flex-1 px-4 pt-2 space-y-2">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.to;
                             return (
                                 <Link
                                     key={item.label}
                                     to={item.to}
-                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition ${
-                                        isActive ? "bg-white/15 text-white" : "text-white/65 hover:bg-white/10 hover:text-white"
+                                    className={`group relative flex items-center gap-3 px-4 py-3.5 text-[0.98rem] font-medium transition ${
+                                        isActive
+                                            ? "bg-white/10 text-white before:absolute before:right-0 before:top-0 before:h-full before:w-1 before:bg-[#7bd02c]"
+                                            : "text-white/75 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
-                                    <img src={item.icon} alt={item.label} className="h-4.5 w-4.5 object-contain brightness-[10] opacity-90" />
+                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
                                     {item.label}
                                 </Link>
                             );
                         })}
                     </nav>
+
                     <div className="p-4">
-                        <div className="bg-white/10 rounded-2xl px-4 py-3">
-                            <p className="text-sm font-semibold text-white truncate">Admin User</p>
-                            <p className="text-[0.7rem] text-white/55 mt-0.5">admin@hmif.com</p>
+                        <div className="rounded-[14px] bg-white/10 px-4 py-3 shadow-inner shadow-black/10">
+                            <div className="flex items-center gap-3">
+                                <div className="h-11 w-11 overflow-hidden rounded-full border border-white/20 bg-white/10">
+                                    <img src={fotoProfile} alt="Admin" className="h-full w-full object-cover" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-white">{userName}</p>
+                                    <p className="truncate text-[0.7rem] text-white/55">{nim}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </aside>
 
-                <div className="flex-1 md:ml-55 flex flex-col min-h-screen min-w-0 relative">
-                    <header className="md:hidden flex items-center justify-between bg-white px-5 py-4 shadow-sm w-full">
+                <div className="flex min-w-0 flex-1 flex-col md:ml-[252px]">
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
-                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
-                            <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
+                            <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <div className="text-sm font-semibold text-gray-700">Anggota</div>
+                        <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">
+                            Logout
+                        </button>
                     </header>
 
-                    <main className="flex-1 px-5 py-6 md:px-8 md:py-8 pb-28 md:pb-10">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
+                    <header className="sticky top-0 z-40 hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
+                        <div>
+                            <p className="text-[1.05rem] font-semibold text-slate-800">Member Management</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-slate-600">
+                            <button className="transition hover:text-slate-900" aria-label="Notifikasi">
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1.8}
+                                        d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                    />
+                                </svg>
+                            </button>
+                            <span className="h-7 w-px bg-slate-300" />
+                            <button onClick={handleLogout} className="flex items-center gap-2 text-[0.98rem] transition hover:text-slate-900">
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17l5-5m0 0l-5-5m5 5H9m4 8a8 8 0 100-16" />
+                                </svg>
+                                Logout
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 px-4 py-6 md:px-8 md:py-8 pb-28 md:pb-10">
+                        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <p className="text-sm text-gray-500">Member Management</p>
-                                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">Manajemen Anggota</h1>
-                                <p className="text-sm text-gray-600">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
+                                <h1 className="text-[2.25rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Anggota</h1>
+                                <p className="mt-2 text-[1rem] text-slate-700">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
                             </div>
-                            <button
-                                type="button"
-                                className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg font-semibold shadow-sm hover:bg-yellow-300 transition"
-                            >
-                                <img src={iconAdd} alt="Tambah" className="h-4 w-4" />
+                            <button className="inline-flex items-center justify-center gap-3 rounded-[14px] bg-[#f5bf17] px-5 py-3.5 text-[0.98rem] font-semibold text-slate-900 shadow-[0_10px_22px_rgba(245,191,23,0.28)] transition hover:bg-[#ffd033]">
+                                <img src={iconAdd} alt="Tambah" className="h-4.5 w-4.5" />
                                 Tambah Anggota
                             </button>
                         </div>
 
-                        <div className="grid gap-4 grid-cols-1 md:grid-cols-4 mb-6">
+                        <div className="mb-8 grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                             {METRICS.map((metric) => (
-                                <div key={metric.label} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700 font-bold">
-                                            {metric.label.charAt(0)}
-                                        </div>
-                                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                                            {metric.help || " "}
-                                        </span>
-                                    </div>
-                                    <p className="mt-4 text-xs uppercase tracking-[0.2em] text-slate-400">{metric.label}</p>
-                                    <h2 className="mt-2 text-3xl font-extrabold text-slate-900">{metric.value}</h2>
-                                </div>
+                                <MetricCard key={metric.label} metric={metric} />
                             ))}
                         </div>
 
-                        <div className="rounded-3xl bg-[#2f8c2b] p-4 shadow-sm mb-6">
-                            <div className="grid gap-3 sm:grid-cols-[1.65fr_0.95fr] items-center">
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <input
-                                        type="text"
-                                        value={search}
-                                        onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Cari nama atau NIM..."
-                                        className="w-full rounded-xl border border-white/20 bg-white/95 px-4 py-2 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
-                                    />
+                        <div className="mb-8 rounded-[10px] bg-[#4faa19] p-4 shadow-sm">
+                            <div className="grid gap-3 xl:grid-cols-[1.85fr_1fr] items-center">
+                                <div className="grid gap-3 sm:grid-cols-[1.7fr_1fr]">
+                                    <div className="relative">
+                                        <img src={iconSearch} alt="" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60" />
+                                        <input
+                                            type="text"
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            placeholder="Cari nama atau NIM..."
+                                            className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 pl-12 pr-4 text-[0.95rem] text-slate-700 shadow-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-white/40"
+                                        />
+                                    </div>
                                     <select
                                         value={division}
                                         onChange={(e) => setDivision(e.target.value)}
-                                        className="w-full rounded-xl border border-white/20 bg-white/95 px-4 py-2 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
                                     >
                                         <option>Semua Divisi</option>
                                         <option>Eksternal</option>
@@ -242,7 +293,7 @@ export default function DashboardAdminAnggota() {
                                     <select
                                         value={year}
                                         onChange={(e) => setYear(e.target.value)}
-                                        className="w-full rounded-xl border border-white/20 bg-white/95 px-4 py-2 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
                                     >
                                         <option>Semua Angkatan</option>
                                         <option>2021</option>
@@ -253,7 +304,7 @@ export default function DashboardAdminAnggota() {
                                     <select
                                         value={status}
                                         onChange={(e) => setStatus(e.target.value)}
-                                        className="w-full rounded-xl border border-white/20 bg-white/95 px-4 py-2 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                                        className="h-[44px] w-full rounded-[4px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
                                     >
                                         <option>Semua Status</option>
                                         <option>TETAP</option>
@@ -268,94 +319,104 @@ export default function DashboardAdminAnggota() {
                                             setYear("Semua Angkatan");
                                             setStatus("Semua Status");
                                         }}
-                                        className="text-white/80 hover:text-white transition font-semibold"
+                                        className="inline-flex h-[44px] items-center gap-2 px-3 text-[0.95rem] font-semibold text-white transition hover:text-white/90"
                                     >
+                                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M6 12h12M10 19h4" />
+                                        </svg>
                                         Reset
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
-                            <div className="text-sm text-slate-700">Terpilih: {selectedCount} baris</div>
+                        <div className="flex flex-col gap-4 rounded-[10px] bg-white px-5 py-4 shadow-sm ring-1 ring-slate-200/70 sm:flex-row sm:items-center sm:justify-between mb-4">
+                            <div className="text-sm text-slate-700">Terpilih: {selectedIds.length} baris</div>
                             <div className="flex items-center gap-3">
-                                <button className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 transition">
+                                <button className="inline-flex items-center gap-2 rounded-[6px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M6 11v6m6-6v6m6-6v6M5 19h14" />
+                                    </svg>
                                     Export CSV
                                 </button>
-                                <button className="inline-flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 transition">
+                                <button className="inline-flex items-center gap-2 rounded-[6px] border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-500 shadow-sm hover:bg-red-50 transition">
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
+                                    </svg>
                                     Hapus Massal
                                 </button>
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-3xl p-4 shadow-sm ring-1 ring-slate-200/70 overflow-hidden">
+                        <div className="overflow-hidden rounded-[10px] bg-white shadow-sm ring-1 ring-slate-200/70">
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-max text-sm">
+                                <table className="w-full min-w-[1120px] text-sm">
                                     <thead>
-                                        <tr className="text-left text-xs uppercase text-slate-500 tracking-[0.12em]">
-                                            <th className="w-10 py-3 pl-4 pr-2">
-                                                <label className="flex items-center gap-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="h-4 w-4 rounded border-slate-300 text-emerald-600"
-                                                        checked={selectedIds.length === filteredRows.length && filteredRows.length > 0}
-                                                        onChange={handleToggleAll}
-                                                    />
-                                                </label>
+                                        <tr className="border-b border-slate-200 bg-[#fafafa] text-left text-xs uppercase tracking-[0.12em] text-slate-500">
+                                            <th className="w-12 py-4 pl-5 pr-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                                                    checked={selectedIds.length === filteredRows.length && filteredRows.length > 0}
+                                                    onChange={handleToggleAll}
+                                                />
                                             </th>
-                                            <th className="py-3 px-3">NO</th>
-                                            <th className="py-3 px-3">NIM</th>
-                                            <th className="py-3 px-3">NAMA</th>
-                                            <th className="py-3 px-3">KONTAK</th>
-                                            <th className="py-3 px-3">ANGKATAN</th>
-                                            <th className="py-3 px-3">DIVISI</th>
-                                            <th className="py-3 px-3">JABATAN</th>
-                                            <th className="py-3 px-3">STATUS</th>
-                                            <th className="py-3 px-3">AKSI</th>
+                                            <th className="py-4 px-4">NO</th>
+                                            <th className="py-4 px-4">NIM</th>
+                                            <th className="py-4 px-4">NAMA</th>
+                                            <th className="py-4 px-4">KONTAK</th>
+                                            <th className="py-4 px-4">ANGKATAN</th>
+                                            <th className="py-4 px-4">DIVISI</th>
+                                            <th className="py-4 px-4">JABATAN</th>
+                                            <th className="py-4 px-4">STATUS</th>
+                                            <th className="py-4 px-4 text-right">AKSI</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {filteredRows.map((row) => (
-                                            <tr key={row.id} className="border-t border-slate-100 hover:bg-slate-50 transition">
-                                                <td className="py-3 pl-4 pr-2">
-                                                    <label className="flex items-center gap-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="h-4 w-4 rounded border-slate-300 text-emerald-600"
-                                                            checked={selectedIds.includes(row.id)}
-                                                            onChange={() => handleToggleRow(row.id)}
-                                                        />
-                                                    </label>
+                                            <tr key={row.id} className="border-b border-slate-100 bg-white hover:bg-slate-50/80">
+                                                <td className="py-5 pl-5 pr-2 align-middle">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                                                        checked={selectedIds.includes(row.id)}
+                                                        onChange={() => handleToggleRow(row.id)}
+                                                    />
                                                 </td>
-                                                <td className="py-3 px-3 text-slate-600">{row.id}</td>
-                                                <td className="py-3 px-3 text-blue-600 font-semibold">{row.nim}</td>
-                                                <td className="py-3 px-3 font-semibold">{row.nama}</td>
-                                                <td className="py-3 px-3 text-slate-500">{row.kontak}</td>
-                                                <td className="py-3 px-3">{row.angkatan}</td>
-                                                <td className="py-3 px-3">{row.divisi}</td>
-                                                <td className="py-3 px-3">{row.jabatan}</td>
-                                                <td className="py-3 px-3">
-                                                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold ${
-                                                        statusClasses[row.status] || "bg-slate-100 text-slate-700"
-                                                    }`}>
+                                                <td className="py-5 px-4 align-middle text-slate-700">{row.id}</td>
+                                                <td className="py-5 px-4 align-middle font-medium text-[#a8c8ff]">{row.nim}</td>
+                                                <td className="py-5 px-4 align-middle font-semibold text-slate-800">{row.nama}</td>
+                                                <td className="py-5 px-4 align-middle text-slate-600">
+                                                    <div>{row.kontak}</div>
+                                                    <div className="text-[0.78rem] text-slate-400">{row.email}</div>
+                                                </td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">{row.angkatan}</td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">{row.divisi}</td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">{row.jabatan}</td>
+                                                <td className="py-5 px-4 align-middle">
+                                                    <span className={`inline-flex rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] ${statusClasses[row.status]}`}>
                                                         {row.status}
                                                     </span>
                                                 </td>
-                                                <td className="py-3 px-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <button type="button" onClick={() => handleOpenDetail(row)} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
-                                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                            </svg>
-                                                        </button>
-                                                        <button type="button" onClick={() => handleOpenDetail(row)} className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
-                                                            <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <td className="py-5 px-4 align-middle">
+                                                    <div className="flex items-center justify-end gap-3 text-slate-400">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleOpenDetail(row)}
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-slate-100 transition"
+                                                            aria-label={`Edit ${row.nama}`}
+                                                        >
+                                                            <svg className="h-4.5 w-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                             </svg>
                                                         </button>
-                                                        <button className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white border border-slate-100 text-slate-500 shadow-sm hover:bg-slate-50 transition">
-                                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        <button
+                                                            type="button"
+                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-red-50 transition"
+                                                            aria-label={`Hapus ${row.nama}`}
+                                                        >
+                                                            <svg className="h-4.5 w-4.5 text-slate-400 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -366,110 +427,130 @@ export default function DashboardAdminAnggota() {
                                 </table>
                             </div>
 
-                            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm text-slate-600">
-                                <div>Menampilkan 1 - {filteredRows.length} dari 1,248 data</div>
-                                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2">
-                                    <button className="h-8 w-8 rounded-full bg-white text-slate-700 shadow-sm hover:bg-slate-50 transition">1</button>
-                                    <button className="h-8 w-8 rounded-full text-slate-500 hover:bg-white transition">2</button>
-                                    <button className="h-8 w-8 rounded-full text-slate-500 hover:bg-white transition">3</button>
-                                    <span className="px-2 text-slate-400">...</span>
-                                    <button className="h-8 w-8 rounded-full text-slate-500 hover:bg-white transition">250</button>
+                            <div className="flex flex-col gap-4 border-t border-slate-100 px-6 py-5 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+                                <div>Menampilkan 1 - 5 dari 1,248 data</div>
+                                <div className="flex items-center gap-2">
+                                    <button className="text-slate-300 hover:text-slate-500">‹</button>
+                                    <button className="h-8 w-8 rounded-[4px] bg-[#1f5e22] text-white font-semibold">1</button>
+                                    <button className="h-8 w-8 rounded-[4px] text-slate-600 hover:bg-slate-100">2</button>
+                                    <button className="h-8 w-8 rounded-[4px] text-slate-600 hover:bg-slate-100">3</button>
+                                    <span className="px-1 text-slate-400">...</span>
+                                    <button className="h-8 w-10 rounded-[4px] text-slate-600 hover:bg-slate-100">250</button>
+                                    <button className="text-slate-300 hover:text-slate-500">›</button>
                                 </div>
                             </div>
                         </div>
+
                         {detailMember && (
-                            <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 backdrop-blur-sm px-4 py-6">
-                                <div className="mx-auto w-full max-w-4xl rounded-4xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+                            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/35 px-4 py-6 backdrop-blur-sm">
+                                <div className="relative mx-auto mt-10 w-full max-w-[780px] rounded-[18px] bg-white px-6 py-5 shadow-[0_20px_55px_rgba(15,23,42,0.28)] sm:px-7 sm:py-6">
                                     <button
                                         type="button"
                                         onClick={handleCloseDetail}
-                                        className="absolute right-6 top-6 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200 transition"
+                                        className="absolute right-5 top-5 text-slate-600 transition hover:text-slate-900"
+                                        aria-label="Tutup detail anggota"
                                     >
-                                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
 
-                                    <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-                                        <div className="space-y-6">
-                                            <div className="flex items-center gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-slate-100 text-3xl font-bold text-slate-700">
-                                                    {detailMember.nama
-                                                        .split(" ")
-                                                        .map((part) => part[0])
-                                                        .slice(0, 2)
-                                                        .join("")}
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Detail Anggota</p>
-                                                    <h2 className="mt-3 text-3xl font-semibold text-slate-900">{detailMember.nama}</h2>
-                                                    <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
-                                                        <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-slate-700">
-                                                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                                                                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
-                                                                <circle cx="9" cy="7" r="4" />
-                                                            </svg>
-                                                            {detailMember.nim}
-                                                        </span>
-                                                    </div>
-                                                    <span className="mt-4 inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">
-                                                        {memberStatus}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Division</div>
-                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.divisi}</p>
-                                                </div>
-                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Position</div>
-                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.jabatan}</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Email Address</div>
-                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.email}</p>
-                                                </div>
-                                                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                                                    <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Phone Number</div>
-                                                    <p className="mt-3 text-lg font-semibold text-slate-900">{detailMember.kontak}</p>
-                                                </div>
-                                            </div>
+                                    <div className="grid gap-5 md:grid-cols-[130px_1fr] md:items-start">
+                                        <div className="relative h-[110px] w-[110px] overflow-hidden rounded-[14px] border border-slate-200 bg-slate-100 shadow-[0_4px_12px_rgba(15,23,42,0.12)]">
+                                            <img
+                                                src={fotoProfile}
+                                                alt={detailMember.nama}
+                                                className="h-full w-full object-cover"
+                                            />
                                         </div>
 
-                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-                                            <div className="mb-6">
-                                                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Status Keanggotaan</div>
-                                                <select
-                                                    value={memberStatus}
-                                                    onChange={(e) => handleMemberStatusChange(e.target.value)}
-                                                    className="mt-3 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
-                                                >
-                                                    <option>Anggota Tetap</option>
-                                                    <option>Anggota Muda</option>
-                                                    <option>Luar Biasa</option>
-                                                </select>
+                                        <div className="pt-1">
+                                            <h2 className="text-[2rem] font-medium leading-tight text-[#1f4b2a] sm:text-[2.15rem]">
+                                                {detailMember.nama}
+                                            </h2>
+                                            <div className="mt-1 flex flex-wrap items-center gap-2 text-[1.02rem] text-slate-600">
+                                                <span className="inline-flex items-center gap-2">
+                                                    <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 3v18M3 9h18" />
+                                                    </svg>
+                                                    {detailMember.nim}
+                                                </span>
                                             </div>
+                                            <div className="mt-4 inline-flex rounded-full bg-[#f5bf17] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white shadow-sm">
+                                                {detailMember.status === "TETAP" ? "ANGGOTA TETAP" : detailMember.status === "MUDA" ? "ANGGOTA MUDA" : "LUAR BIASA"}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                                        <InfoCard
+                                            label="DIVISION"
+                                            value={detailMember.divisi}
+                                            icon={
+                                                <svg className="h-5 w-5 text-[#4d8c18]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M9 5h6M10 3h4M8 7h8M6 11h12v7H6z" />
+                                                </svg>
+                                            }
+                                        />
+                                        <InfoCard
+                                            label="POSITION"
+                                            value={detailMember.jabatan}
+                                            icon={
+                                                <svg className="h-5 w-5 text-[#4d8c18]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M4 19h16M7 19V8m5 11V5m5 14v-9" />
+                                                </svg>
+                                            }
+                                        />
+                                        <InfoCard
+                                            label="EMAIL ADDRESS"
+                                            value={detailMember.email}
+                                            icon={
+                                                <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6h16v12H4z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="m4 7 8 6 8-6" />
+                                                </svg>
+                                            }
+                                        />
+                                        <InfoCard
+                                            label="PHONE NUMBER"
+                                            value={detailMember.kontak}
+                                            icon={
+                                                <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 5.5A2.5 2.5 0 0 1 5.5 3H8l2 5-2 2c1.6 3.2 3.8 5.4 7 7l2-2 5 2v2.5A2.5 2.5 0 0 1 19.5 22h-1C10.3 22 2 13.7 2 4.5v-1Z" />
+                                                </svg>
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="mt-6 border-t border-slate-200 pt-6">
+                                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">STATUS KEANGGOTAAN</div>
+                                        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_188px]">
+                                            <select
+                                                value={memberStatus}
+                                                onChange={(e) => setMemberStatus(e.target.value)}
+                                                className="h-[48px] w-full rounded-[10px] border border-slate-300 bg-white px-4 text-[0.95rem] text-slate-800 shadow-sm outline-none focus:border-slate-400"
+                                            >
+                                                <option>Anggota Tetap</option>
+                                                <option>Anggota Muda</option>
+                                                <option>Luar Biasa</option>
+                                            </select>
 
                                             <button
                                                 type="button"
-                                                className="inline-flex w-full items-center justify-center gap-2 rounded-3xl bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-600 transition"
+                                                className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-[#ffd3d0] px-4 text-[0.95rem] font-semibold text-[#a30e0e] transition hover:bg-[#ffc5c0]"
                                             >
-                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
                                                 </svg>
                                                 Delete Member
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 grid gap-3 sm:grid-cols-2 border-t border-slate-200 pt-5 text-xs uppercase tracking-[0.24em] text-slate-400">
+                                    <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 pt-4 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                                         <span>HMIF ITERA • MEMBER RECORDS DIVISION</span>
-                                        <span className="text-right text-slate-500">Last updated: Oct 24, 2023</span>
+                                        <span className="text-slate-500">LAST UPDATED: OCT 24, 2023</span>
                                     </div>
                                 </div>
                             </div>
@@ -477,6 +558,26 @@ export default function DashboardAdminAnggota() {
                     </main>
                 </div>
             </div>
+
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#185b21] md:hidden">
+                <div className="grid grid-cols-4">
+                    {NAV_ITEMS.map((item) => {
+                        const isActive = pathname === item.to;
+                        return (
+                            <Link
+                                key={item.label}
+                                to={item.to}
+                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${
+                                    isActive ? "bg-white/10 text-white" : "text-white/80 hover:text-white"
+                                }`}
+                            >
+                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
         </div>
     );
 }
