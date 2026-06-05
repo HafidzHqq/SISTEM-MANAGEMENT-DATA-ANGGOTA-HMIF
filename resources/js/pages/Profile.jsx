@@ -39,6 +39,8 @@ export default function Profile() {
     const [saving, setSaving] = React.useState(false);
     const [toast, setToast] = React.useState(false);
     const toastTimer = React.useRef(null);
+    const [fotoUrl, setFotoUrl] = React.useState(null);
+    const [uploadingFoto, setUploadingFoto] = React.useState(false);
 
     const showToast = () => {
         setToast(true);
@@ -66,6 +68,10 @@ export default function Profile() {
         .then(res => res.json())
         .then(data => {
             setProfile(data);
+            setFotoUrl(data?.profile?.foto
+                ? `/storage/${data.profile.foto}`
+                : null
+            );
             const initial = {
                 departemen: data?.profile?.departemen || "",
                 jabatan: data?.profile?.jabatan || "",
@@ -99,11 +105,38 @@ export default function Profile() {
         }
         if (name === "departemen") {
             setForm(prev => ({ ...prev, departemen: value, jabatan: "" }));
-            setAlert(null);
             return;
         }
         setForm(prev => ({ ...prev, [name]: value }));
-        setAlert(null);
+    };
+
+    const handleFotoChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploadingFoto(true);
+        const token = localStorage.getItem("auth_token");
+        const formData = new FormData();
+        formData.append("foto", file);
+
+        try {
+            const res = await fetch("/api/profile/foto", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json",
+                },
+                body: formData,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Gagal upload foto");
+            setFotoUrl(data.foto_url);
+            showToast();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setUploadingFoto(false);
+        }
     };
 
     const handleSave = async () => {
@@ -241,20 +274,32 @@ export default function Profile() {
                     <div className="bg-white rounded-2xl p-6 shadow-sm">
                         <div className="flex flex-col items-center md:hidden mb-2">
                             <div className="relative mb-3">
-                                <img src={fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
-                                <button className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow">
-                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                </button>
+                                <img
+                                    src={fotoUrl || fotoProfile}
+                                    alt="Profile"
+                                    className="h-24 w-24 rounded-2xl object-cover shadow"
+                                />
+                                <label className={`absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer ${uploadingFoto ? "opacity-50" : ""}`}>
+                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <input type="file" accept="image/jpg,image/jpeg,image/png" onChange={handleFotoChange} className="hidden" disabled={uploadingFoto} />
+                                </label>
                             </div>
                             <h2 className="text-xl font-extrabold text-gray-900">{name}</h2>
                             <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusKeanggotaan}</span>
                         </div>
                         <div className="hidden md:flex items-center gap-6">
                             <div className="relative">
-                                <img src={fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
-                                <button className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow">
-                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                </button>
+                                <img src={fotoUrl || fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
+                                <label className={`absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer ${uploadingFoto ? "opacity-50" : ""}`}>
+                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <input type="file" accept="image/jpg,image/jpeg,image/png" onChange={handleFotoChange} className="hidden" disabled={uploadingFoto} />
+                                </label>
                             </div>
                             <div>
                                 <div className="flex items-center gap-3 mb-1">

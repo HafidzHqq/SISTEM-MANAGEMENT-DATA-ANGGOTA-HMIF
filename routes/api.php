@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/foto', [ProfileController::class, 'uploadFoto']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/attendances/check-in', [AttendanceController::class, 'checkIn']);
     Route::post('/attendances/archive-old', [AttendanceController::class, 'archiveOldForUser']);
