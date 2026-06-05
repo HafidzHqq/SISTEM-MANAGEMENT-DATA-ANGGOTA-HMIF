@@ -15,6 +15,7 @@ class MemberProfile extends Model
         'departemen',
         'jabatan',
         'status_keanggotaan',
+        'no_telepon',
     ];
 
     public function user() {
