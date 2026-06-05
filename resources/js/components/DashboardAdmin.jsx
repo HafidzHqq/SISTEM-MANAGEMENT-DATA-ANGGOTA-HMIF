@@ -75,7 +75,6 @@ export default function DashboardAdmin() {
     const navigate = useNavigate();
     const location = useLocation();
     const pathname = location.pathname;
-    const [trendRange, setTrendRange] = React.useState("30D");
     const userName = localStorage.getItem("name") || "Admin User";
     const nim = localStorage.getItem("nim") || "124140056";
     const handleLogout = () => {
@@ -87,7 +86,7 @@ export default function DashboardAdmin() {
     };
 
     return (
-        <div className="min-h-screen overflow-x-hidden bg-[#e8f6ea] font-sans text-gray-900">
+        <div className="min-h-screen bg-[#e8f6ea] font-sans text-gray-900">
             <div className="min-h-screen flex">
                 <aside className="hidden md:flex flex-col w-[252px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
@@ -136,7 +135,7 @@ export default function DashboardAdmin() {
                 </aside>
 
                 <div className="flex-1 md:ml-[252px] flex flex-col min-h-screen min-w-0 relative">
-                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
+                    <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
                             <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
@@ -146,7 +145,7 @@ export default function DashboardAdmin() {
                         </button>
                     </header>
 
-                    <header className="sticky top-0 z-40 hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
+                    <header className="hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
                         <div>
                             <p className="text-[1.05rem] font-semibold text-slate-800">Admin Dashboard</p>
                         </div>
@@ -195,22 +194,12 @@ export default function DashboardAdmin() {
                                             <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
                                             <h3 className="text-[1.2rem] font-semibold">Participation Trend</h3>
                                         </div>
-                                        <div className="inline-flex rounded-[6px] bg-white/15 p-1 text-[0.85rem] font-bold text-white/80">
-                                            {["30D", "7D"].map((range) => (
-                                                <button
-                                                    key={range}
-                                                    type="button"
-                                                    onClick={() => setTrendRange(range)}
-                                                    className={`min-w-[54px] rounded-[4px] px-3 py-2 transition ${
-                                                        trendRange === range
-                                                            ? "bg-white text-[#1f5e22] shadow-sm"
-                                                            : "hover:bg-white/10"
-                                                    }`}
-                                                >
-                                                    {range}
-                                                </button>
-                                            ))}
-                                        </div>
+                                        <button className="inline-flex items-center gap-3 rounded-[4px] bg-white/10 px-4 py-3 text-[0.95rem] text-white/95">
+                                            <span>Last 30 Days</span>
+                                            <svg className="h-4 w-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
                                     </div>
 
                                     <div className="mt-10 rounded-[8px] bg-white/10 p-4">
@@ -235,15 +224,12 @@ export default function DashboardAdmin() {
                                             <h3 className="text-[1.2rem] font-semibold text-white">Attendance Status</h3>
                                         </div>
                                         <div className="mt-8 flex justify-center">
-                                            <div className="relative flex h-[150px] w-[150px] items-center justify-center rounded-full sm:h-[190px] sm:w-[190px]">
-                                                <div
-                                                    className="absolute inset-0 rounded-full shadow-inner"
-                                                    style={{ background: "conic-gradient(#1d4b28 0deg 316.8deg, rgba(255,255,255,0.28) 316.8deg 360deg)" }}
-                                                />
-                                                <div className="absolute inset-[12%] rounded-full bg-[#b8dd9f]" />
-                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-[#9ccc75] text-center">
-                                                    <p className="text-[1.7rem] font-extrabold leading-none text-slate-900 sm:text-[2rem]">88%</p>
-                                                    <p className="mt-1 text-[0.8rem] font-medium text-white/90 sm:text-[0.9rem]">Avg.</p>
+                                            <div className="relative h-[190px] w-[190px]">
+                                                <div className="absolute inset-0 rotate-45 rounded-[12px] bg-[#42a40f]" />
+                                                <div className="absolute inset-[14%] rotate-45 rounded-[12px] bg-[#b8dd9f]" />
+                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-[12px] bg-transparent text-center -rotate-45">
+                                                    <p className="text-[2rem] font-extrabold leading-none text-slate-900">88%</p>
+                                                    <p className="mt-1 text-[0.9rem] font-medium text-white/90">Avg.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -332,3 +318,4 @@ export default function DashboardAdmin() {
         </div>
     );
 }
+

@@ -1,17 +1,5 @@
 import React from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 export default function MainLayout({ children }) {
-    return (
-        <div className="min-h-screen flex flex-col">
-            <Navbar />
-            
-            <main className="grow p-0">
-                {children}
-            </main>
-
-            <Footer />
-        </div>
-    );
+    return <div className="min-h-screen bg-[#f7f9ff] text-slate-900">{children}</div>;
 }

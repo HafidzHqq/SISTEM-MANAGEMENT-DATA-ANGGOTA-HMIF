@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import UserMenu from "../components/UserMenu";
 import hmifLogo from "../assets/logo-hmif.png";
 import googleLogo from "../assets/logo-google.png";
 
@@ -12,6 +13,15 @@ export default function Login() {
         window.location.href = "/auth/google";
     };
 
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [name, setName] = useState("User");
+
+    useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        setIsLoggedIn(!!token);
+        setName(localStorage.getItem("name") || "User");
+    }, []);
+
     const query = new URLSearchParams(window.location.search);
     const errorKey = query.get("error");
     const errorMessage = errorKey
@@ -19,7 +29,12 @@ export default function Login() {
         : "";
 
     return (
-        <div className="min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4 font-sans">
+        <div className="relative min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4 font-sans">
+            {isLoggedIn && (
+                <header className="absolute right-6 top-6 z-20">
+                    <UserMenu />
+                </header>
+            )}
 
             {/* ── CARD WRAPPER ── */}
             <div className="w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
@@ -114,17 +129,26 @@ export default function Login() {
                         )}
 
                         {/* Google Login Button */}
-                        <button
-                            onClick={handleGoogleLogin}
-                            className="mt-8 flex w-full max-w-sm items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-[0.85rem] text-[0.95rem] font-semibold text-gray-700 shadow-sm transition duration-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
-                        >
-                            <img
-                                src={googleLogo}
-                                alt="Google"
-                                className="h-5 w-5 object-contain"
-                            />
-                            <span>Login with Google</span>
-                        </button>
+                        {isLoggedIn ? (
+                            <div className="mt-8 w-full max-w-sm rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-5 text-sm text-emerald-900 shadow-sm">
+                                Anda sudah login sebagai <span className="font-semibold">{name}</span>.
+                                <div className="mt-2 text-slate-600">
+                                    Gunakan menu di kanan atas untuk membuka Dashboard atau Logout.
+                                </div>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleGoogleLogin}
+                                className="mt-8 flex w-full max-w-sm items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-[0.85rem] text-[0.95rem] font-semibold text-gray-700 shadow-sm transition duration-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+                            >
+                                <img
+                                    src={googleLogo}
+                                    alt="Google"
+                                    className="h-5 w-5 object-contain"
+                                />
+                                <span>Login with Google</span>
+                            </button>
+                        )}
 
                         {/* Support link */}
                         <a

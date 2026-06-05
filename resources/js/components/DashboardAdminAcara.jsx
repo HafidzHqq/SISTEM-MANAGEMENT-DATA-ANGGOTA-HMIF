@@ -3,8 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import hmifLogo from "../assets/logo-hmif.png";
 import eventWorkshop from "../assets/assets dash admin/acara/workshop.png";
 import eventMeeting from "../assets/assets dash admin/acara/rapatpleno.png";
-import iconApproval from "../assets/assets dash admin/acara/Icon-menunggupersetujuan.png";
-import iconAction from "../assets/assets dash admin/acara/icon-aksi.png";
 import qrImage from "../assets/sqanqr.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
@@ -35,11 +33,6 @@ const FEATURED_EVENTS = [
         footerLeft: "Presensi: 45/48",
         footerRight: "Lihat Berita Acara →",
     },
-];
-
-const APPROVALS = [
-    { name: "Coding Competition 2024", department: "Technopreneur", date: "12 Okt 2025", status: "Reviewing" },
-    { name: "LDK Aktivis HMIF", department: "PSDA", date: "10 Okt 2025", status: "Reviewing" },
 ];
 
 function MetaRow({ children, type }) {
@@ -315,56 +308,6 @@ export default function DashboardAdminAcara() {
                             </article>
                         </section>
 
-                        <section className="mt-8">
-                            <div className="mb-5 flex items-center gap-2">
-                                <img src={iconApproval} alt="Menunggu Persetujuan" className="h-6 w-6 object-contain" />
-                                <h2 className="text-[1.55rem] font-bold text-slate-900">Menunggu Persetujuan</h2>
-                            </div>
-
-                            <div className="overflow-hidden rounded-[14px] border border-slate-300 bg-white shadow-[0_10px_18px_rgba(15,23,42,0.08)]">
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-left text-sm">
-                                        <thead>
-                                            <tr className="border-b border-slate-300 bg-[#fafafa] text-[0.82rem] uppercase tracking-[0.12em] text-slate-700">
-                                                <th className="px-7 py-4">Nama Acara</th>
-                                                <th className="px-7 py-4">Departemen</th>
-                                                <th className="px-7 py-4">Tanggal Pengajuan</th>
-                                                <th className="px-7 py-4">Status</th>
-                                                <th className="px-7 py-4 text-right">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {APPROVALS.map((item) => (
-                                                <tr key={item.name} className="border-b border-slate-300 last:border-b-0">
-                                                    <td className="px-7 py-5 align-middle">
-                                                        <p className="font-semibold text-slate-900">{item.name}</p>
-                                                        <p className="mt-1 text-[0.78rem] text-slate-500">Kategori: Kompetisi</p>
-                                                    </td>
-                                                    <td className="px-7 py-5 align-middle text-[0.98rem] text-slate-800">{item.department}</td>
-                                                    <td className="px-7 py-5 align-middle text-[0.98rem] text-slate-800">{item.date}</td>
-                                                    <td className="px-7 py-5 align-middle">
-                                                        <span className="inline-flex rounded-[3px] bg-[#5b2c0f] px-3 py-1 text-[0.72rem] font-medium text-[#f7c98f]">
-                                                            {item.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-7 py-5 align-middle">
-                                                        <div className="flex justify-end">
-                                                            <button
-                                                                type="button"
-                                                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] bg-transparent transition hover:bg-slate-100"
-                                                                aria-label={`Aksi ${item.name}`}
-                                                            >
-                                                                <img src={iconAction} alt="" className="h-5 w-5 object-contain" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </section>
                     </main>
                 </div>
             </div>

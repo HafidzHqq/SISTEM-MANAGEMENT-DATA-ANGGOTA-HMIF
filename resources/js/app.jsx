@@ -14,6 +14,7 @@ import History from "./pages/History";
 import QrScanner from "./components/QrScanner";
 import Anggota from "./pages/Anggota";
 import DashboardAdminAcara from "./components/DashboardAdminAcara";
+import DashboardAdminLaporan from "./components/DashboardAdminLaporan";
 
 function App() {
     return (
@@ -35,6 +36,11 @@ function App() {
                 <Route path="/dashboard/acara" element={
                     <ProtectedRoute>
                         <DashboardAdminAcara />
+                    </ProtectedRoute>
+                } />
+                <Route path="/dashboard/laporan" element={
+                    <ProtectedRoute>
+                        <DashboardAdminLaporan />
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/profile" element={
