@@ -11,7 +11,7 @@ class EventController extends Controller
     // Ambil semua event
     public function index()
     {
-        $events = Event::all();
+        $events = Event::withCount('attendances')->get();
         return response()->json($events);
     }
 
