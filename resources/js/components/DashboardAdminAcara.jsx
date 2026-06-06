@@ -22,7 +22,11 @@ const getAuthHeaders = () => {
     };
 };
 
-const generateHash = () => Math.random().toString(36).substring(2, 5).toUpperCase();
+// Helper: cek apakah event masih aktif
+const isEventActive = (event) => {
+    const end = event.attendance_window_end ? new Date(event.attendance_window_end) : null;
+    return end && end >= new Date();
+};
 
 function MetaRow({ children, type }) {
     return (
@@ -57,20 +61,39 @@ function StatBox({ label, value }) {
     );
 }
 
-function DetailModal({ event, onClose }) {
+// Badge status: Aktif (hijau) atau Berakhir (merah)
+function StatusBadge({ event }) {
+    const active = isEventActive(event);
+    return (
+        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] ${
+            active
+                ? "bg-[#def6d7] text-[#5baa19]"
+                : "bg-red-100 text-red-600"
+        }`}>
+            {active ? "Aktif" : "Berakhir"}
+        </span>
+    );
+}
+
+// Modal Detail — tombol Hapus dipindah ke sini, di bawah tombol Tutup
+function DetailModal({ event, onClose, onDelete, deletingId }) {
     if (!event) return null;
     const formatDate = (dt) => dt ? new Date(dt).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "-";
-    const windowStart = event.attendance_window_start ? new Date(event.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-";
-    const windowEnd = event.attendance_window_end ? new Date(event.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-";
+    const windowStart = event.attendance_window_start
+        ? new Date(event.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        : "-";
+    const windowEnd = event.attendance_window_end
+        ? new Date(event.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        : "-";
+
+    const isDeleting = deletingId === event.event_id;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
             <div className="w-full max-w-lg rounded-[18px] bg-white p-6 shadow-2xl">
                 <div className="flex items-start justify-between mb-4">
                     <div>
-                        <span className="inline-flex items-center rounded-full bg-[#def6d7] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#5baa19]">
-                            {event.status || "AKTIF"}
-                        </span>
+                        <StatusBadge event={event} />
                         <h2 className="mt-2 text-[1.4rem] font-bold text-slate-900 leading-snug">{event.title}</h2>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 ml-4 shrink-0">
@@ -79,19 +102,35 @@ function DetailModal({ event, onClose }) {
                         </svg>
                     </button>
                 </div>
+
                 <div className="space-y-3 mb-4">
                     <MetaRow type="calendar">{formatDate(event.date_time)}</MetaRow>
                     <MetaRow type="pin">{event.location || "-"}</MetaRow>
                     <MetaRow type="clock">Window: {windowStart} – {windowEnd} WIB</MetaRow>
                 </div>
+
                 {event.description && (
-                    <div className="rounded-[12px] bg-slate-50 border border-slate-200 px-4 py-3">
+                    <div className="rounded-[12px] bg-slate-50 border border-slate-200 px-4 py-3 mb-1">
                         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-slate-400 mb-1">Deskripsi</p>
                         <p className="text-[0.95rem] text-slate-700 leading-relaxed">{event.description}</p>
                     </div>
                 )}
-                <button onClick={onClose} className="mt-5 w-full rounded-[10px] bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition">
+
+                {/* Tombol Tutup */}
+                <button
+                    onClick={onClose}
+                    className="mt-5 w-full rounded-[10px] bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition"
+                >
                     Tutup
+                </button>
+
+                {/* Tombol Hapus — di bawah Tutup */}
+                <button
+                    onClick={() => onDelete(event.event_id, event.title)}
+                    disabled={isDeleting}
+                    className="mt-2 w-full rounded-[10px] border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-100 transition disabled:opacity-50"
+                >
+                    {isDeleting ? "Menghapus..." : "Hapus Acara"}
                 </button>
             </div>
         </div>
@@ -135,7 +174,18 @@ export default function DashboardAdminAcara() {
             const data = await res.json();
             const list = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
             setEvents(list);
-            if (list.length > 0) setFeaturedEvent(prev => prev ?? list[0]);
+            if (list.length > 0) {
+                setFeaturedEvent(prev => {
+                    // Kalau featured masih ada di list, pertahankan. Kalau tidak, ambil index 0.
+                    if (prev) {
+                        const stillExists = list.find(e => e.event_id === prev.event_id);
+                        return stillExists ?? list[0];
+                    }
+                    return list[0];
+                });
+            } else {
+                setFeaturedEvent(null);
+            }
         } catch {
             setEvents([]);
         } finally {
@@ -155,7 +205,8 @@ export default function DashboardAdminAcara() {
                 const data = await res.json();
                 throw new Error(data.message || "Gagal menghapus acara");
             }
-            if (featuredEvent?.event_id === eventId) setFeaturedEvent(null);
+            // Tutup modal detail kalau yang dihapus adalah yang sedang dibuka
+            if (detailEvent?.event_id === eventId) setDetailEvent(null);
             await fetchEvents();
         } catch (err) {
             alert(err.message);
@@ -178,10 +229,16 @@ export default function DashboardAdminAcara() {
         fetchEvents();
     }, []);
 
-    const totals = useMemo(() => {
-        const totalCheckin = events.reduce((s, e) => s + (Number(e.attendances_count ?? 0)), 0);
-        return { totalCheckin, totalEvents: events.length };
-    }, [events]);
+    // Stats panel sekarang spesifik ke featuredEvent
+    const featuredStats = useMemo(() => {
+        if (!featuredEvent) return { checkin: 0, active: false };
+        return {
+            checkin: Number(featuredEvent.attendances_count ?? 0),
+            active: isEventActive(featuredEvent),
+        };
+    }, [featuredEvent]);
+
+    const totalEvents = events.length;
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
@@ -292,7 +349,11 @@ export default function DashboardAdminAcara() {
                                 <p className="mt-2 text-[1rem] text-slate-700">Kelola jadwal, presensi, dan logistik acara HMIF.</p>
                             </div>
                             <button
-                                onClick={() => { setShowCreateModal(true); setCreateFormError(""); setForm({ title: "", description: "", location: "", date: "", time: "", window_start: "", window_end: "" }); }}
+                                onClick={() => {
+                                    setShowCreateModal(true);
+                                    setCreateFormError("");
+                                    setForm({ title: "", description: "", location: "", date: "", time: "", window_start: "", window_end: "" });
+                                }}
                                 className="inline-flex items-center justify-center gap-3 rounded-[14px] bg-[#f5bf17] px-5 py-3.5 text-[0.98rem] font-semibold text-slate-900 shadow-[0_10px_22px_rgba(245,191,23,0.28)] transition hover:bg-[#ffd033]"
                             >
                                 <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-900">
@@ -304,102 +365,159 @@ export default function DashboardAdminAcara() {
                             </button>
                         </div>
 
-                        {/* FEATURED EVENT */}
+                        {/* FEATURED EVENT — update otomatis saat card diklik */}
                         {featuredEvent && (
-                        <section className="grid gap-5 xl:grid-cols-[1.95fr_0.92fr] mb-6">
-                            <div className="overflow-hidden rounded-[16px] border border-slate-300 bg-white shadow-[0_9px_18px_rgba(15,23,42,0.13)]">
-                                <div className="grid min-h-[320px] xl:grid-cols-[1.18fr_0.82fr]">
-                                    <div className="p-6 sm:p-7">
-                                        <div className="inline-flex items-center rounded-full bg-[#def6d7] px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-[#5baa19]">AKTIF</div>
-                                        <h2 className="mt-4 max-w-[22ch] text-[1.8rem] font-bold leading-[1.1] tracking-tight text-slate-900 sm:text-[2.1rem]">
-                                            {featuredEvent.title}
-                                        </h2>
-                                        <div className="mt-5 space-y-3">
-                                            <MetaRow type="calendar">
-                                                {featuredEvent.date_time ? new Date(featuredEvent.date_time).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "-"}
-                                            </MetaRow>
-                                            <MetaRow type="pin">{featuredEvent.location || "-"}</MetaRow>
-                                            <MetaRow type="clock">
-                                                Window: {featuredEvent.attendance_window_start ? new Date(featuredEvent.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"} – {featuredEvent.attendance_window_end ? new Date(featuredEvent.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"} WIB
-                                            </MetaRow>
-                                        </div>
-                                        <div className="mt-6 flex flex-wrap gap-3">
-                                            <button onClick={() => setDetailEvent(featuredEvent)}
-                                                className="inline-flex items-center gap-2 rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-[0.96rem] font-medium text-slate-700 transition hover:bg-slate-50">
-                                                Detail
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="border-t border-slate-200 xl:border-l xl:border-t-0">
-                                        <div className="flex h-full flex-col items-center justify-center p-6 sm:p-8">
-                                            <p className="text-[0.9rem] font-semibold uppercase tracking-[0.12em] text-slate-400">QR Presensi</p>
-                                            <div className="mt-5 rounded-[18px] border-2 border-[#b6cbf6] bg-white p-3 shadow-sm">
-                                                <img
-                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
-                                                    alt="QR Code"
-                                                    className="h-[170px] w-[170px] object-contain"
-                                                />
+                            <section className="grid gap-5 xl:grid-cols-[1.95fr_0.92fr] mb-6">
+                                <div className="overflow-hidden rounded-[16px] border border-slate-300 bg-white shadow-[0_9px_18px_rgba(15,23,42,0.13)]">
+                                    <div className="grid min-h-[320px] xl:grid-cols-[1.18fr_0.82fr]">
+                                        <div className="p-6 sm:p-7">
+                                            <StatusBadge event={featuredEvent} />
+                                            <h2 className="mt-4 max-w-[22ch] text-[1.8rem] font-bold leading-[1.1] tracking-tight text-slate-900 sm:text-[2.1rem]">
+                                                {featuredEvent.title}
+                                            </h2>
+                                            <div className="mt-5 space-y-3">
+                                                <MetaRow type="calendar">
+                                                    {featuredEvent.date_time
+                                                        ? new Date(featuredEvent.date_time).toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+                                                        : "-"}
+                                                </MetaRow>
+                                                <MetaRow type="pin">{featuredEvent.location || "-"}</MetaRow>
+                                                <MetaRow type="clock">
+                                                    Window:{" "}
+                                                    {featuredEvent.attendance_window_start
+                                                        ? new Date(featuredEvent.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+                                                        : "-"}{" "}
+                                                    –{" "}
+                                                    {featuredEvent.attendance_window_end
+                                                        ? new Date(featuredEvent.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+                                                        : "-"}{" "}
+                                                    WIB
+                                                </MetaRow>
                                             </div>
-                                            <p className="mt-4 text-center text-[0.85rem] text-slate-400">Scan untuk presensi kehadiran</p>
-                                            <a href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
-                                                download={`QR-${featuredEvent.title}.png`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="mt-4 inline-flex items-center gap-2 rounded-[10px] bg-[#63bc2b] px-4 py-2.5 text-[0.95rem] font-medium text-slate-900 transition hover:bg-[#73cd35]"
-                                            >
-                                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v9m0 0l-3-3m3 3l3-3M5 19h14" />
-                                                </svg>
-                                                Download QR
-                                            </a>
+                                            <div className="mt-6 flex flex-wrap gap-3">
+                                                <button
+                                                    onClick={() => setDetailEvent(featuredEvent)}
+                                                    className="inline-flex items-center gap-2 rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-[0.96rem] font-medium text-slate-700 transition hover:bg-slate-50"
+                                                >
+                                                    Detail
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* QR Panel — otomatis ganti sesuai featuredEvent */}
+                                        <div className="border-t border-slate-200 xl:border-l xl:border-t-0">
+                                            <div className="flex h-full flex-col items-center justify-center p-6 sm:p-8">
+                                                <p className="text-[0.9rem] font-semibold uppercase tracking-[0.12em] text-slate-400">QR Presensi</p>
+                                                <div className="mt-5 rounded-[18px] border-2 border-[#b6cbf6] bg-white p-3 shadow-sm">
+                                                    <img
+                                                        key={featuredEvent.event_id}
+                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
+                                                        alt="QR Code"
+                                                        className="h-[170px] w-[170px] object-contain"
+                                                    />
+                                                </div>
+                                                <p className="mt-3 text-center text-[0.82rem] text-slate-400 max-w-[160px]">
+                                                    {featuredEvent.title}
+                                                </p>
+                                                <p className="mt-1 text-center text-[0.78rem] text-slate-300">Scan untuk presensi kehadiran</p>
+                                                <a
+                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
+                                                    download={`QR-${featuredEvent.title}.png`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="mt-4 inline-flex items-center gap-2 rounded-[10px] bg-[#63bc2b] px-4 py-2.5 text-[0.95rem] font-medium text-slate-900 transition hover:bg-[#73cd35]"
+                                                >
+                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v9m0 0l-3-3m3 3l3-3M5 19h14" />
+                                                    </svg>
+                                                    Download QR
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <aside className="rounded-[16px] bg-[#5fae14] p-5 text-white shadow-[0_10px_22px_rgba(68,131,19,0.24)]">
-                                <p className="text-[1rem] uppercase tracking-[0.18em] text-white/85">TOTAL ACARA</p>
-                                <h3 className="mt-2 text-[3.1rem] font-extrabold leading-none">{totals.totalEvents}</h3>
-                                <div className="mt-12 grid gap-3 sm:grid-cols-2">
-                                    <StatBox label="Total Check-in" value={totals.totalCheckin} />
-                                    <StatBox label="Acara Aktif" value={events.filter(e => e.attendance_window_end && new Date(e.attendance_window_end) >= new Date()).length} />
-                                </div>
-                            </aside>
-                        </section>
+
+                                {/* STATS PANEL — spesifik ke featuredEvent */}
+                                <aside className="rounded-[16px] bg-[#5fae14] p-5 text-white shadow-[0_10px_22px_rgba(68,131,19,0.24)]">
+                                    <p className="text-[0.78rem] uppercase tracking-[0.18em] text-white/70">Total Acara</p>
+                                    <h3 className="mt-1 text-[3.1rem] font-extrabold leading-none">{totalEvents}</h3>
+
+                                    <div className="mt-5 h-px bg-white/20" />
+
+                                    {/* Statistik per acara yang dipilih */}
+                                    <p className="mt-4 text-[0.72rem] uppercase tracking-[0.14em] text-white/60 truncate">
+                                        Statistik: {featuredEvent.title}
+                                    </p>
+                                    <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                                        <StatBox label="Check-in Acara Ini" value={featuredStats.checkin} />
+                                        <StatBox
+                                            label="Status"
+                                            value={featuredStats.active ? "Aktif" : "Berakhir"}
+                                        />
+                                    </div>
+                                </aside>
+                            </section>
                         )}
 
-                        {/* EVENT LIST */}
+                        {/* EVENT LIST — klik card = ganti featured */}
                         <section className="grid gap-5 lg:grid-cols-3">
                             {isLoadingEvents ? (
                                 <div className="col-span-3 rounded-[14px] border border-slate-300 bg-white p-6 text-center text-slate-500">Memuat acara...</div>
                             ) : events.length > 0 ? (
                                 events.map((event) => {
-                                    const end = event.attendance_window_end ? new Date(event.attendance_window_end) : null;
-                                    const isActive = end && end >= new Date();
+                                    const active = isEventActive(event);
+                                    const isSelected = featuredEvent?.event_id === event.event_id;
+
                                     return (
-                                        <article key={event.event_id} className="overflow-hidden rounded-[14px] border border-slate-300 bg-white shadow-[0_10px_20px_rgba(15,23,42,0.08)]">
+                                        <article
+                                            key={event.event_id}
+                                            onClick={() => setFeaturedEvent(event)}
+                                            className={`overflow-hidden rounded-[14px] border bg-white shadow-[0_10px_20px_rgba(15,23,42,0.08)] cursor-pointer transition-all duration-200 ${
+                                                isSelected
+                                                    ? "border-[#5baa19] ring-2 ring-[#5baa19]/30 shadow-[0_10px_24px_rgba(91,170,25,0.18)]"
+                                                    : "border-slate-300 hover:border-[#5baa19]/50 hover:shadow-[0_12px_24px_rgba(15,23,42,0.12)]"
+                                            }`}
+                                        >
                                             <div className="p-5">
                                                 <div className="flex items-center justify-between mb-3">
-                                                    <span className={`rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] ${isActive ? "bg-[#def6d7] text-[#5baa19]" : "bg-slate-100 text-slate-500"}`}>
-                                                        {isActive ? "AKTIF" : "SELESAI"}
+                                                    {/* Badge: Aktif (hijau) atau Berakhir (merah) */}
+                                                    <span className={`rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] ${
+                                                        active
+                                                            ? "bg-[#def6d7] text-[#5baa19]"
+                                                            : "bg-red-100 text-red-600"
+                                                    }`}>
+                                                        {active ? "Aktif" : "Berakhir"}
                                                     </span>
-                                                    <button onClick={() => setFeaturedEvent(event)} className="text-[0.78rem] text-slate-400 hover:text-slate-700 transition">Jadikan Featured</button>
+                                                    {/* Indikator event yang sedang ditampilkan */}
+                                                    {isSelected && (
+                                                        <span className="text-[0.72rem] font-semibold text-[#5baa19] flex items-center gap-1">
+                                                            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                                <circle cx="12" cy="12" r="6" />
+                                                            </svg>
+                                                            Ditampilkan
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <h3 className="text-[1.05rem] font-bold leading-snug text-slate-900">{event.title}</h3>
                                                 {event.location && <p className="mt-1 text-[0.85rem] text-slate-500">{event.location}</p>}
-                                                {event.date_time && <p className="mt-1 text-[0.82rem] text-slate-400">{new Date(event.date_time).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>}
+                                                {event.date_time && (
+                                                    <p className="mt-1 text-[0.82rem] text-slate-400">
+                                                        {new Date(event.date_time).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+                                                    </p>
+                                                )}
                                                 <div className="my-3 h-px bg-slate-100" />
                                                 <div className="flex items-center justify-between gap-3">
                                                     <p className="text-[0.88rem] text-slate-500">Check-in: {event.attendances_count ?? 0}</p>
-                                                    <div className="flex items-center gap-3">
-                                                        <button onClick={() => setDetailEvent(event)} className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition">Detail →</button>
-                                                        <button
-                                                            onClick={() => handleDeleteEvent(event.event_id, event.title)}
-                                                            disabled={deletingId === event.event_id}
-                                                            className="text-[0.88rem] font-medium text-red-400 hover:text-red-600 transition disabled:opacity-50"
-                                                        >
-                                                            {deletingId === event.event_id ? "..." : "Hapus"}
-                                                        </button>
-                                                    </div>
+                                                    {/* Hanya tombol Detail — Hapus sudah dipindah ke dalam modal */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation(); // jangan trigger klik card
+                                                            setDetailEvent(event);
+                                                        }}
+                                                        className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition"
+                                                    >
+                                                        Detail →
+                                                    </button>
                                                 </div>
                                             </div>
                                         </article>
@@ -489,8 +607,13 @@ export default function DashboardAdminAcara() {
                 </div>
             )}
 
-            {/* MODAL DETAIL */}
-            <DetailModal event={detailEvent} onClose={() => setDetailEvent(null)} />
+            {/* MODAL DETAIL — Hapus ada di sini */}
+            <DetailModal
+                event={detailEvent}
+                onClose={() => setDetailEvent(null)}
+                onDelete={handleDeleteEvent}
+                deletingId={deletingId}
+            />
 
             {/* MOBILE NAV */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#185b21] md:hidden">
