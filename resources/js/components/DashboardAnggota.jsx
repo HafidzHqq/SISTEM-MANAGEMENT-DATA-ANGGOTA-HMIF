@@ -8,6 +8,7 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 import { calculateAttendanceSummary } from "../utils/attendanceHistory";
+import MemberMobileSidebar, { MemberMenuButton } from "./MemberMobileSidebar";
 
 
 
@@ -18,6 +19,7 @@ export default function DashboardAnggota() {
     const [historyData, setHistoryData] = React.useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = React.useState(true);
     const [fotoUrl, setFotoUrl] = React.useState(null);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
 React.useEffect(() => {
     const token = localStorage.getItem("auth_token");
@@ -84,6 +86,15 @@ const attendanceLabel =
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
+            <MemberMobileSidebar
+                open={isMobileSidebarOpen}
+                onClose={() => setIsMobileSidebarOpen(false)}
+                navItems={navItems}
+                name={name}
+                nim={nim}
+                avatarSrc={fotoUrl || fotoProfile}
+                onLogout={handleLogout}
+            />
 
             {/* ════════ DESKTOP SIDEBAR ════════ */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
@@ -137,8 +148,9 @@ const attendanceLabel =
             <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
 
                 {/* Mobile Header */}
-                <header className="md:hidden flex items-center justify-between bg-white px-5 py-4 shadow-sm">
-                    <div className="flex items-center gap-2">
+                <header className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
                         <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
                         <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
                     </div>
