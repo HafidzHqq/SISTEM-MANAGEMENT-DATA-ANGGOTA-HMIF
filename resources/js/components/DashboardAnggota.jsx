@@ -9,10 +9,7 @@ import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 import { calculateAttendanceSummary } from "../utils/attendanceHistory";
 
-const DIVISION_PROGRESS = [
-    { label: "Project Milestone A", value: 75 },
-    { label: "Member Development", value: 42 },
-];
+
 
 export default function DashboardAnggota() {
     const navigate = useNavigate();
@@ -295,26 +292,7 @@ const attendanceLabel =
                                 </div>
                             </div>
 
-                            {/* Division Progress — desktop only */}
-                            <div className="hidden md:block bg-white rounded-2xl p-5 shadow-sm">
-                                <h3 className="text-base font-bold text-gray-900 mb-4">Division Progress</h3>
-                                <div className="space-y-4">
-                                    {DIVISION_PROGRESS.map((item, i) => (
-                                        <div key={i}>
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-[0.82rem] text-gray-600">{item.label}</span>
-                                                <span className="text-[0.82rem] font-bold text-green-600">{item.value}%</span>
-                                            </div>
-                                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-1.5 rounded-full bg-green-500"
-                                                    style={{ width: `${item.value}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+
 
                         </div>
                     </div>
