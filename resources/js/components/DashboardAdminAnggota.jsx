@@ -8,6 +8,9 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
+import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
+import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png";
+import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
@@ -224,7 +227,7 @@ function MetricCard({ metric }) {
             </div>
             <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{metric.label}</p>
             <h2 className={`mt-1 text-[2.3rem] font-extrabold leading-none ${metric.valueClass}`}>{metric.value}</h2>
-            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth }} />
+            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth || "82px" }} />
         </div>
     );
 }
@@ -717,7 +720,7 @@ export default function DashboardAdminAnggota() {
                         </div>
 
                         <div className="mb-8 grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-                            {METRICS.map((metric) => (
+                            {memberMetrics.map((metric) => (
                                 <MetricCard key={metric.label} metric={metric} />
                             ))}
                         </div>

@@ -25,6 +25,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'title'                    => 'required|string',
             'description'              => 'nullable|string',
+            'location'                => 'nullable|string',
             'date_time'                => 'required|date',
             'attendance_window_start'  => 'required|date',
             'attendance_window_end'    => 'required|date',

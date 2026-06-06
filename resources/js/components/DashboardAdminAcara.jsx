@@ -118,6 +118,7 @@ export default function DashboardAdminAcara() {
     const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
     const [createFormError, setCreateFormError] = useState("");
     const [featuredEvent, setFeaturedEvent] = useState(null);
+    const [deletingId, setDeletingId] = useState(null);
 
     const [form, setForm] = useState({
         title: "",
@@ -135,6 +136,27 @@ export default function DashboardAdminAcara() {
     const handleLogout = () => {
         ["auth_token", "role", "name", "nim"].forEach(k => localStorage.removeItem(k));
         navigate("/login");
+    };
+
+    const handleDeleteEvent = async (eventId, eventTitle) => {
+        if (!window.confirm(`Hapus acara "${eventTitle}"?`)) return;
+        setDeletingId(eventId);
+        try {
+            const res = await fetch(`/api/events/${eventId}`, {
+                method: "DELETE",
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.message || "Gagal menghapus acara");
+            }
+            if (featuredEvent?.event_id === eventId) setFeaturedEvent(null);
+            await fetchEvents();
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setDeletingId(null);
+        }
     };
 
     const fetchEvents = async () => {
@@ -389,10 +411,22 @@ return (
                                                 {event.location && <p className="mt-1 text-[0.85rem] text-slate-500">{event.location}</p>}
                                                 {event.date_time && <p className="mt-1 text-[0.82rem] text-slate-400">{new Date(event.date_time).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</p>}
                                                 <div className="my-3 h-px bg-slate-100" />
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <p className="text-[0.88rem] text-slate-500">Check-in: {event.attendances_count ?? 0}</p>
-                                                    <button onClick={() => setDetailEvent(event)} className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition">Detail →</button>
-                                                </div>
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <p className="text-[0.88rem] text-slate-500">Check-in: {event.attendances_count ?? 0}</p>
+                                                        <div className="flex items-center gap-3">
+                                                            <button onClick={() => setDetailEvent(event)}
+                                                                className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition">
+                                                                Detail →
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteEvent(event.event_id, event.title)}
+                                                                disabled={deletingId === event.event_id}
+                                                                className="text-[0.88rem] font-medium text-red-400 hover:text-red-600 transition disabled:opacity-50"
+                                                            >
+                                                                {deletingId === event.event_id ? "..." : "Hapus"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                             </div>
                                         </article>
                                     );
