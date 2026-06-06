@@ -179,17 +179,7 @@ export default function DashboardAdmin() {
         })
         .slice(-8);
     const trendMax = Math.max(...trendItems.map((item) => Number(item.total_present || 0)), 1);
-    const recentActivities = (dashboardData?.recent_attendances || []).map((attendance) => {
-        const isValid = Boolean(attendance.is_in_radius);
 
-        return {
-            id: attendance.attendance_id,
-            title: `${attendance.name || "Anggota"} check-in ${attendance.event_title || "acara"}`,
-            time: formatRelativeTime(attendance.checkin_time),
-            tone: isValid ? "bg-[#1f5e22]" : "bg-[#b40c16]",
-            status: isValid ? "Valid" : "Di luar radius",
-        };
-    });
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -306,9 +296,8 @@ export default function DashboardAdmin() {
                             </div>
                         )}
 
-                        <div className="grid gap-5 xl:grid-cols-[1.9fr_0.9fr]">
-                            <div className="space-y-5">
-                                <section className="rounded-[10px] bg-[#7bbd36] p-5 shadow-[0_8px_18px_rgba(15,23,42,0.1)]">
+                        <div className="space-y-5">
+                            <section className="rounded-[10px] bg-[#7bbd36] p-5 shadow-[0_8px_18px_rgba(15,23,42,0.1)]">
                                     <div className="flex items-start justify-between gap-4 text-white">
                                         <div className="flex items-center gap-3">
                                             <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
@@ -426,42 +415,9 @@ export default function DashboardAdmin() {
                                     </section>
                                 </div>
                             </div>
-
-                            <aside className="rounded-[10px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)]">
-                                <div className="mb-5 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-[1.2rem] font-semibold text-slate-900">Recent Activity</h3>
-                                    </div>
-                                    <Link to="/dashboard/laporan" className="text-[0.9rem] text-slate-700 hover:text-slate-900">View All</Link>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {recentActivities.length > 0 ? (
-                                        recentActivities.map((activity) => (
-                                            <div key={activity.id} className="relative pl-12">
-                                                <div className="absolute left-5 top-0 bottom-0 w-[2px] bg-slate-300" />
-                                                <div className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-[10px] ${activity.tone} text-white shadow-sm`}>
-                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                </div>
-                                                <p className="text-[0.95rem] leading-6 text-slate-800">
-                                                    <span className="font-semibold">{activity.title}</span>
-                                                </p>
-                                                <p className="mt-1 text-[0.82rem] text-slate-500">{activity.time} - {activity.status}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="rounded-[10px] bg-slate-50 px-4 py-6 text-center text-sm font-medium text-slate-500">
-                                            Belum ada aktivitas presensi.
-                                        </div>
-                                    )}
-                                </div>
-                            </aside>
-                        </div>
-                    </main>
+                        </main>
+                    </div>
                 </div>
-            </div>
 
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]">
                 <div className="grid grid-cols-4">

@@ -264,9 +264,8 @@ export default function Home() {
                                                 {faq.question}
                                             </span>
                                             <span
-                                                className={`shrink-0 text-slate-500 transition-transform duration-200 ${
-                                                    open ? "rotate-180" : ""
-                                                }`}
+                                                className={`shrink-0 text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""
+                                                    }`}
                                             >
                                                 <IconChevron />
                                             </span>
@@ -310,39 +309,25 @@ export default function Home() {
                             <ul className="mt-6 space-y-4 text-[15px] text-slate-300">
                                 <li>
                                     <a className="transition hover:text-white" href="#guide">
-                                        Privacy Policy
-                                    </a>
-                                </li>
-                                <li>
-                                    <a className="transition hover:text-white" href="#guide">
-                                        Terms of Service
+                                        Guide
                                     </a>
                                 </li>
                                 <li>
                                     <a className="transition hover:text-white" href="#faq">
-                                        Contact Support
+                                        FAQ
                                     </a>
                                 </li>
                                 <li>
-                                    <a className="transition hover:text-white" href="#dashboard">
-                                        Instagram
-                                    </a>
-                                </li>
-                                <li>
-                                    <a className="transition hover:text-white" href="#dashboard">
-                                        LinkedIn
-                                    </a>
+                                    <Link className="transition hover:text-white" to="/dashboard">
+                                        Dashboard
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-3xl font-bold tracking-tight text-white">Hubungi Kami</h4>
-                            <p className="mt-6 max-w-md text-[15px] leading-7 text-slate-300">
-                                Gedung Laboratorium Teknik O7, ITERA
-                                <br />
-                                Lampung Selatan, Indonesia
-                            </p>
+                            <p className="mt-6 max-w-md text-[15px] leading-7 text-slate-300"></p>
                             <div className="mt-8 h-px bg-white/10" />
                             <p className="mt-4 text-sm leading-6 text-slate-400">
                                 (c) 2026 HMIF (Himpunan Mahasiswa Informatika). All rights reserved.

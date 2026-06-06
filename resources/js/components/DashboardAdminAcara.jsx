@@ -59,14 +59,7 @@ function MetaRow({ children, type }) {
     );
 }
 
-function StatBox({ label, value }) {
-    return (
-        <div className="rounded-[16px] bg-white/10 px-4 py-4 backdrop-blur-sm">
-            <p className="text-[0.7rem] uppercase tracking-[0.12em] text-white/60">{label}</p>
-            <p className="mt-2 text-2xl font-extrabold text-white">{value}</p>
-        </div>
-    );
-}
+
 
 export default function DashboardAdminAcara() {
     const navigate = useNavigate();
@@ -194,7 +187,7 @@ export default function DashboardAdminAcara() {
                             </button>
                         </div>
 
-                        <section className="grid gap-5 xl:grid-cols-[1.95fr_0.92fr]">
+                        <section className="w-full">
                             <div className="overflow-hidden rounded-[16px] border border-slate-300 bg-white shadow-[0_9px_18px_rgba(15,23,42,0.13)]">
                                 <div className="grid min-h-[380px] xl:grid-cols-[1.18fr_0.82fr]">
                                     <div className="p-6 sm:p-7">
@@ -248,26 +241,6 @@ export default function DashboardAdminAcara() {
                                     </div>
                                 </div>
                             </div>
-
-                            <aside className="rounded-[16px] bg-[#5fae14] p-5 text-white shadow-[0_10px_22px_rgba(68,131,19,0.24)]">
-                                <p className="text-[1rem] uppercase tracking-[0.18em] text-white/85">TOTAL PESERTA TERDAFTAR</p>
-                                <h3 className="mt-2 text-[3.1rem] font-extrabold leading-none">1,248</h3>
-
-                                <div className="mt-12">
-                                    <div className="mb-2 flex items-center justify-between text-[0.95rem]">
-                                        <span>Kapasitas Ruangan</span>
-                                        <span>85% Full</span>
-                                    </div>
-                                    <div className="h-2 rounded-full bg-black/15">
-                                        <div className="h-2 w-[85%] rounded-full bg-[#2d6b16]" />
-                                    </div>
-                                </div>
-
-                                <div className="mt-12 grid gap-3 sm:grid-cols-2">
-                                    <StatBox label="Check-in" value="422" />
-                                    <StatBox label="Sisa" value="826" />
-                                </div>
-                            </aside>
                         </section>
 
                         <section className="mt-6 grid gap-5 lg:grid-cols-3">
