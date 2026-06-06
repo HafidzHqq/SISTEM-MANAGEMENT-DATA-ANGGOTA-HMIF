@@ -31,6 +31,7 @@ function normalizeHistoryItem(item, index) {
     const status = item.status === "present" || item.status === "hadir" ? "hadir" : "tidak_hadir";
     const name = item.name || item.event_name || item.event_title || item.title || "Event belum bernama";
     const location = item.location || item.location_name || item.venue || DEFAULT_LOCATION;
+    
 
     return {
         ...item,
@@ -109,6 +110,7 @@ export default function DashboardHistory() {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isArchiving, setIsArchiving] = useState(false);
     const [archiveNotice, setArchiveNotice] = useState("");
+    const [fotoUrl, setFotoUrl] = useState(null);
 
     const name = user?.name || localStorage.getItem("name") || "Anggota HMIF";
     const nim = user?.nim || "-";
@@ -128,7 +130,10 @@ export default function DashboardHistory() {
     React.useEffect(() => {
         fetch("/api/me", { headers: getAuthHeaders() })
             .then((res) => res.json())
-            .then((data) => setUser(data))
+            .then((data) => {
+                setUser(data);
+                setFotoUrl(data?.profile?.foto ? `/storage/${data.profile.foto}` : null);
+            })
             .catch((err) => console.error("Gagal fetch user:", err));
 
         fetchHistoryData().catch((err) => console.error("Gagal fetch history:", err));
@@ -452,7 +457,7 @@ export default function DashboardHistory() {
                         />
                     </svg>
                 </button>
-                <img src={fotoProfile} alt="avatar" className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover" />
+                <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover" />
             </div>
         </header>
     );
