@@ -13,55 +13,40 @@ import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
 
-const SUMMARY_CARDS = [
+const SUMMARY_CARD_CONFIG = [
     {
+        key: "total_members",
         label: "Total Anggota",
-        value: "150",
-        help: "+12%",
+        help: "Terdaftar",
         icon: iconTotalAnggota,
         helperTone: "text-emerald-600",
         accent: "bg-[#1f5e22]",
     },
     {
+        key: "active_events",
         label: "Acara Aktif",
-        value: "3",
-        help: "This Month",
+        help: "Aktif",
         icon: iconAcaraAktif,
         helperTone: "text-orange-500",
         accent: "bg-[#f59e0b]",
     },
     {
+        key: "today_attendances",
         label: "Hadir Hari Ini",
-        value: "45",
         help: "Live",
         icon: iconLiveHadir,
         helperTone: "text-emerald-600",
         accent: "bg-[#1f5e22]",
     },
     {
+        key: "attendance_rate",
         label: "Persentase Keaktifan",
-        value: "92%",
-        help: "Goal: 95%",
+        help: "Global",
         icon: iconPersentaseKeaktifan,
         helperTone: "text-emerald-700",
         accent: "bg-[#1f5e22]",
+        isPercent: true,
     },
-];
-
-const DEPARTMENTS = [
-    { label: "Keprofesian", value: 95 },
-    { label: "Eksternal", value: 88 },
-    { label: "Internal", value: 72 },
-    { label: "Kominfo", value: 91 },
-    { label: "BUMH", value: 84 },
-];
-
-const ACTIVITIES = [
-    { title: "Budi Santoso joined the RISTEK division.", time: "2 minutes ago", tone: "bg-[#a7bffc]", icon: "👥" },
-    { title: "Presensi Web Development Seminar opened.", time: "45 minutes ago", tone: "bg-[#0e2d5d]", icon: "✓" },
-    { title: "New announcement sent to all Anggota Aktif.", time: "2 hours ago", tone: "bg-[#f8b38c]", icon: "✦" },
-    { title: "Admin updated schedule for Makrab HMIF.", time: "Yesterday at 14:20", tone: "bg-[#9fbdf5]", icon: "≋" },
-    { title: "System identified 3 missing reports from AKBES.", time: "Yesterday at 09:15", tone: "bg-[#b40c16]", icon: "⚠" },
 ];
 
 const NAV_ITEMS = [
@@ -71,12 +56,141 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
+const numberFormatter = new Intl.NumberFormat("id-ID");
+
+const formatNumber = (value) => numberFormatter.format(Number(value) || 0);
+
+const clampPercent = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+
+const formatPercent = (value) => `${Math.round(clampPercent(value))}%`;
+
+const getAuthHeaders = () => {
+    const token = localStorage.getItem("auth_token");
+
+    return {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+};
+
+const formatRelativeTime = (dateValue) => {
+    if (!dateValue) return "-";
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return "-";
+
+    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+
+    if (diffMinutes < 1) return "Baru saja";
+    if (diffMinutes < 60) return `${diffMinutes} menit lalu`;
+
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours} jam lalu`;
+
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} hari lalu`;
+};
+
+const formatShortDate = (dateValue) => {
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) return "-";
+
+    return date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+    });
+};
+
 export default function DashboardAdmin() {
     const navigate = useNavigate();
     const location = useLocation();
     const pathname = location.pathname;
+    const [trendRange, setTrendRange] = React.useState("30D");
+    const [dashboardData, setDashboardData] = React.useState(null);
+    const [dashboardError, setDashboardError] = React.useState("");
+    const [isDashboardLoading, setIsDashboardLoading] = React.useState(false);
     const userName = localStorage.getItem("name") || "Admin User";
     const nim = localStorage.getItem("nim") || "124140056";
+
+    React.useEffect(() => {
+        let isMounted = true;
+
+        const fetchDashboardStats = async () => {
+            setIsDashboardLoading(true);
+            setDashboardError("");
+
+            try {
+                const response = await fetch("/api/dashboard/attendance-statistics", {
+                    headers: getAuthHeaders(),
+                });
+                const payload = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(payload.message || "Gagal mengambil statistik dashboard.");
+                }
+
+                if (isMounted) {
+                    setDashboardData(payload);
+                }
+            } catch (error) {
+                if (isMounted) {
+                    setDashboardError(error.message || "Gagal mengambil statistik dashboard.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsDashboardLoading(false);
+                }
+            }
+        };
+
+        fetchDashboardStats();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    const summary = dashboardData?.summary || {};
+    const charts = dashboardData?.charts || {};
+    const attendanceRate = clampPercent(summary.attendance_rate);
+    const summaryCards = SUMMARY_CARD_CONFIG.map((card) => ({
+        ...card,
+        value: card.isPercent ? formatPercent(summary[card.key]) : formatNumber(summary[card.key]),
+        help: isDashboardLoading ? "Memuat" : card.help,
+    }));
+    const attendanceByDepartment = charts.attendance_by_department || [];
+    const departmentTotal = attendanceByDepartment.reduce((total, item) => total + Number(item.total_present || 0), 0);
+    const departmentStats = attendanceByDepartment.slice(0, 5).map((item) => ({
+        label: item.departemen || "Belum Ditentukan",
+        value: departmentTotal > 0 ? Math.round((Number(item.total_present || 0) / departmentTotal) * 100) : 0,
+        total: Number(item.total_present || 0),
+    }));
+    const trendItems = (charts.attendance_trend_by_event || [])
+        .filter((item) => {
+            const eventDate = new Date(item.date_time);
+
+            if (Number.isNaN(eventDate.getTime())) return true;
+
+            const rangeDays = trendRange === "7D" ? 7 : 30;
+            const diffDays = (Date.now() - eventDate.getTime()) / 86400000;
+
+            return diffDays <= rangeDays;
+        })
+        .slice(-8);
+    const trendMax = Math.max(...trendItems.map((item) => Number(item.total_present || 0)), 1);
+    const recentActivities = (dashboardData?.recent_attendances || []).map((attendance) => {
+        const isValid = Boolean(attendance.is_in_radius);
+
+        return {
+            id: attendance.attendance_id,
+            title: `${attendance.name || "Anggota"} check-in ${attendance.event_title || "acara"}`,
+            time: formatRelativeTime(attendance.checkin_time),
+            tone: isValid ? "bg-[#1f5e22]" : "bg-[#b40c16]",
+            status: isValid ? "Valid" : "Di luar radius",
+        };
+    });
+
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("role");
@@ -172,7 +286,7 @@ export default function DashboardAdmin() {
 
                     <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-32 md:pb-10">
                         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 mb-8">
-                            {SUMMARY_CARDS.map((card) => (
+                            {summaryCards.map((card) => (
                                 <div key={card.label} className="rounded-[12px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
                                     <div className="flex items-start justify-between">
                                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
@@ -185,6 +299,12 @@ export default function DashboardAdmin() {
                                 </div>
                             ))}
                         </div>
+
+                        {dashboardError && (
+                            <div className="mb-6 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                                {dashboardError}
+                            </div>
+                        )}
 
                         <div className="grid gap-5 xl:grid-cols-[1.9fr_0.9fr]">
                             <div className="space-y-5">
@@ -203,16 +323,41 @@ export default function DashboardAdmin() {
                                     </div>
 
                                     <div className="mt-10 rounded-[8px] bg-white/10 p-4">
-                                        <div className="flex h-[275px] items-center justify-center rounded-[4px] border border-dashed border-white/25 bg-[#7bbd36] px-4 text-center">
-                                            <div>
-                                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white/85">
-                                                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6" />
-                                                    </svg>
+                                        <div className="h-[275px] rounded-[4px] bg-[#7bbd36] px-4 pb-4 pt-6">
+                                            {trendItems.length > 0 ? (
+                                                <div className="flex h-full items-end gap-3">
+                                                    {trendItems.map((item) => {
+                                                        const barHeight = Math.max(16, Math.round((Number(item.total_present || 0) / trendMax) * 100));
+
+                                                        return (
+                                                            <div key={item.event_id} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+                                                                <div className="flex w-full flex-1 items-end">
+                                                                    <div
+                                                                        className="w-full rounded-t-[6px] bg-white/85 shadow-sm transition-all"
+                                                                        style={{ height: `${barHeight}%` }}
+                                                                        title={`${item.title}: ${formatNumber(item.total_present)} hadir`}
+                                                                    />
+                                                                </div>
+                                                                <div className="w-full truncate text-center text-[0.68rem] font-semibold text-white/80">
+                                                                    {formatShortDate(item.date_time)}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
-                                                <p className="mt-4 text-[1rem] font-semibold text-white">Grafik belum tersedia</p>
-                                                <p className="mt-1 text-sm text-white/75">Data dari backend belum dimasukkan.</p>
-                                            </div>
+                                            ) : (
+                                                <div className="flex h-full items-center justify-center px-4 text-center">
+                                                    <div>
+                                                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white/85">
+                                                            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6" />
+                                                            </svg>
+                                                        </div>
+                                                        <p className="mt-4 text-[1rem] font-semibold text-white">Belum ada data presensi</p>
+                                                        <p className="mt-1 text-sm text-white/75">Grafik akan muncul setelah ada check-in.</p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </section>
@@ -224,12 +369,17 @@ export default function DashboardAdmin() {
                                             <h3 className="text-[1.2rem] font-semibold text-white">Attendance Status</h3>
                                         </div>
                                         <div className="mt-8 flex justify-center">
-                                            <div className="relative h-[190px] w-[190px]">
-                                                <div className="absolute inset-0 rotate-45 rounded-[12px] bg-[#42a40f]" />
-                                                <div className="absolute inset-[14%] rotate-45 rounded-[12px] bg-[#b8dd9f]" />
-                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-[12px] bg-transparent text-center -rotate-45">
-                                                    <p className="text-[2rem] font-extrabold leading-none text-slate-900">88%</p>
-                                                    <p className="mt-1 text-[0.9rem] font-medium text-white/90">Avg.</p>
+                                            <div className="relative flex h-[150px] w-[150px] items-center justify-center rounded-full sm:h-[190px] sm:w-[190px]">
+                                                <div
+                                                    className="absolute inset-0 rounded-full shadow-inner"
+                                                    style={{
+                                                        background: `conic-gradient(#1d4b28 0deg ${attendanceRate * 3.6}deg, rgba(255,255,255,0.28) ${attendanceRate * 3.6}deg 360deg)`,
+                                                    }}
+                                                />
+                                                <div className="absolute inset-[12%] rounded-full bg-[#b8dd9f]" />
+                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-[#9ccc75] text-center">
+                                                    <p className="text-[1.7rem] font-extrabold leading-none text-slate-900 sm:text-[2rem]">{formatPercent(attendanceRate)}</p>
+                                                    <p className="mt-1 text-[0.8rem] font-medium text-white/90 sm:text-[0.9rem]">Avg.</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -239,14 +389,14 @@ export default function DashboardAdmin() {
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#1d4b28]" />
                                                     <span className="text-white/80">Present</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">1,240</span>
+                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_attendances)}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-white/90">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#ff8d2a]" />
                                                     <span className="text-white/80">Absent</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">145</span>
+                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_absences)}</span>
                                             </div>
                                         </div>
                                     </section>
@@ -254,17 +404,24 @@ export default function DashboardAdmin() {
                                     <section className="rounded-[10px] bg-[#52b316] p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)]">
                                         <h3 className="text-[1.2rem] font-semibold text-white">By Department</h3>
                                         <div className="mt-6 space-y-4">
-                                            {DEPARTMENTS.map((item) => (
-                                                <div key={item.label}>
-                                                    <div className="mb-1 flex items-center justify-between text-[0.85rem] font-medium text-white/95">
-                                                        <span>{item.label}</span>
-                                                        <span>{item.value}%</span>
+                                            {departmentStats.length > 0 ? (
+                                                departmentStats.map((item) => (
+                                                    <div key={item.label}>
+                                                        <div className="mb-1 flex items-center justify-between text-[0.85rem] font-medium text-white/95">
+                                                            <span>{item.label}</span>
+                                                            <span>{item.value}%</span>
+                                                        </div>
+                                                        <div className="h-[8px] overflow-hidden rounded-full bg-white/15">
+                                                            <div className="h-full rounded-full bg-white" style={{ width: `${item.value}%` }} />
+                                                        </div>
+                                                        <p className="mt-1 text-[0.72rem] font-medium text-white/70">{formatNumber(item.total)} check-in</p>
                                                     </div>
-                                                    <div className="h-[8px] rounded-full bg-white/15 overflow-hidden">
-                                                        <div className="h-full rounded-full bg-white" style={{ width: `${item.value}%` }} />
-                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="rounded-[8px] bg-white/10 px-4 py-5 text-sm font-medium text-white/80">
+                                                    Belum ada data departemen.
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     </section>
                                 </div>
@@ -275,22 +432,30 @@ export default function DashboardAdmin() {
                                     <div>
                                         <h3 className="text-[1.2rem] font-semibold text-slate-900">Recent Activity</h3>
                                     </div>
-                                    <button className="text-[0.9rem] text-slate-700 hover:text-slate-900">View All</button>
+                                    <Link to="/dashboard/laporan" className="text-[0.9rem] text-slate-700 hover:text-slate-900">View All</Link>
                                 </div>
 
                                 <div className="space-y-4">
-                                    {ACTIVITIES.map((activity) => (
-                                        <div key={activity.title} className="relative pl-12">
-                                            <div className="absolute left-5 top-0 bottom-0 w-[2px] bg-slate-300" />
-                                            <div className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-[10px] ${activity.tone} text-white text-sm shadow-sm`}>
-                                                {activity.icon}
+                                    {recentActivities.length > 0 ? (
+                                        recentActivities.map((activity) => (
+                                            <div key={activity.id} className="relative pl-12">
+                                                <div className="absolute left-5 top-0 bottom-0 w-[2px] bg-slate-300" />
+                                                <div className={`absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-[10px] ${activity.tone} text-white shadow-sm`}>
+                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                                <p className="text-[0.95rem] leading-6 text-slate-800">
+                                                    <span className="font-semibold">{activity.title}</span>
+                                                </p>
+                                                <p className="mt-1 text-[0.82rem] text-slate-500">{activity.time} - {activity.status}</p>
                                             </div>
-                                            <p className="text-[0.95rem] leading-6 text-slate-800">
-                                                <span className="font-semibold">{activity.title}</span>
-                                            </p>
-                                            <p className="mt-1 text-[0.82rem] text-slate-500">{activity.time}</p>
+                                        ))
+                                    ) : (
+                                        <div className="rounded-[10px] bg-slate-50 px-4 py-6 text-center text-sm font-medium text-slate-500">
+                                            Belum ada aktivitas presensi.
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </aside>
                         </div>
@@ -318,4 +483,3 @@ export default function DashboardAdmin() {
         </div>
     );
 }
-

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\Attendance;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -15,12 +16,18 @@ class DashboardController extends Controller
         $totalMembers = User::where('role', 'anggota')->count();
         $totalAdmins = User::where('role', 'admin')->count();
         $totalEvents = Event::count();
+        $activeEvents = Event::where('date_time', '>=', now())->count();
+        $eventsThisMonth = Event::whereYear('date_time', now()->year)
+            ->whereMonth('date_time', now()->month)
+            ->count();
 
         $totalAttendances = Attendance::count();
+        $todayAttendances = Attendance::whereDate('checkin_time', now()->toDateString())->count();
         $totalValidRadius = Attendance::where('is_in_radius', true)->count();
         $totalInvalidRadius = Attendance::where('is_in_radius', false)->count();
 
         $attendanceCapacity = $totalMembers * $totalEvents;
+        $totalAbsences = max($attendanceCapacity - $totalAttendances, 0);
 
         $attendanceRate = $attendanceCapacity > 0
             ? round(($totalAttendances / $attendanceCapacity) * 100, 2)
@@ -31,16 +38,24 @@ class DashboardController extends Controller
             'invalid' => $totalInvalidRadius,
         ];
 
+        $departmentColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+
         $attendanceByDepartment = Attendance::query()
             ->join('users', 'attendances.user_id', '=', 'users.user_id')
             ->leftJoin('member_profiles', 'users.user_id', '=', 'member_profiles.user_id')
             ->select(
-                'member_profiles.Departemen as departemen',
+                "member_profiles.$departmentColumn as departemen",
                 DB::raw('COUNT(*) as total_present')
             )
-            ->groupBy('member_profiles.Departemen')
+            ->groupBy("member_profiles.$departmentColumn")
             ->orderByDesc('total_present')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->departemen = $item->departemen ?: 'Belum Ditentukan';
+                return $item;
+            });
         
         $attendanceByGeneration = Attendance::with('user.memberProfile')
             ->get()
@@ -91,7 +106,12 @@ class DashboardController extends Controller
                 'total_members' => $totalMembers,
                 'total_admins' => $totalAdmins,
                 'total_events' => $totalEvents,
+                'active_events' => $activeEvents,
+                'events_this_month' => $eventsThisMonth,
                 'total_attendances' => $totalAttendances,
+                'today_attendances' => $todayAttendances,
+                'total_absences' => $totalAbsences,
+                'attendance_capacity' => $attendanceCapacity,
                 'total_valid_radius' => $totalValidRadius,
                 'total_invalid_radius' => $totalInvalidRadius,
                 'attendance_rate' => $attendanceRate,

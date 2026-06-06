@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -20,7 +22,11 @@ class AuthController extends Controller
     // Handle callback dari Google setelah user login
     public function handleGoogleCallback()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        } catch (ClientException $exception) {
+            return redirect(env('FRONTEND_URL') . '/login?error=google_session_expired');
+        }
 
         $email = $googleUser->getEmail();
         if (!str_ends_with($email, '@student.itera.ac.id')) {
@@ -51,11 +57,6 @@ class AuthController extends Controller
             return redirect(env('FRONTEND_URL') . '/login?error=bukan_informatika');
         }
 
-        // Cek NIM terdaftar di database
-        if (!User::where('nim', $nim)->exists()) {
-            return redirect(env('FRONTEND_URL') . '/login?error=nim_tidak_terdaftar');
-        }
-
         // Cek status akun
         $existingUser = User::where('nim', $nim)->first();
         if ($existingUser && $existingUser->status === 'non-aktif') {
@@ -68,14 +69,24 @@ class AuthController extends Controller
                 'google_id' => $googleUser->getId(),
                 'name'      => $googleUser->getName(),
                 'email'     => $email,
+                'role'      => $existingUser?->role ?? 'anggota',
                 'status'    => 'aktif',
             ]
         );
 
-        // Set role anggota hanya kalau user baru
-        if ($user->wasRecentlyCreated) {
-            $user->update(['role' => 'anggota']);
-        }
+        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+
+        $user->memberProfile()->firstOrCreate(
+            ['user_id' => $user->user_id],
+            [
+                'angkatan' => (int) ('20' . $angkatan),
+                $departemenColumn => 'Belum Ditentukan',
+                'jabatan' => 'Anggota',
+                'status_keanggotaan' => 'Muda',
+            ]
+        );
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

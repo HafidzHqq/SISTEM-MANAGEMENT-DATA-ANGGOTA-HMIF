@@ -4,9 +4,6 @@ import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconSearch from "../assets/icon-search.png";
 import iconTotalAnggota from "../assets/assets dash admin/Icon-totalanggota.png";
-import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
-import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png";
-import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
@@ -19,64 +16,84 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
-const METRICS = [
+const METRIC_CONFIG = [
     {
         label: "Total Anggota",
-        value: "1,248",
-        help: "+12% peningkatan",
+        key: "total",
+        help: "Live",
         icon: iconTotalAnggota,
         valueClass: "text-[#1f5e22]",
         accentClass: "bg-[#1f5e22]",
-        accentWidth: "w-[82px]",
     },
     {
         label: "Anggota Muda",
-        value: "420",
+        key: "muda",
         help: "",
-        icon: iconAcaraAktif,
+        iconType: "person",
+        iconClass: "text-[#f5bf17]",
+        iconBgClass: "bg-amber-50",
         valueClass: "text-[#f5bf17]",
         accentClass: "bg-[#f5bf17]",
-        accentWidth: "w-[82px]",
     },
     {
         label: "Anggota Tetap",
-        value: "712",
+        key: "tetap",
         help: "",
-        icon: iconHadirHariIni,
+        iconType: "person",
+        iconClass: "text-emerald-600",
+        iconBgClass: "bg-emerald-50",
         valueClass: "text-emerald-600",
         accentClass: "bg-emerald-500",
-        accentWidth: "w-[145px]",
     },
     {
         label: "Luar Biasa",
-        value: "116",
+        key: "luarBiasa",
         help: "",
-        icon: iconPersentaseKeaktifan,
+        iconType: "person",
+        iconClass: "text-blue-500",
+        iconBgClass: "bg-blue-50",
         valueClass: "text-blue-500",
         accentClass: "bg-blue-500",
-        accentWidth: "w-[43px]",
     },
-];
-
-const SAMPLE_ROWS = [
-    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "Eksternal", jabatan: "Ketua Divisi", status: "TETAP", email: "aditya.k@hmif.org" },
-    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "siti.p@hmif.org" },
-    { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "rizky.r@hmif.org" },
-    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
-    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
-    { id: 6, nim: "124140090", nama: "Ridho Maulana Saputa", kontak: "0813-6728-9083", angkatan: 2024, divisi: "Technopreneur", jabatan: "Staff", status: "MUDA", email: "ridho.124140090@student.itera.ac.id" },
-    { id: 7, nim: "121140011", nama: "Nadia Putri", kontak: "0812-3456-7895", angkatan: 2021, divisi: "Internal", jabatan: "Bendahara", status: "TETAP", email: "nadia.p@hmif.org" },
-    { id: 8, nim: "122140078", nama: "Bagas Pratama", kontak: "0812-3456-7896", angkatan: 2022, divisi: "Eksternal", jabatan: "Staff", status: "TETAP", email: "bagas.p@hmif.org" },
-    { id: 9, nim: "123140044", nama: "Dewi Kartika", kontak: "0812-3456-7897", angkatan: 2023, divisi: "Minat Bakat", jabatan: "Staff", status: "MUDA", email: "dewi.k@hmif.org" },
-    { id: 10, nim: "120140066", nama: "Raka Mahendra", kontak: "0812-3456-7898", angkatan: 2020, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "raka.m@hmif.org" },
-    { id: 11, nim: "124140099", nama: "Maya Salsabila", kontak: "0812-3456-7899", angkatan: 2024, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "maya.s@hmif.org" },
-    { id: 12, nim: "121140073", nama: "Aldi Firmansyah", kontak: "0812-3456-7900", angkatan: 2021, divisi: "Technopreneur", jabatan: "Koordinator", status: "TETAP", email: "aldi.f@hmif.org" },
 ];
 
 const statusClasses = {
     TETAP: "bg-emerald-100 text-emerald-700",
     MUDA: "bg-amber-100 text-amber-700",
     "LUAR BIASA": "bg-blue-100 text-blue-600",
+    "NON-ANGGOTA": "bg-slate-200 text-slate-600",
+};
+
+const JABATAN_OPTIONS = [
+    "-",
+    "Ketua Departemen",
+    "Ketua Divisi",
+    "Sekertaris Departemen",
+    "Staf Ahli",
+    "Staf",
+];
+
+const STATUS_OPTIONS = [
+    { value: "Muda", label: "Anggota Muda" },
+    { value: "Tetap", label: "Anggota Tetap" },
+    { value: "Luar Biasa", label: "Luar Biasa" },
+    { value: "Non-Anggota", label: "Non-Anggota" },
+];
+
+const normalizeJabatan = (value) => {
+    const normalized = String(value ?? "").trim();
+    const lower = normalized.toLowerCase();
+
+    if (!normalized || normalized === "-") return "-";
+    if (lower === "staff") return "Staf";
+
+    return JABATAN_OPTIONS.find((option) => option.toLowerCase() === lower) || normalized;
+};
+
+const toEditableJabatan = (value) => {
+    const normalized = normalizeJabatan(value);
+
+    return JABATAN_OPTIONS.includes(normalized) ? normalized : "-";
 };
 
 const ITEMS_PER_PAGE = 5;
@@ -114,11 +131,30 @@ const getAuthHeaders = () => {
 const normalizeMemberStatus = (value) => {
     const normalized = String(value ?? "").trim().toUpperCase();
 
+    if (normalized.includes("NON")) return "NON-ANGGOTA";
     if (normalized.includes("TETAP")) return "TETAP";
     if (normalized.includes("LUAR")) return "LUAR BIASA";
     if (normalized.includes("MUDA")) return "MUDA";
 
     return "MUDA";
+};
+
+const toApiMemberStatus = (value) => {
+    const normalized = normalizeMemberStatus(value);
+
+    if (normalized === "TETAP") return "Tetap";
+    if (normalized === "LUAR BIASA") return "Luar Biasa";
+    if (normalized === "NON-ANGGOTA") return "Non-Anggota";
+
+    return "Muda";
+};
+
+const getStatusBadgeLabel = (status) => {
+    if (status === "TETAP") return "ANGGOTA TETAP";
+    if (status === "MUDA") return "ANGGOTA MUDA";
+    if (status === "NON-ANGGOTA") return "NON-ANGGOTA";
+
+    return "LUAR BIASA";
 };
 
 const mapMemberRow = (member, index) => {
@@ -131,18 +167,38 @@ const mapMemberRow = (member, index) => {
         kontak: profile.no_telepon ?? profile.no_telp ?? profile.phone ?? member.no_telepon ?? "-",
         angkatan: profile.angkatan ?? member.angkatan ?? "-",
         divisi: profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-",
-        jabatan: profile.jabatan ?? member.jabatan ?? "-",
+        jabatan: normalizeJabatan(profile.jabatan ?? member.jabatan),
         status: normalizeMemberStatus(profile.status_keanggotaan ?? member.status_keanggotaan),
         email: member.email ?? "-",
     };
 };
 
+const formatNumber = (value) => new Intl.NumberFormat("id-ID").format(value);
+
+function PersonMetricIcon({ className = "" }) {
+    return (
+        <svg className={`h-5 w-5 ${className}`} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+                d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+}
+
 function MetricCard({ metric }) {
     return (
         <div className="rounded-[12px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
             <div className="flex items-start justify-between">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                    <img src={metric.icon} alt={metric.label} className="h-5 w-5 object-contain" />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${metric.iconBgClass || "bg-slate-50"}`}>
+                    {metric.iconType === "person" ? (
+                        <PersonMetricIcon className={metric.iconClass} />
+                    ) : (
+                        <img src={metric.icon} alt={metric.label} className="h-5 w-5 object-contain" />
+                    )}
                 </div>
                 {metric.help ? (
                     <span className="text-xs font-semibold text-emerald-600">{metric.help}</span>
@@ -152,19 +208,7 @@ function MetricCard({ metric }) {
             </div>
             <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{metric.label}</p>
             <h2 className={`mt-1 text-[2.3rem] font-extrabold leading-none ${metric.valueClass}`}>{metric.value}</h2>
-            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass} ${metric.accentWidth}`} />
-        </div>
-    );
-}
-
-function InfoCard({ label, value, icon }) {
-    return (
-        <div className="rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
-            <div className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">{label}</div>
-            <div className="mt-3 flex items-center gap-3">
-                <span className="flex h-5 w-5 items-center justify-center">{icon}</span>
-                <p className="text-[1rem] text-slate-800">{value}</p>
-            </div>
+            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth }} />
         </div>
     );
 }
@@ -178,11 +222,18 @@ export default function DashboardAdminAnggota() {
     const [division, setDivision] = useState("Semua Divisi");
     const [year, setYear] = useState("Semua Angkatan");
     const [status, setStatus] = useState("Semua Status");
-    const [rows, setRows] = useState(SAMPLE_ROWS);
+    const [rows, setRows] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [detailMember, setDetailMember] = useState(null);
-    const [memberStatus, setMemberStatus] = useState("");
+    const [editMemberForm, setEditMemberForm] = useState({
+        departemen: "",
+        jabatan: "",
+        no_telepon: "",
+        status_keanggotaan: "Muda",
+    });
+    const [isSavingMember, setIsSavingMember] = useState(false);
+    const [isMemberSaved, setIsMemberSaved] = useState(false);
     const [isApiBacked, setIsApiBacked] = useState(false);
     const [isLoadingMembers, setIsLoadingMembers] = useState(false);
     const [memberActionError, setMemberActionError] = useState("");
@@ -238,7 +289,7 @@ export default function DashboardAdminAnggota() {
             } catch (error) {
                 if (!isActive) return;
                 setIsApiBacked(false);
-                setMemberActionError(`${error.message || "Gagal mengambil data anggota."} Menampilkan data contoh.`);
+                setMemberActionError(error.message || "Gagal mengambil data anggota.");
             } finally {
                 if (isActive) {
                     setIsLoadingMembers(false);
@@ -247,9 +298,11 @@ export default function DashboardAdminAnggota() {
         };
 
         fetchMembers();
+        window.addEventListener("focus", fetchMembers);
 
         return () => {
             isActive = false;
+            window.removeEventListener("focus", fetchMembers);
         };
     }, []);
 
@@ -261,6 +314,26 @@ export default function DashboardAdminAnggota() {
     const paginationPages = getPaginationPages(safePage, totalPages);
     const visibleIds = paginatedRows.map((row) => row.id);
     const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
+    const memberMetrics = useMemo(() => {
+        const total = rows.length;
+        const counts = {
+            total,
+            muda: rows.filter((row) => row.status === "MUDA").length,
+            tetap: rows.filter((row) => row.status === "TETAP").length,
+            luarBiasa: rows.filter((row) => row.status === "LUAR BIASA").length,
+        };
+
+        return METRIC_CONFIG.map((metric) => {
+            const value = counts[metric.key] ?? 0;
+            const percentage = metric.key === "total" || total === 0 ? 100 : Math.max(12, Math.round((value / total) * 100));
+
+            return {
+                ...metric,
+                value: formatNumber(value),
+                accentWidth: `${percentage}%`,
+            };
+        });
+    }, [rows]);
 
     React.useEffect(() => {
         setCurrentPage(1);
@@ -394,11 +467,69 @@ export default function DashboardAdminAnggota() {
 
     const handleOpenDetail = (member) => {
         setDetailMember(member);
-        setMemberStatus(member.status === "TETAP" ? "Anggota Tetap" : member.status === "MUDA" ? "Anggota Muda" : "Luar Biasa");
+        setEditMemberForm({
+            departemen: member.divisi === "-" ? "" : member.divisi,
+            jabatan: toEditableJabatan(member.jabatan),
+            no_telepon: member.kontak === "-" ? "" : member.kontak,
+            status_keanggotaan: toApiMemberStatus(member.status),
+        });
+        setIsMemberSaved(false);
+        setMemberActionError("");
     };
 
     const handleCloseDetail = () => {
         setDetailMember(null);
+        setIsMemberSaved(false);
+    };
+
+    const handleEditMemberChange = (event) => {
+        const { name, value } = event.target;
+        setIsMemberSaved(false);
+        setEditMemberForm((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
+    const handleSaveMember = async () => {
+        if (!detailMember) return;
+
+        setIsSavingMember(true);
+        setIsMemberSaved(false);
+        setMemberActionError("");
+
+        const payload = {
+            departemen: editMemberForm.departemen.trim(),
+            jabatan: editMemberForm.jabatan.trim(),
+            no_telepon: editMemberForm.no_telepon.trim(),
+            status_keanggotaan: editMemberForm.status_keanggotaan,
+        };
+
+        try {
+            const response = await fetch(`/api/members/${detailMember.id}`, {
+                method: "PUT",
+                headers: {
+                    ...getAuthHeaders(),
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
+            const responseData = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(responseData.message || "Gagal menyimpan perubahan anggota.");
+            }
+
+            const updatedRow = mapMemberRow(responseData.data, detailMember.id);
+
+            setRows((current) => current.map((row) => (row.id === detailMember.id ? updatedRow : row)));
+            setDetailMember(updatedRow);
+            setIsMemberSaved(true);
+        } catch (error) {
+            setMemberActionError(error.message || "Gagal menyimpan perubahan anggota.");
+        } finally {
+            setIsSavingMember(false);
+        }
     };
 
     return (
@@ -494,22 +625,10 @@ export default function DashboardAdminAnggota() {
                                 <h1 className="text-[2.25rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Anggota</h1>
                                 <p className="mt-2 text-[1rem] text-slate-700">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
                             </div>
-                            <button className="inline-flex items-center justify-center gap-3 rounded-[14px] bg-[#f5bf17] px-5 py-3.5 text-[0.98rem] font-semibold text-slate-900 shadow-[0_10px_22px_rgba(245,191,23,0.28)] transition hover:bg-[#ffd033]">
-                                <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path
-                                        d="M15 19a6 6 0 0 0-12 0M9 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10-6v6m3-3h-6"
-                                        stroke="currentColor"
-                                        strokeWidth="2.2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-                                Tambah Anggota
-                            </button>
                         </div>
 
                         <div className="mb-8 grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-                            {METRICS.map((metric) => (
+                            {memberMetrics.map((metric) => (
                                 <MetricCard key={metric.label} metric={metric} />
                             ))}
                         </div>
@@ -558,6 +677,7 @@ export default function DashboardAdminAnggota() {
                                     <option>TETAP</option>
                                     <option>MUDA</option>
                                     <option>LUAR BIASA</option>
+                                    <option>NON-ANGGOTA</option>
                                 </select>
                                 <button
                                     type="button"
@@ -617,10 +737,10 @@ export default function DashboardAdminAnggota() {
 
                         <div className="overflow-hidden rounded-[10px] bg-white shadow-sm ring-1 ring-slate-200/70">
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[1120px] text-sm">
+                                <table className="w-full min-w-[1120px] table-fixed text-sm">
                                     <thead>
                                         <tr className="border-b border-slate-200 bg-[#fafafa] text-left text-xs uppercase tracking-[0.12em] text-slate-500">
-                                            <th className="w-12 py-4 pl-5 pr-2">
+                                            <th className="w-[52px] py-4 pl-5 pr-2">
                                                 <input
                                                     type="checkbox"
                                                     className="h-4 w-4 rounded border-slate-300 text-emerald-600"
@@ -628,26 +748,25 @@ export default function DashboardAdminAnggota() {
                                                     onChange={handleToggleAll}
                                                 />
                                             </th>
-                                            <th className="py-4 px-4">NO</th>
-                                            <th className="py-4 px-4">NIM</th>
-                                            <th className="py-4 px-4">NAMA</th>
-                                            <th className="py-4 px-4">KONTAK</th>
-                                            <th className="py-4 px-4">ANGKATAN</th>
-                                            <th className="py-4 px-4">DIVISI</th>
-                                            <th className="py-4 px-4">JABATAN</th>
-                                            <th className="py-4 px-4">STATUS</th>
-                                            <th className="py-4 px-4 text-right">AKSI</th>
+                                            <th className="w-[125px] py-4 px-4">NIM</th>
+                                            <th className="w-[190px] py-4 px-4">NAMA</th>
+                                            <th className="w-[225px] py-4 px-4">KONTAK</th>
+                                            <th className="w-[100px] py-4 px-4">ANGKATAN</th>
+                                            <th className="w-[145px] py-4 px-4">DIVISI</th>
+                                            <th className="w-[155px] py-4 px-4">JABATAN</th>
+                                            <th className="w-[135px] py-4 px-4">STATUS</th>
+                                            <th className="w-[90px] py-4 px-4 text-right">AKSI</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {paginatedRows.length === 0 ? (
                                             <tr>
-                                                <td colSpan="10" className="px-6 py-12 text-center text-slate-500">
+                                                <td colSpan="9" className="px-6 py-12 text-center text-slate-500">
                                                     Tidak ada anggota yang cocok dengan filter.
                                                 </td>
                                             </tr>
                                         ) : (
-                                            paginatedRows.map((row, index) => (
+                                            paginatedRows.map((row) => (
                                             <tr key={row.id} className="border-b border-slate-100 bg-white hover:bg-slate-50/80">
                                                 <td className="py-5 pl-5 pr-2 align-middle">
                                                     <input
@@ -657,16 +776,21 @@ export default function DashboardAdminAnggota() {
                                                         onChange={() => handleToggleRow(row.id)}
                                                     />
                                                 </td>
-                                                <td className="py-5 px-4 align-middle text-slate-700">{startIndex + index}</td>
-                                                <td className="py-5 px-4 align-middle font-medium text-[#a8c8ff]">{row.nim}</td>
-                                                <td className="py-5 px-4 align-middle font-semibold text-slate-800">{row.nama}</td>
+                                                <td className="py-5 px-4 align-middle font-medium text-[#8fb9ff]">{row.nim}</td>
+                                                <td className="py-5 px-4 align-middle font-semibold text-slate-800">
+                                                    <div className="truncate" title={row.nama}>{row.nama}</div>
+                                                </td>
                                                 <td className="py-5 px-4 align-middle text-slate-600">
-                                                    <div>{row.kontak}</div>
-                                                    <div className="text-[0.78rem] text-slate-400">{row.email}</div>
+                                                    <div className="truncate" title={row.kontak}>{row.kontak}</div>
+                                                    <div className="truncate text-[0.78rem] text-slate-400" title={row.email}>{row.email}</div>
                                                 </td>
                                                 <td className="py-5 px-4 align-middle text-slate-700">{row.angkatan}</td>
-                                                <td className="py-5 px-4 align-middle text-slate-700">{row.divisi}</td>
-                                                <td className="py-5 px-4 align-middle text-slate-700">{row.jabatan}</td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">
+                                                    <div className="truncate" title={row.divisi}>{row.divisi}</div>
+                                                </td>
+                                                <td className="py-5 px-4 align-middle text-slate-700">
+                                                    <div className="truncate" title={row.jabatan}>{row.jabatan}</div>
+                                                </td>
                                                 <td className="py-5 px-4 align-middle">
                                                     <span className={`inline-flex rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] ${statusClasses[row.status]}`}>
                                                         {row.status}
@@ -787,75 +911,99 @@ export default function DashboardAdminAnggota() {
                                                 </span>
                                             </div>
                                             <div className="mt-4 inline-flex rounded-full bg-[#f5bf17] px-4 py-2 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-white shadow-sm">
-                                                {detailMember.status === "TETAP" ? "ANGGOTA TETAP" : detailMember.status === "MUDA" ? "ANGGOTA MUDA" : "LUAR BIASA"}
+                                                {getStatusBadgeLabel(detailMember.status)}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="mt-6 grid gap-4 md:grid-cols-2">
-                                        <InfoCard
-                                            label="DIVISION"
-                                            value={detailMember.divisi}
-                                            icon={
-                                                <svg className="h-5 w-5 text-[#4d8c18]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M9 5h6M10 3h4M8 7h8M6 11h12v7H6z" />
-                                                </svg>
-                                            }
-                                        />
-                                        <InfoCard
-                                            label="POSITION"
-                                            value={detailMember.jabatan}
-                                            icon={
-                                                <svg className="h-5 w-5 text-[#4d8c18]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M4 19h16M7 19V8m5 11V5m5 14v-9" />
-                                                </svg>
-                                            }
-                                        />
-                                        <InfoCard
-                                            label="EMAIL ADDRESS"
-                                            value={detailMember.email}
-                                            icon={
-                                                <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6h16v12H4z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="m4 7 8 6 8-6" />
-                                                </svg>
-                                            }
-                                        />
-                                        <InfoCard
-                                            label="PHONE NUMBER"
-                                            value={detailMember.kontak}
-                                            icon={
-                                                <svg className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 5.5A2.5 2.5 0 0 1 5.5 3H8l2 5-2 2c1.6 3.2 3.8 5.4 7 7l2-2 5 2v2.5A2.5 2.5 0 0 1 19.5 22h-1C10.3 22 2 13.7 2 4.5v-1Z" />
-                                                </svg>
-                                            }
-                                        />
+                                        <label className="block rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+                                            <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">DIVISI</span>
+                                            <select
+                                                name="departemen"
+                                                value={editMemberForm.departemen}
+                                                onChange={handleEditMemberChange}
+                                                className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
+                                            >
+                                                <option value="">Belum Ditentukan</option>
+                                                <option value="Technopreneur">Technopreneur</option>
+                                                <option value="Eksternal">Eksternal</option>
+                                                <option value="Internal">Internal</option>
+                                                <option value="Minat Bakat">Minat Bakat</option>
+                                                <option value="PSDA">PSDA</option>
+                                                <option value="Kominfo">Kominfo</option>
+                                                <option value="Akbes">Akbes</option>
+                                            </select>
+                                        </label>
+
+                                        <label className="block rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+                                            <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">JABATAN</span>
+                                            <select
+                                                name="jabatan"
+                                                value={editMemberForm.jabatan}
+                                                onChange={handleEditMemberChange}
+                                                className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
+                                            >
+                                                {JABATAN_OPTIONS.map((option) => (
+                                                    <option key={option} value={option}>{option}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+
+                                        <label className="block rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+                                            <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">NOMOR TELEPON</span>
+                                            <input
+                                                name="no_telepon"
+                                                type="text"
+                                                value={editMemberForm.no_telepon}
+                                                onChange={handleEditMemberChange}
+                                                placeholder="Contoh: 081234567890"
+                                                className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none placeholder:text-slate-400 focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
+                                            />
+                                        </label>
+
+                                        <label className="block rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+                                            <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">STATUS KEANGGOTAAN</span>
+                                            <select
+                                                name="status_keanggotaan"
+                                                value={editMemberForm.status_keanggotaan}
+                                                onChange={handleEditMemberChange}
+                                                className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
+                                            >
+                                                {STATUS_OPTIONS.map((option) => (
+                                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                                ))}
+                                            </select>
+                                        </label>
                                     </div>
 
                                     <div className="mt-6 border-t border-slate-200 pt-6">
-                                        <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">STATUS KEANGGOTAAN</div>
-                                        <div className="mt-3 grid gap-3 md:grid-cols-[1fr_188px]">
-                                            <select
-                                                value={memberStatus}
-                                                onChange={(e) => setMemberStatus(e.target.value)}
-                                                className="h-[48px] w-full rounded-[10px] border border-slate-300 bg-white px-4 text-[0.95rem] text-slate-800 shadow-sm outline-none focus:border-slate-400"
-                                            >
-                                                <option>Anggota Tetap</option>
-                                                <option>Anggota Muda</option>
-                                                <option>Luar Biasa</option>
-                                            </select>
+                                        <div className="grid gap-3 sm:grid-cols-[1fr_188px]">
+                                            <div className="rounded-[10px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                                                Email tidak diubah dari panel ini: <span className="font-semibold text-slate-800">{detailMember.email}</span>
+                                            </div>
 
                                             <button
                                                 type="button"
-                                                onClick={() => handleDeleteMember(detailMember.id)}
-                                                className="inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] bg-[#ffd3d0] px-4 text-[0.95rem] font-semibold text-[#a30e0e] transition hover:bg-[#ffc5c0]"
+                                                onClick={handleSaveMember}
+                                                disabled={isSavingMember}
+                                                className={`inline-flex h-[48px] items-center justify-center gap-2 rounded-[10px] px-4 text-[0.95rem] font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                                    isMemberSaved
+                                                        ? "bg-emerald-500 hover:bg-emerald-500"
+                                                        : "bg-[#1f5e22] hover:bg-[#17491b]"
+                                                }`}
                                             >
                                                 <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
-                                                Delete Member
+                                                {isSavingMember ? "Menyimpan..." : isMemberSaved ? "Tersimpan" : "Simpan"}
                                             </button>
                                         </div>
+                                        {isMemberSaved && (
+                                            <div className="mt-3 rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                                                Perubahan data anggota berhasil disimpan.
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 pt-4 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-slate-500 sm:flex-row sm:items-center sm:justify-between">
