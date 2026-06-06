@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import History from "./pages/History";
 import QrScanner from "./components/QrScanner";
 import Anggota from "./pages/Anggota";
+import DashboardAdmin from "./components/DashboardAdmin";
 import DashboardAdminAcara from "./components/DashboardAdminAcara";
 import DashboardAdminLaporan from "./components/DashboardAdminLaporan";
 
@@ -29,17 +30,22 @@ function App() {
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/anggota" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         <Anggota />
                     </ProtectedRoute>
                 } />
+                <Route path="/dashboard/admin-overview" element={
+                    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
+                        <DashboardAdmin />
+                    </ProtectedRoute>
+                } />
                 <Route path="/dashboard/acara" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         <DashboardAdminAcara />
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/laporan" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         <DashboardAdminLaporan />
                     </ProtectedRoute>
                 } />
@@ -59,7 +65,7 @@ function App() {
                     </ProtectedRoute>
                 } />
                 <Route path="/anggota" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         <Anggota />
                     </ProtectedRoute>
                 } />

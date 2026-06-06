@@ -28,6 +28,7 @@ export default function DashboardSuperAdmin() {
 
     const menus = [
         { key: "dashboard", label: "Dashboard", icon: "grid" },
+        { key: "adminDashboard", label: "Admin Dashboard", icon: "admin", to: "/dashboard/admin-overview" },
         { key: "admins", label: "Admin Management", icon: "user" },
         { key: "monitoring", label: "System Monitoring", icon: "chart" },
         { key: "audit", label: "Audit Logs", icon: "log" },
@@ -265,7 +266,14 @@ export default function DashboardSuperAdmin() {
                         {menus.map((menu) => (
                             <button
                                 key={menu.key}
-                                onClick={() => setActiveMenu(menu.key)}
+                                onClick={() => {
+                                    if (menu.to) {
+                                        navigate(menu.to);
+                                        return;
+                                    }
+
+                                    setActiveMenu(menu.key);
+                                }}
                                 className={`relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-[12px] font-semibold transition ${
                                     activeMenu === menu.key
                                         ? "bg-white/10 text-white"
@@ -326,6 +334,7 @@ export default function DashboardSuperAdmin() {
                             setActiveMenu("admins");
                             setShowAddAdmin(true);
                         }}
+                        onOpenAdminDashboard={() => navigate("/dashboard/admin-overview")}
                         onViewLogs={() => setActiveMenu("audit")}
                     />
                 )}
@@ -588,6 +597,7 @@ function Icon({ name, className = "h-4 w-4" }) {
 function MenuIcon({ type }) {
     const icons = {
         grid: "layoutGrid",
+        admin: "suitcase",
         user: "userCog",
         chart: "chart",
         log: "log",
@@ -757,7 +767,7 @@ function getMemberDepartment(member) {
         || "";
 }
 
-function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs }) {
+function DashboardContent({ stats, logs, loading, error, onAddAdmin, onOpenAdminDashboard, onViewLogs }) {
     const [networkRange, setNetworkRange] = useState("24H");
 
     if (loading) {
@@ -900,6 +910,15 @@ function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs 
                         >
                             <Icon name="userPlus" className="h-5 w-5" />
                             Add New Admin
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onOpenAdminDashboard}
+                            className="flex w-full items-center gap-3 rounded-[8px] border border-[#39a80f] bg-green-50 px-5 py-4 text-left text-base font-bold text-[#003f17] transition hover:bg-green-100"
+                        >
+                            <Icon name="suitcase" className="h-5 w-5" />
+                            Open Admin Dashboard
                         </button>
 
                         <button
