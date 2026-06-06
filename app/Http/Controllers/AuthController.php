@@ -45,9 +45,9 @@ class AuthController extends Controller
             return redirect(env('FRONTEND_URL') . '/login?error=bukan_sarjana');
         }
 
-        // Cek angkatan (digit 2-3 = 23 atau 24)
+        // Cek angkatan (digit 2-3)
         $angkatan = substr($nimDigits, 1, 2);
-        if (!in_array($angkatan, ['23', '24'])) {
+        if (!in_array($angkatan, ['22', '23', '24', '25'])) {
             return redirect(env('FRONTEND_URL') . '/login?error=angkatan_tidak_valid');
         }
 
