@@ -261,7 +261,7 @@ export default function DashboardAdminAnggota() {
     const [userDivision, setUserDivision] = useState("Admin");
 
     const userName = user?.name || localStorage.getItem("name") || "Admin User";
-    const nim = user?.nim || localStorage.getItem("nim") || "124140056";
+    const nim = user?.nim || localStorage.getItem("nim") || "-";
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");

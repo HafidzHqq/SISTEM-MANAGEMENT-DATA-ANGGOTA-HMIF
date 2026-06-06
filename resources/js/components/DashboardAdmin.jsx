@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
@@ -110,13 +110,36 @@ export default function DashboardAdmin() {
     const [dashboardData, setDashboardData] = React.useState(null);
     const [dashboardError, setDashboardError] = React.useState("");
     const [isDashboardLoading, setIsDashboardLoading] = React.useState(false);
+    const [user, setUser] = useState(null);
+    const [fotoUrl, setFotoUrl] = useState(null);
+    const [userDivision, setUserDivision] = useState("Admin");
     const userName = localStorage.getItem("name") || "Admin User";
-    const nim = localStorage.getItem("nim") || "124140056";
+    const nim = user?.nim || localStorage.getItem("nim") || "-";
     const isSuperAdmin = localStorage.getItem("role") === "super_admin";
 
     React.useEffect(() => {
         let isMounted = true;
 
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+
+        // Fetch user profile
+        fetch("/api/me", {
+            headers: getAuthHeaders(),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (isMounted) {
+                    setUser(data);
+                    setFotoUrl(data?.profile?.foto ? `/storage/${data.profile.foto}` : fotoProfile);
+                    setUserDivision(data?.profile?.departemen || data?.profile?.Departemen || "Admin");
+                }
+            })
+            .catch(() => {
+                if (isMounted) setFotoUrl(fotoProfile);
+            });
+
+        // Fetch dashboard stats
         const fetchDashboardStats = async () => {
             setIsDashboardLoading(true);
             setDashboardError("");
@@ -193,7 +216,7 @@ export default function DashboardAdmin() {
     return (
         <div className="min-h-screen bg-[#e8f6ea] font-sans text-gray-900">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[252px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
+                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
                         <img
                             src={hmifLogo}
@@ -205,17 +228,17 @@ export default function DashboardAdmin() {
                             Himpunan Mahasiswa Informatika<br />ITERA
                         </p>
                     </div>
-                    <nav className="flex-1 px-4 pt-2 space-y-2">
+                    <nav className="flex-1 px-3 pt-4 space-y-1">
                         {NAV_ITEMS.map((item) => {
                             const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
                             return (
                                 <Link
                                     key={item.label}
                                     to={item.to}
-                                    className={`group relative flex items-center gap-3 rounded-none px-4 py-3.5 text-[0.98rem] font-medium transition ${
+                                    className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
                                         isActive
-                                            ? "bg-white/10 text-white before:absolute before:right-0 before:top-0 before:h-full before:w-1 before:bg-[#7bd02c]"
-                                            : "text-white/75 hover:bg-white/10 hover:text-white"
+                                            ? "bg-white/15 text-white"
+                                            : "text-white/65 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
                                     <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
@@ -224,84 +247,43 @@ export default function DashboardAdmin() {
                             );
                         })}
                     </nav>
-                    {isSuperAdmin && (
-                        <div className="px-4 pb-3">
-                            <Link
-                                to="/dashboard"
-                                className="flex items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-[0.92rem] font-semibold text-white transition hover:bg-white/15"
-                            >
-                                <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 11l9-8 9 8" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M5 10v10h14V10" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 20v-6h6v6" />
-                                </svg>
-                                Super Admin Panel
-                            </Link>
-                        </div>
-                    )}
                     <div className="p-4">
-                        <div className="rounded-[14px] bg-white/10 px-4 py-3 shadow-inner shadow-black/10">
-                            <div className="flex items-center gap-3">
-                                <div className="h-11 w-11 overflow-hidden rounded-full border border-white/20 bg-white/10">
-                                    <img src={fotoProfile} alt="Admin" className="h-full w-full object-cover" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-white">{userName}</p>
-                                    <p className="truncate text-[0.7rem] text-white/55">{nim}</p>
-                                </div>
-                            </div>
+                        <div className="bg-white/10 rounded-2xl px-4 py-3">
+                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
+                            <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
+                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">
+                                ⤷ Logout
+                            </button>
                         </div>
                     </div>
                 </aside>
 
-                <div className="flex-1 md:ml-[252px] flex flex-col min-h-screen min-w-0 relative">
+                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
                     <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
-                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
-                            <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
+                            <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
                         <div className="flex items-center gap-3">
-                            {isSuperAdmin && (
-                                <Link to="/dashboard" className="text-xs font-semibold text-[#185b21]">
-                                    Super Admin
-                                </Link>
-                            )}
-                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">
-                                Logout
-                            </button>
+                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
                         </div>
                     </header>
 
-                    <header className="hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
-                        <div>
-                            <p className="text-[1.05rem] font-semibold text-slate-800">Admin Dashboard</p>
-                        </div>
-                        <div className="flex items-center gap-4 text-slate-600">
-                            {isSuperAdmin && (
-                                <Link
-                                    to="/dashboard"
-                                    className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[0.9rem] font-semibold text-[#185b21] transition hover:bg-emerald-100"
-                                >
-                                    Super Admin Panel
-                                </Link>
-                            )}
-                            <button className="transition hover:text-slate-900" aria-label="Notifikasi">
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.8}
-                                        d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                    />
-                                </svg>
-                            </button>
-                            <span className="h-7 w-px bg-slate-300" />
-                            <button onClick={handleLogout} className="flex items-center gap-2 text-[0.98rem] transition hover:text-slate-900">
+                    <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
+                        <h2 className="text-[1.05rem] font-bold text-gray-800">Admin Dashboard</h2>
+                        <div className="flex items-center gap-4">
+                            <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">
+                                {userDivision}
+                            </span>
+                            <div className="h-5 w-px bg-gray-200" />
+                            <button className="text-gray-400 hover:text-gray-600 transition" aria-label="Notifikasi">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17l5-5m0 0l-5-5m5 5H9m4 8a8 8 0 100-16" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                Logout
                             </button>
+                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                         </div>
                     </header>
 
@@ -409,14 +391,14 @@ export default function DashboardAdmin() {
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#1d4b28]" />
                                                     <span className="text-white/80">Present</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_attendances)}</span>
+                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_valid_radius || 0)}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-white/90">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#ff8d2a]" />
                                                     <span className="text-white/80">Absent</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_absences)}</span>
+                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_invalid_radius || 0)}</span>
                                             </div>
                                         </div>
                                     </section>
