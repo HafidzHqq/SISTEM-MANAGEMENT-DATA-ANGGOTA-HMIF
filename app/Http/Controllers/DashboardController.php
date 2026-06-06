@@ -38,14 +38,18 @@ class DashboardController extends Controller
             'invalid' => $totalInvalidRadius,
         ];
 
+        $departmentColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+
         $attendanceByDepartment = Attendance::query()
             ->join('users', 'attendances.user_id', '=', 'users.user_id')
             ->leftJoin('member_profiles', 'users.user_id', '=', 'member_profiles.user_id')
             ->select(
-                'member_profiles.departemen as departemen',
+                "member_profiles.{$departmentColumn} as departemen",
                 DB::raw('COUNT(*) as total_present')
             )
-            ->groupBy('member_profiles.departemen')
+            ->groupBy("member_profiles.{$departmentColumn}")
             ->orderByDesc('total_present')
             ->get()
             ->map(function ($item) {
