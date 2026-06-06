@@ -153,6 +153,7 @@ export default function DashboardAdminAcara() {
     const [createFormError, setCreateFormError] = useState("");
     const [featuredEvent, setFeaturedEvent] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+    const isSuperAdmin = localStorage.getItem("role") === "super_admin";
 
     const [form, setForm] = useState({
         title: "", description: "", location: "", date: "", time: "", window_start: "", window_end: "",
@@ -306,6 +307,21 @@ export default function DashboardAdminAcara() {
                                 </Link>
                             );
                         })}
+
+                        {isSuperAdmin && (
+                            <button
+                                type="button"
+                                onClick={() => navigate("/dashboard")}
+                                className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-white/15"
+                            >
+                                <img
+                                    src={iconDashboard}
+                                    alt="Super Admin Dashboard"
+                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
+                                />
+                                <span>Super Admin Dashboard</span>
+                            </button>
+                        )}
                     </nav>
                     <div className="p-4">
                         <div className="bg-white/10 rounded-2xl px-4 py-3">
