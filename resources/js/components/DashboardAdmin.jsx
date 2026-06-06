@@ -50,7 +50,7 @@ const SUMMARY_CARD_CONFIG = [
 ];
 
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+    { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview", activePaths: ["/dashboard", "/dashboard/admin-overview"] },
     { label: "Anggota", icon: iconProfile, to: "/dashboard/anggota" },
     { label: "Acara", icon: iconKegiatan, to: "/dashboard/acara" },
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
@@ -112,6 +112,7 @@ export default function DashboardAdmin() {
     const [isDashboardLoading, setIsDashboardLoading] = React.useState(false);
     const userName = localStorage.getItem("name") || "Admin User";
     const nim = localStorage.getItem("nim") || "124140056";
+    const isSuperAdmin = localStorage.getItem("role") === "super_admin";
 
     React.useEffect(() => {
         let isMounted = true;
@@ -216,7 +217,7 @@ export default function DashboardAdmin() {
                     </div>
                     <nav className="flex-1 px-4 pt-2 space-y-2">
                         {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.to;
+                            const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
                             return (
                                 <Link
                                     key={item.label}
@@ -233,6 +234,21 @@ export default function DashboardAdmin() {
                             );
                         })}
                     </nav>
+                    {isSuperAdmin && (
+                        <div className="px-4 pb-3">
+                            <Link
+                                to="/dashboard"
+                                className="flex items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-[0.92rem] font-semibold text-white transition hover:bg-white/15"
+                            >
+                                <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 11l9-8 9 8" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M5 10v10h14V10" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 20v-6h6v6" />
+                                </svg>
+                                Super Admin Panel
+                            </Link>
+                        </div>
+                    )}
                     <div className="p-4">
                         <div className="rounded-[14px] bg-white/10 px-4 py-3 shadow-inner shadow-black/10">
                             <div className="flex items-center gap-3">
@@ -254,9 +270,16 @@ export default function DashboardAdmin() {
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
                             <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
                         </div>
-                        <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">
-                            Logout
-                        </button>
+                        <div className="flex items-center gap-3">
+                            {isSuperAdmin && (
+                                <Link to="/dashboard" className="text-xs font-semibold text-[#185b21]">
+                                    Super Admin
+                                </Link>
+                            )}
+                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">
+                                Logout
+                            </button>
+                        </div>
                     </header>
 
                     <header className="hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
@@ -264,6 +287,14 @@ export default function DashboardAdmin() {
                             <p className="text-[1.05rem] font-semibold text-slate-800">Admin Dashboard</p>
                         </div>
                         <div className="flex items-center gap-4 text-slate-600">
+                            {isSuperAdmin && (
+                                <Link
+                                    to="/dashboard"
+                                    className="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[0.9rem] font-semibold text-[#185b21] transition hover:bg-emerald-100"
+                                >
+                                    Super Admin Panel
+                                </Link>
+                            )}
                             <button className="transition hover:text-slate-900" aria-label="Notifikasi">
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path
@@ -466,7 +497,7 @@ export default function DashboardAdmin() {
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]">
                 <div className="grid grid-cols-4">
                     {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.to;
+                        const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
                         return (
                             <Link
                                 key={item.label}
