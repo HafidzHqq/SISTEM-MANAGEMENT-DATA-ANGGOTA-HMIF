@@ -250,7 +250,7 @@ export default function DashboardSuperAdmin() {
     return (
         <div className="min-h-screen bg-[#f5f7f8] text-slate-900">
             <div className="flex min-h-screen w-full overflow-hidden bg-[#f4f7f4]">
-                <aside className="hidden w-[190px] shrink-0 bg-[#135723] text-white md:flex md:flex-col">
+                <aside className="hidden bg-[#135723] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[190px] md:flex-col md:overflow-y-auto">
                     <div className="flex flex-col items-center px-5 pt-7">
                         <img src={logoHmif} alt="HMIF" className="h-20 w-20 object-contain" />
                         <p className="mt-1 text-center text-base font-extrabold leading-none">HMIF</p>
@@ -301,7 +301,7 @@ export default function DashboardSuperAdmin() {
                     </div>
                 </aside>
 
-                <div className="min-w-0 flex-1 bg-[#f5f7f8]">
+                <div className="min-w-0 flex-1 bg-[#f5f7f8] md:ml-[190px]">
                     <header className="flex h-[64px] items-center justify-between border-b border-slate-200 bg-white px-5 md:px-7">
                         <h1 className="text-xl font-extrabold tracking-tight text-[#003f17]">{getTitle()}</h1>
 
