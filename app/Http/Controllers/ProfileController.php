@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 // Fitur: API Manajemen Profil Anggota
 // Deskripsi: Mengizinkan anggota untuk memperbarui data profil pribadi mereka sendiri
 class ProfileController extends Controller
@@ -13,7 +14,7 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|string|max:100',
             'jabatan'            => 'nullable|string|max:100',
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non-Anggota',
             'no_telepon'         => 'nullable|string|max:20'
         ]);
 
@@ -34,17 +35,29 @@ class ProfileController extends Controller
             $angkatan = (int)('20' . substr($nim, 1, 2));
         }
 
+        $profileData = $request->only(['jabatan', 'status_keanggotaan', 'no_telepon']);
+        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+        $profileData[$departemenColumn] = $request->input('departemen');
+        $profileData['angkatan'] = $angkatan;
+
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
-            array_merge(
-                $request->only(['departemen', 'jabatan', 'status_keanggotaan', 'no_telepon']),
-                ['angkatan' => $angkatan]
-            )
+            $profileData
         );
+
+        $profile = $user->fresh()->memberProfile;
+        $profileData = $profile?->toArray();
+
+        if ($profileData) {
+            $profileData['departemen'] = $profileData['departemen'] ?? ($profileData['Departemen'] ?? null);
+            $profileData['Departemen'] = $profileData['Departemen'] ?? ($profileData['departemen'] ?? null);
+        }
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui',
-            'profile' => $user->fresh()->memberProfile,
+            'profile' => $profileData,
         ]);
     }
 

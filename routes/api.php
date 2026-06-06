@@ -18,6 +18,12 @@ Route::apiResource('events', EventController::class)->only(['index', 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
         $user = $request->user()->load('memberProfile');
+        $profile = $user->memberProfile?->toArray();
+
+        if ($profile) {
+            $profile['departemen'] = $profile['departemen'] ?? ($profile['Departemen'] ?? null);
+            $profile['Departemen'] = $profile['Departemen'] ?? ($profile['departemen'] ?? null);
+        }
 
         return response()->json([
             'user_id' => $user->user_id,
@@ -26,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
             'nim'     => $user->nim,
             'role'    => $user->role,
             'status'  => $user->status,
-            'profile' => $user->memberProfile,
+            'profile' => $profile,
         ]);
     });
 
@@ -48,7 +54,6 @@ Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function ()
 
     Route::get('/members', [MemberController::class, 'index']);
     Route::get('/members/{id}', [MemberController::class, 'show']);
-    Route::post('/members', [MemberController::class, 'store']);
     Route::post('/members/import', [MemberController::class, 'import']);
     Route::put('/members/{id}', [MemberController::class, 'update']);
     Route::delete('/members/{id}', [MemberController::class, 'destroy']);

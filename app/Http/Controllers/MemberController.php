@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\MemberProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 use App\Models\AuditLog;
 
 class MemberController extends Controller
@@ -21,8 +22,12 @@ class MemberController extends Controller
 
         // Filter by departemen
         if ($request->has('departemen')) {
-            $query->whereHas('memberProfile', function ($q) use ($request) {
-                $q->where('departemen', $request->departemen);
+            $departmentColumn = Schema::hasColumn('member_profiles', 'Departemen')
+                ? 'Departemen'
+                : 'departemen';
+
+            $query->whereHas('memberProfile', function ($q) use ($request, $departmentColumn) {
+                $q->where($departmentColumn, $request->departemen);
             });
         }
 
@@ -74,7 +79,8 @@ class MemberController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|string|max:100',
             'jabatan'            => 'nullable|string|max:100',
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non-Anggota',
+            'no_telepon'         => 'nullable|string|max:20',
         ]);
 
         if ($validator->fails()) {
@@ -84,9 +90,15 @@ class MemberController extends Controller
             ], 422);
         }
 
+        $profileData = $request->only(['jabatan', 'status_keanggotaan', 'no_telepon']);
+        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+        $profileData[$departemenColumn] = $request->input('departemen');
+
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
-            $request->only(['departemen', 'jabatan', 'status_keanggotaan'])
+            $profileData
         );
 
         AuditLog::catat($request->user()->user_id, 'update', 'member', $id);
@@ -114,48 +126,6 @@ class MemberController extends Controller
         return response()->json(['message' => 'Anggota berhasil dihapus']);
 
     }
-
-            // POST /api/members — tambah 1 anggota manual
-        public function store(Request $request)
-        {
-            $validator = Validator::make($request->all(), [
-                'nim'   => 'required|string|max:15|unique:users,nim',
-                'name'  => 'required|string|max:150',
-                'email' => 'required|email|unique:users,email',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validasi gagal',
-                    'errors'  => $validator->errors(),
-                ], 422);
-            }
-
-            // Validasi format NIM
-            $nimDigits = preg_replace('/\D/', '', $request->nim);
-            if (
-                substr($nimDigits, 0, 1) !== '1' ||
-                !in_array(substr($nimDigits, 1, 2), ['23', '24']) ||
-                substr($nimDigits, 3, 2) !== '14'
-            ) {
-                return response()->json(['message' => 'Gagal memasukan data'], 422);
-            }
-
-            $user = User::create([
-                'nim'    => $request->nim,
-                'name'   => $request->name,
-                'email'  => $request->email,
-                'role'   => 'anggota',
-                'status' => 'aktif',
-            ]);
-
-            AuditLog::catat($request->user()->user_id, 'create', 'member', $user->user_id);
-
-            return response()->json([
-                'message' => 'Anggota berhasil ditambahkan',
-                'data'    => $user,
-            ], 201);
-        }
 
         // POST /api/members/import — import bulk via CSV
         public function import(Request $request)

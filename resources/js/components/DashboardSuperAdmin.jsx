@@ -28,15 +28,14 @@ export default function DashboardSuperAdmin() {
 
     const menus = [
         { key: "dashboard", label: "Dashboard", icon: "grid" },
+        { key: "adminDashboard", label: "Admin Dashboard", icon: "admin", to: "/dashboard/admin-overview" },
         { key: "admins", label: "Admin Management", icon: "user" },
-        { key: "monitoring", label: "System Monitoring", icon: "chart" },
         { key: "audit", label: "Audit Logs", icon: "log" },
     ];
 
     const getTitle = () => {
         if (activeMenu === "admins") return "Admin Management";
         if (activeMenu === "audit") return "Audit Logs";
-        if (activeMenu === "monitoring") return "System Monitoring";
         return "Dashboard";
     };
 
@@ -265,7 +264,14 @@ export default function DashboardSuperAdmin() {
                         {menus.map((menu) => (
                             <button
                                 key={menu.key}
-                                onClick={() => setActiveMenu(menu.key)}
+                                onClick={() => {
+                                    if (menu.to) {
+                                        navigate(menu.to);
+                                        return;
+                                    }
+
+                                    setActiveMenu(menu.key);
+                                }}
                                 className={`relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-[12px] font-semibold transition ${
                                     activeMenu === menu.key
                                         ? "bg-white/10 text-white"
@@ -326,6 +332,7 @@ export default function DashboardSuperAdmin() {
                             setActiveMenu("admins");
                             setShowAddAdmin(true);
                         }}
+                        onOpenAdminDashboard={() => navigate("/dashboard/admin-overview")}
                         onViewLogs={() => setActiveMenu("audit")}
                     />
                 )}
@@ -353,10 +360,6 @@ export default function DashboardSuperAdmin() {
                         loading={loadingAuditLogs}
                         error={auditLogsError}
                     />
-                )}
-
-                {activeMenu === "monitoring" && (
-                    <SystemMonitoringContent logs={auditLogs} />
                 )}
                     </div>
                 </div>
@@ -588,6 +591,7 @@ function Icon({ name, className = "h-4 w-4" }) {
 function MenuIcon({ type }) {
     const icons = {
         grid: "layoutGrid",
+        admin: "suitcase",
         user: "userCog",
         chart: "chart",
         log: "log",
@@ -689,64 +693,6 @@ function buildDashboardLogs(logs) {
     ];
 }
 
-function buildMonitoringFeed(logs) {
-    if (logs?.length > 0) {
-        return logs.slice(0, 4).map((log, index) => ({
-            key: log.audit_id || log.id || `${log.action}-${index}`,
-            title: log.action || "System Activity",
-            description: `${log.actor?.name || "System"} - ${log.target_type || "system"} #${log.target_id || "-"}`,
-            time: log.created_at ? new Date(log.created_at).toLocaleString("id-ID") : "-",
-            status: index === 2 ? "Critical" : "Success",
-            icon: index === 2 ? "alertTriangle" : "log",
-            iconClass: index === 2 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-900",
-            statusClass: index === 2 ? "bg-red-100 text-red-700" : "bg-[#9df76b] text-green-800",
-        }));
-    }
-
-    return [
-        {
-            key: "login",
-            title: "New Admin Login",
-            description: "Admin rizky.p signed in from 192.168.1.42 (ID-Jakarta)",
-            time: "2 minutes ago",
-            status: "Success",
-            icon: "logout",
-            iconClass: "bg-green-100 text-green-900",
-            statusClass: "bg-[#9df76b] text-green-800",
-        },
-        {
-            key: "attendance",
-            title: "Attendance Recorded",
-            description: "Batch synchronization for 'Algorithm 101' completed. 42 records updated.",
-            time: "15 minutes ago",
-            status: "Success",
-            icon: "calendarCheck",
-            iconClass: "bg-green-100 text-green-900",
-            statusClass: "bg-[#9df76b] text-green-800",
-        },
-        {
-            key: "latency",
-            title: "Database Latency Alert",
-            description: "Response times in Cluster-B exceeded 250ms threshold. Automated scaling initiated.",
-            time: "32 minutes ago",
-            status: "Critical",
-            icon: "alertTriangle",
-            iconClass: "bg-red-100 text-red-700",
-            statusClass: "bg-red-100 text-red-700",
-        },
-        {
-            key: "archive",
-            title: "Log Archive Started",
-            description: "Routine log rotation for June 2024 is currently in progress. System speed might vary.",
-            time: "1 hour ago",
-            status: "Warning",
-            icon: "refresh",
-            iconClass: "bg-slate-100 text-slate-600",
-            statusClass: "bg-slate-200 text-slate-700",
-        },
-    ];
-}
-
 function getMemberDepartment(member) {
     return member.department
         || member.departemen
@@ -757,7 +703,7 @@ function getMemberDepartment(member) {
         || "";
 }
 
-function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs }) {
+function DashboardContent({ stats, logs, loading, error, onAddAdmin, onOpenAdminDashboard, onViewLogs }) {
     const [networkRange, setNetworkRange] = useState("24H");
 
     if (loading) {
@@ -900,6 +846,15 @@ function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs 
                         >
                             <Icon name="userPlus" className="h-5 w-5" />
                             Add New Admin
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={onOpenAdminDashboard}
+                            className="flex w-full items-center gap-3 rounded-[8px] border border-[#39a80f] bg-green-50 px-5 py-4 text-left text-base font-bold text-[#003f17] transition hover:bg-green-100"
+                        >
+                            <Icon name="suitcase" className="h-5 w-5" />
+                            Open Admin Dashboard
                         </button>
 
                         <button
@@ -1398,38 +1353,12 @@ function AuditLogsContent({ logs, loading, error }) {
         );
     }
 
-    const totalLogs = logs.length;
-    const today = new Date().toDateString();
 
-    const todayLogs = logs.filter((log) => {
-        if (!log.created_at) return false;
-        return new Date(log.created_at).toDateString() === today;
-    }).length;
 
-    const handleExportCsv = () => {
-        const header = ["Action", "Actor", "Target Type", "Target ID", "Timestamp"];
-        const rows = logs.map((log) => [
-            log.action || "",
-            log.actor?.name || "System",
-            log.target_type || "",
-            log.target_id || "",
-            log.created_at || "",
-        ]);
-        const csv = [header, ...rows]
-            .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
-            .join("\n");
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "audit-logs.csv";
-        link.click();
-        URL.revokeObjectURL(url);
-    };
+
 
     return (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_0.68fr]">
-            <div className="space-y-4">
+        <div className="space-y-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 className="text-2xl font-extrabold tracking-tight text-[#003f17]">Audit Logs</h2>
@@ -1438,51 +1367,9 @@ function AuditLogsContent({ logs, loading, error }) {
                         Live System Monitoring Active
                     </p>
                 </div>
-
-                <button
-                    onClick={handleExportCsv}
-                    className="inline-flex items-center gap-2 rounded-[18px] bg-[#39a80f] px-8 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#2f8d0d]"
-                >
-                    <Icon name="download" className="h-4 w-4" />
-                    Export CSV
-                </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="flex items-center justify-between rounded-[10px] bg-white p-5 shadow-sm">
-                    <div>
-                        <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                            Critical Actions (24h)
-                        </p>
-                        <h3 className="mt-3 text-4xl font-extrabold text-red-600">
-                            {Math.min(todayLogs, 12)}
-                        </h3>
-                        <p className="mt-1 text-[12px] font-semibold text-red-600">
-                            +4% from yesterday
-                        </p>
-                    </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-700">
-                        <Icon name="alertTriangle" className="h-7 w-7" />
-                    </div>
-                </div>
 
-                <div className="flex items-center justify-between rounded-[10px] bg-white p-5 shadow-sm">
-                    <div>
-                        <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
-                            Today's Total Actions
-                        </p>
-                        <h3 className="mt-3 text-4xl font-extrabold text-[#003f17]">
-                            {todayLogs}
-                        </h3>
-                        <p className="mt-1 text-[12px] font-semibold text-green-700">
-                            {totalLogs} total records
-                        </p>
-                    </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-[#003f17]">
-                        <Icon name="refresh" className="h-7 w-7" />
-                    </div>
-                </div>
-            </div>
 
             <div className="overflow-hidden rounded-[10px] bg-white shadow-sm">
                 <div className="grid grid-cols-1 gap-3 border-b border-slate-100 p-4 md:grid-cols-3">
@@ -1570,301 +1457,7 @@ function AuditLogsContent({ logs, loading, error }) {
                     Showing {Math.min(logs.length, 25)} of {logs.length} entries
                 </div>
             </div>
-            </div>
-
-            <aside className="space-y-4">
-                <div className="rounded-[10px] bg-[#39a80f] p-5 text-white shadow-sm">
-                    <h2 className="flex items-center gap-3 text-xl font-extrabold">
-                        <Icon name="shield" className="h-6 w-6" />
-                        Institutional Integrity
-                    </h2>
-                    <p className="mt-4 text-[13px] leading-relaxed text-white/85">
-                        Audit logs are immutable records of all administrative actions for accountability.
-                    </p>
-
-                    <div className="mt-5 space-y-4 border-t border-white/20 pt-4">
-                        {[
-                            ["lock", "WORM Storage"],
-                            ["hash", "Cryptographic Hashes"],
-                            ["shield", "Strict Compliance"],
-                        ].map(([icon, item]) => (
-                            <div key={item}>
-                                <p className="flex items-center gap-2 text-[13px] font-extrabold">
-                                    <Icon name={icon} className="h-4 w-4" />
-                                    {item}
-                                </p>
-                                <p className="mt-1 text-[12px] text-white/70">Monitoring protocols are active.</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-[7px] bg-[#9df76b] px-4 py-3 text-sm font-extrabold text-green-950">
-                        <Icon name="shield" className="h-4 w-4" />
-                        Review Security Policy
-                    </button>
-                </div>
-
-                <div className="rounded-[10px] bg-slate-200 p-5 shadow-sm">
-                    <p className="text-[13px] font-extrabold uppercase tracking-wide text-slate-700">System Health</p>
-                    <div className="mt-4 space-y-4">
-                        <div>
-                            <div className="mb-2 flex justify-between text-[12px] font-semibold">
-                                <span>Log Storage</span>
-                                <span>64% Full</span>
-                            </div>
-                            <div className="h-2 rounded-full bg-slate-100">
-                                <div className="h-full w-[64%] rounded-full bg-[#003f17]" />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="mb-2 flex justify-between text-[12px] font-semibold">
-                                <span>Encryption Load</span>
-                                <span>12%</span>
-                            </div>
-                            <div className="h-2 rounded-full bg-slate-100">
-                                <div className="h-full w-[12%] rounded-full bg-[#39a80f]" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
         </div>
     );
 }
 
-function SystemMonitoringContent({ logs }) {
-    const [monitoringRange, setMonitoringRange] = useState("24h");
-    const metrics = [
-        { label: "Online Users", value: "1,284", badge: "+12%", icon: "users" },
-        { label: "Active Sessions", value: "312", badge: "+4%", icon: "network" },
-        { label: "System Uptime", value: "99.98%", badge: "Stable", icon: "timer" },
-        { label: "Server Load", value: "42.5%", badge: "+8%", icon: "cpu" },
-    ];
-
-    const health = [
-        { label: "CPU Usage", value: 24 },
-        { label: "RAM Utilization", value: 68 },
-        { label: "Disk Space", value: 42 },
-    ];
-
-    const services = [
-        { label: "API Gateway", status: "HEALTHY", color: "bg-green-700" },
-        { label: "Database (Main)", status: "HEALTHY", color: "bg-green-700" },
-        { label: "Auth Service", status: "DEGRADED", color: "bg-red-600" },
-        { label: "CDN Node", status: "HEALTHY", color: "bg-green-700" },
-    ];
-
-    const feed = buildMonitoringFeed(logs);
-    const chartShapes = {
-        "24h": {
-            area: "M0 190 C55 95 105 100 150 160 C190 210 260 185 300 105 C335 35 390 85 420 155 C455 230 515 220 545 95 C565 25 590 35 620 78 L620 240 L0 240 Z",
-            line: "M0 190 C55 95 105 100 150 160 C190 210 260 185 300 105 C335 35 390 85 420 155 C455 230 515 220 545 95 C565 25 590 35 620 78",
-        },
-        "7d": {
-            area: "M0 165 C70 115 110 145 155 95 C205 40 250 70 300 130 C350 195 395 160 440 98 C500 20 555 45 620 110 L620 240 L0 240 Z",
-            line: "M0 165 C70 115 110 145 155 95 C205 40 250 70 300 130 C350 195 395 160 440 98 C500 20 555 45 620 110",
-        },
-        "30d": {
-            area: "M0 150 C45 120 75 170 120 145 C165 120 190 75 245 95 C310 120 330 195 390 165 C445 138 470 70 525 82 C570 92 595 125 620 118 L620 240 L0 240 Z",
-            line: "M0 150 C45 120 75 170 120 145 C165 120 190 75 245 95 C310 120 330 195 390 165 C445 138 470 70 525 82 C570 92 595 125 620 118",
-        },
-    };
-    const chartShape = chartShapes[monitoringRange];
-
-    return (
-        <div className="mx-auto flex min-h-[calc(100vh-112px)] max-w-[980px] flex-col gap-5">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {metrics.map((item) => (
-                    <div key={item.label} className="min-h-[104px] rounded-[10px] bg-white p-4 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-[11px] font-black text-green-900">
-                                <Icon name={item.icon} className="h-4 w-4" />
-                            </div>
-                            <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-700">
-                                {item.badge}
-                            </span>
-                        </div>
-
-                        <p className="mt-4 text-[11px] font-bold text-slate-600">
-                            {item.label}
-                        </p>
-                        <h3 className="mt-1 text-3xl font-extrabold text-slate-950">
-                            {item.value}
-                        </h3>
-                    </div>
-                ))}
-            </div>
-
-            <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_230px]">
-                <div className="flex min-h-0 flex-col gap-4">
-                    <div className="rounded-[10px] bg-white p-5 shadow-sm">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div>
-                                <h2 className="text-xl font-extrabold text-slate-950">Network Reliability</h2>
-                                <p className="mt-1 text-[12px] text-slate-600">
-                                    Real-time latency and uptime tracking across primary clusters.
-                                </p>
-                            </div>
-
-                            <div className="flex rounded-md bg-slate-100 p-1 text-[11px] font-bold">
-                                {["24h", "7d", "30d"].map((range) => (
-                                    <button
-                                        key={range}
-                                        type="button"
-                                        onClick={() => setMonitoringRange(range)}
-                                        className={`rounded px-4 py-1 transition ${
-                                            monitoringRange === range
-                                                ? "bg-white text-slate-950 shadow-sm"
-                                                : "text-slate-600 hover:text-slate-950"
-                                        }`}
-                                    >
-                                        {range}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="mt-5 h-[230px] overflow-hidden rounded-[8px] bg-gradient-to-b from-white to-green-100">
-                            <svg viewBox="0 0 620 240" className="h-full w-full" preserveAspectRatio="none">
-                                <path
-                                d={chartShape.area}
-                                fill="#dce7dd"
-                            />
-                            <path
-                                d={chartShape.line}
-                                    fill="none"
-                                    stroke="#06451d"
-                                    strokeWidth="5"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div className="flex min-h-0 flex-1 flex-col rounded-[10px] bg-white shadow-sm">
-                        <div className="flex items-center justify-between border-b border-slate-100 p-5">
-                            <h2 className="text-xl font-extrabold text-slate-950">Real-time Activity Feed</h2>
-                            <button className="text-[12px] font-bold text-green-900">View All Logs</button>
-                        </div>
-
-                        <div className="flex-1 divide-y divide-slate-100">
-                            {feed.map((log) => (
-                                <div
-                                    key={log.key}
-                                    className="flex items-start gap-4 px-5 py-4"
-                                >
-                                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${log.iconClass}`}>
-                                        <Icon name={log.icon} className="h-4 w-4" />
-                                    </div>
-
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div>
-                                                <p className="text-[13px] font-bold text-slate-950">
-                                                    {log.title}
-                                                </p>
-                                                <p className="mt-1 text-[13px] text-slate-600">
-                                                    {log.description}
-                                                </p>
-                                                <p className="mt-2 text-[12px] font-semibold text-slate-500">
-                                                    {log.time}
-                                                </p>
-                                            </div>
-
-                                            <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${log.statusClass}`}>
-                                                {log.status}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {feed.length === 0 && (
-                                <div className="p-5 text-[13px] text-slate-500">
-                                    Belum ada aktivitas sistem.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex min-h-0 flex-col gap-4">
-                    <div className="rounded-[10px] bg-white p-5 shadow-sm">
-                        <h2 className="text-xl font-extrabold text-slate-950">System Health</h2>
-
-                        <div className="mt-5 space-y-5">
-                            {health.map((item) => (
-                                <div key={item.label}>
-                                    <div className="mb-2 flex items-center justify-between">
-                                        <p className="text-[12px] font-bold text-slate-800">{item.label}</p>
-                                        <p className="text-[12px] text-slate-600">{item.value}%</p>
-                                    </div>
-
-                                    <div className="h-2 rounded-full bg-slate-100">
-                                        <div
-                                            className="h-full rounded-full bg-green-700"
-                                            style={{ width: `${item.value}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="mt-5 flex items-start gap-3 rounded-[8px] bg-slate-100 p-4 text-[13px] leading-relaxed text-slate-600">
-                            <Icon name="checkCircle" className="mt-0.5 h-5 w-5 shrink-0 text-green-700" />
-                            <span>All thermal sensors reporting within normal range.</span>
-                        </div>
-                    </div>
-
-                    <div className="rounded-[10px] bg-white p-5 shadow-sm">
-                        <h2 className="text-xl font-extrabold text-slate-950">Service Status</h2>
-
-                        <div className="mt-6 space-y-5">
-                            {services.map((service) => (
-                                <div key={service.label} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <span className={`h-2.5 w-2.5 rounded-full ${service.color}`} />
-                                        <p className="text-[13px] font-bold text-slate-900">{service.label}</p>
-                                    </div>
-
-                                    <span
-                                        className={`text-[11px] font-extrabold tracking-widest ${
-                                            service.status === "HEALTHY" ? "text-green-700" : "text-red-600"
-                                        }`}
-                                    >
-                                        {service.status}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-
-                        <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-green-950 px-5 py-3 text-sm font-bold text-white">
-                            <Icon name="refresh" className="h-4 w-4" />
-                            Run Quick Diagnostic
-                        </button>
-                    </div>
-
-                    <div className="flex flex-1 flex-col justify-between rounded-[10px] bg-green-950 p-5 text-white shadow-sm">
-                        <h2 className="text-xl font-extrabold">Automated Optimization</h2>
-                        <p className="mt-4 text-[13px] leading-relaxed text-green-100">
-                            The system has automatically scaled instances in the last hour to maintain performance.
-                        </p>
-
-                        <button className="mt-5 inline-flex items-center gap-2 text-[13px] font-bold text-lime-300">
-                            Review Cloud Logs
-                            <Icon name="arrowRight" className="h-4 w-4" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <footer className="flex flex-col gap-3 border-t border-slate-200 pt-5 text-[11px] font-semibold text-slate-500 md:flex-row md:items-center md:justify-between">
-                <p>2026 HMIF Academic Oversight System. All nodes operational.</p>
-                <div className="flex flex-wrap gap-6">
-                    <button>System Architecture</button>
-                    <button>API Documentation</button>
-                    <button>Security Protocol</button>
-                </div>
-            </footer>
-        </div>
-    );
-}

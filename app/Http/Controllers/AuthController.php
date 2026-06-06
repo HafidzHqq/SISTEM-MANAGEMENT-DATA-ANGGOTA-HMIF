@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -20,7 +22,11 @@ class AuthController extends Controller
     // Handle callback dari Google setelah user login
     public function handleGoogleCallback()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        } catch (ClientException $exception) {
+            return redirect(env('FRONTEND_URL') . '/login?error=google_session_expired');
+        }
 
         $email = $googleUser->getEmail();
         if (!str_ends_with($email, '@student.itera.ac.id')) {
@@ -39,9 +45,9 @@ class AuthController extends Controller
             return redirect(env('FRONTEND_URL') . '/login?error=bukan_sarjana');
         }
 
-        // Cek angkatan (digit 2-3 = 23 atau 24)
+        // Cek angkatan (digit 2-3)
         $angkatan = substr($nimDigits, 1, 2);
-        if (!in_array($angkatan, ['23', '24'])) {
+        if (!in_array($angkatan, ['22', '23', '24', '25'])) {
             return redirect(env('FRONTEND_URL') . '/login?error=angkatan_tidak_valid');
         }
 
@@ -49,11 +55,6 @@ class AuthController extends Controller
         $prodi = substr($nimDigits, 3, 2);
         if ($prodi !== '14') {
             return redirect(env('FRONTEND_URL') . '/login?error=bukan_informatika');
-        }
-
-        // Cek NIM terdaftar di database
-        if (!User::where('nim', $nim)->exists()) {
-            return redirect(env('FRONTEND_URL') . '/login?error=nim_tidak_terdaftar');
         }
 
         // Cek status akun
@@ -68,14 +69,28 @@ class AuthController extends Controller
                 'google_id' => $googleUser->getId(),
                 'name'      => $googleUser->getName(),
                 'email'     => $email,
+                'role'      => $existingUser?->role ?? 'anggota',
                 'status'    => 'aktif',
             ]
         );
 
-        // Set role anggota hanya kalau user baru
-        if ($user->wasRecentlyCreated) {
-            $user->update(['role' => 'anggota']);
-        }
+        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
+            ? 'Departemen'
+            : 'departemen';
+
+        $statusKeanggotaan = in_array($angkatan, ['22', '23'], true)
+            ? 'Tetap'
+            : ($angkatan === '24' ? 'Muda' : 'Non-Anggota');
+
+        $user->memberProfile()->firstOrCreate(
+            ['user_id' => $user->user_id],
+            [
+                'angkatan' => (int) ('20' . $angkatan),
+                $departemenColumn => 'Belum Ditentukan',
+                'jabatan' => 'Anggota',
+                'status_keanggotaan' => $statusKeanggotaan,
+            ]
+        );
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

@@ -7,18 +7,37 @@ import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 
 const DEPARTEMEN_LIST = [
-    "Kesekjenan", "Senator", "DPA", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo",
+    "Kesekjenan", "Senator", "DPA", "Technopreneur", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo", "Akbes", "Minat Bakat",
 ];
 
-const JABATAN_BY_DEPARTEMEN = {
-    "Kesekjenan": ["Ketua Himpunan", "Sekretaris Jenderal", "Sekretaris Umum", "Bendahara Umum"],
-    "Senator": ["Senator", "Sekretaris Umum", "Staff"],
-    "DPA": ["Koordinator DPA", "Sekretaris Jenderal", "Sekretaris Umum", "Ketua Komisi", "Staff Ahli", "Staff"],
-    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
-    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
-    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
-    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
-    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+const JABATAN_LIST = [
+    "-",
+    "Ketua Departemen",
+    "Ketua Divisi",
+    "Sekertaris Departemen",
+    "Staf Ahli",
+    "Staf",
+];
+
+const normalizeJabatan = (value) => {
+    const normalized = String(value ?? "").trim();
+
+    if (!normalized) return "-";
+    if (normalized.toLowerCase() === "staff") return "Staf";
+    if (normalized.toLowerCase() === "staff ahli") return "Staf Ahli";
+    if (normalized.toLowerCase() === "sekretaris departemen") return "Sekertaris Departemen";
+
+    return normalized;
+};
+
+const normalizeProfileForm = (data) => {
+    const profile = data?.profile || {};
+
+    return {
+        departemen: profile.departemen || profile.Departemen || "",
+        jabatan: normalizeJabatan(profile.jabatan),
+        no_telepon: profile.no_telepon || "",
+    };
 };
 
 export default function Profile() {
@@ -46,48 +65,82 @@ export default function Profile() {
     });
     const [savedForm, setSavedForm] = React.useState({ ...form });
     const [phoneError, setPhoneError] = React.useState("");
+    const hasUnsavedChangesRef = React.useRef(false);
 
     const [attendedEvents, setAttendedEvents] = React.useState([]);
     const [upcomingActivities, setUpcomingActivities] = React.useState([]);
 
-    React.useEffect(() => {
+    const applyProfileData = React.useCallback((data) => {
+        setProfile(data);
+        setFotoUrl(data?.profile?.foto
+            ? `/storage/${data.profile.foto}`
+            : null
+        );
+
+        const nextForm = normalizeProfileForm(data);
+        setForm(nextForm);
+        setSavedForm(nextForm);
+    }, []);
+
+    const fetchProfile = React.useCallback(async () => {
         const token = localStorage.getItem("auth_token");
+
+        if (!token) return;
+
+        const res = await fetch("/api/me", {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+            }
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Gagal fetch profil");
+        }
+
+        applyProfileData(data);
+    }, [applyProfileData]);
+
+    const fetchProfileLists = React.useCallback(async () => {
+        const token = localStorage.getItem("auth_token");
+
+        if (!token) return;
+
         const headers = {
             "Authorization": `Bearer ${token}`,
             "Accept": "application/json",
         };
 
-        // Fetch profile
-        fetch("/api/me", { headers })
-            .then(res => res.json())
-            .then(data => {
-                setProfile(data);
-                setFotoUrl(data?.profile?.foto
-                    ? `/storage/${data.profile.foto}`
-                    : null
-                );
-                const initial = {
-                    departemen: data?.profile?.departemen || "",
-                    jabatan: data?.profile?.jabatan || "",
-                    no_telepon: data?.profile?.no_telepon || "",
-                };
-                setForm(initial);
-                setSavedForm(initial);
-            })
-            .catch(err => console.error("Gagal fetch profil:", err));
-
-        // Fetch attended events
         fetch("/api/attendances/me", { headers })
             .then(res => res.json())
-            .then(data => setAttendedEvents(data))
+            .then(data => setAttendedEvents(Array.isArray(data) ? data : []))
             .catch(err => console.error("Gagal fetch history:", err));
 
-        // Fetch upcoming events
         fetch("/api/events", { headers })
             .then(res => res.json())
-            .then(data => setUpcomingActivities(data))
+            .then(data => setUpcomingActivities(Array.isArray(data) ? data : []))
             .catch(err => console.error("Gagal fetch events:", err));
     }, []);
+
+    React.useEffect(() => {
+        fetchProfile().catch(err => console.error("Gagal fetch profil:", err));
+        fetchProfileLists();
+
+        const handleFocus = () => {
+            if (!hasUnsavedChangesRef.current) {
+                fetchProfile().catch(err => console.error("Gagal sinkron profil:", err));
+            }
+
+            fetchProfileLists();
+        };
+
+        window.addEventListener("focus", handleFocus);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+        };
+    }, [fetchProfile, fetchProfileLists]);
 
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
     const nim = profile?.nim || "-";
@@ -101,6 +154,10 @@ export default function Profile() {
         form.no_telepon !== savedForm.no_telepon ||
         fotoFile !== null;
 
+    React.useEffect(() => {
+        hasUnsavedChangesRef.current = hasChanges;
+    }, [hasChanges]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         if (name === "no_telepon") {
@@ -111,7 +168,7 @@ export default function Profile() {
             setPhoneError("");
         }
         if (name === "departemen") {
-            setForm(prev => ({ ...prev, departemen: value, jabatan: "" }));
+            setForm(prev => ({ ...prev, departemen: value, jabatan: value ? "-" : "" }));
             return;
         }
         setForm(prev => ({ ...prev, [name]: value }));
@@ -160,11 +217,31 @@ export default function Profile() {
                 },
                 body: JSON.stringify(form),
             });
+            const data = await res.json().catch(() => ({}));
+
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || "Gagal menyimpan");
+                throw new Error(data.message || "Gagal menyimpan");
             }
-            setSavedForm({ ...form });
+
+            const nextForm = normalizeProfileForm({
+                profile: {
+                    ...form,
+                    ...(data.profile || {}),
+                },
+            });
+
+            setForm(nextForm);
+            setSavedForm(nextForm);
+            setProfile((current) => ({
+                ...(current || {}),
+                profile: {
+                    ...(current?.profile || {}),
+                    ...(data.profile || {}),
+                    departemen: nextForm.departemen,
+                    jabatan: nextForm.jabatan,
+                    no_telepon: nextForm.no_telepon,
+                },
+            }));
             showToast();
         } catch (err) {
             console.error(err);
@@ -345,7 +422,7 @@ export default function Profile() {
                         >
                             {!form.departemen
                                 ? <option value="">Pilih departemen dulu</option>
-                                : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                : JABATAN_LIST.map(j => (
                                     <option key={j} value={j}>{j}</option>
                                 ))
                             }
@@ -406,7 +483,7 @@ export default function Profile() {
                                 >
                                     {!form.departemen
                                         ? <option value="">Pilih departemen dulu</option>
-                                        : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                        : JABATAN_LIST.map(j => (
                                             <option key={j} value={j}>{j}</option>
                                         ))
                                     }
