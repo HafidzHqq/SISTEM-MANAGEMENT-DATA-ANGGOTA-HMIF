@@ -18,10 +18,7 @@ class AttendanceController extends Controller
     {
         $validated = $request->validate([
             'qr_token' => 'required|string',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
         ]);
-
         $user = $request->user();
 
         $event = Event::where('qr_token', $validated['qr_token'])->first();
@@ -56,38 +53,11 @@ class AttendanceController extends Controller
             ], 409);
         }
 
-        if (
-            is_null($event->latitude_center) ||
-            is_null($event->longitude_center) ||
-            is_null($event->radius_meter)
-        ) {
-            return response()->json([
-                'message' => 'Lokasi presensi event belum diatur'
-            ], 422);
-        }
-
-        $distance = $this->calculateDistance(
-            $validated['latitude'],
-            $validated['longitude'],
-            $event->latitude_center,
-            $event->longitude_center
-        );
-
-        if ($distance > $event->radius_meter) {
-            return response()->json([
-                'message' => 'Anda berada di luar radius presensi',
-                'distance_meter' => round($distance, 2),
-                'allowed_radius_meter' => $event->radius_meter
-            ], 403);
-        }
-
         try {
             $attendance = Attendance::create([
                 'user_id' => $user->user_id,
                 'event_id' => $event->event_id,
                 'checkin_time' => Carbon::now(),
-                'user_latitude' => $validated['latitude'],
-                'user_longitude' => $validated['longitude'],
                 'is_in_radius' => true,
                 'status' => 'present',
                 'remarks' => 'Check-in melalui QR Code',
@@ -101,7 +71,6 @@ class AttendanceController extends Controller
         return response()->json([
             'message' => 'Presensi berhasil',
             'attendance' => $attendance,
-            'distance_meter' => round($distance, 2)
         ], 201);
     }
 
