@@ -5,6 +5,7 @@ import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
+import MemberMobileSidebar, { MemberMenuButton } from "../components/MemberMobileSidebar";
 
 const DEPARTEMEN_LIST = [
     "Kesekjenan", "Senator", "DPA", "Technopreneur", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo", "Akbes", "Minat Bakat",
@@ -50,6 +51,7 @@ export default function Profile() {
     const [uploadingFoto, setUploadingFoto] = React.useState(false);
     const [fotoFile, setFotoFile] = React.useState(null);
     const [fotoPreview, setFotoPreview] = React.useState(null);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
     const showToast = () => {
         setToast(true);
@@ -274,6 +276,15 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
+            <MemberMobileSidebar
+                open={isMobileSidebarOpen}
+                onClose={() => setIsMobileSidebarOpen(false)}
+                navItems={navItems}
+                name={name}
+                nim={nim}
+                avatarSrc={fotoPreview || fotoUrl || fotoProfile}
+                onLogout={handleLogout}
+            />
 
             {/* ════ SIDEBAR ════ */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
@@ -308,10 +319,8 @@ export default function Profile() {
             <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
 
                 {/* Mobile Header */}
-                <header className="md:hidden flex items-center gap-3 bg-white px-5 py-4 shadow-sm">
-                    <button onClick={() => navigate(-1)} className="text-gray-600">
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </button>
+                <header className="md:hidden sticky top-0 z-40 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
+                    <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
                     <span className="text-base font-bold text-gray-800">Profil</span>
                 </header>
 
