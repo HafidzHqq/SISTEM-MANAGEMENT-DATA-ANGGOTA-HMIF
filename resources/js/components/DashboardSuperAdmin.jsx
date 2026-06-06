@@ -28,7 +28,6 @@ export default function DashboardSuperAdmin() {
 
     const menus = [
         { key: "dashboard", label: "Dashboard", icon: "grid" },
-        { key: "adminDashboard", label: "Admin Dashboard", icon: "admin", to: "/dashboard/admin-overview" },
         { key: "admins", label: "Admin Management", icon: "user" },
         { key: "audit", label: "Audit Logs", icon: "log" },
     ];
@@ -265,11 +264,6 @@ export default function DashboardSuperAdmin() {
                             <button
                                 key={menu.key}
                                 onClick={() => {
-                                    if (menu.to) {
-                                        navigate(menu.to);
-                                        return;
-                                    }
-
                                     setActiveMenu(menu.key);
                                 }}
                                 className={`relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-[12px] font-semibold transition ${
@@ -285,6 +279,15 @@ export default function DashboardSuperAdmin() {
                                 )}
                             </button>
                         ))}
+
+                        <button
+                            type="button"
+                            onClick={() => navigate("/dashboard/admin-overview")}
+                            className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-white/15"
+                        >
+                            <MenuIcon type="admin" />
+                            <span>Admin Dashboard</span>
+                        </button>
                     </nav>
 
                     <div className="mt-auto p-4">
@@ -332,7 +335,6 @@ export default function DashboardSuperAdmin() {
                             setActiveMenu("admins");
                             setShowAddAdmin(true);
                         }}
-                        onOpenAdminDashboard={() => navigate("/dashboard/admin-overview")}
                         onViewLogs={() => setActiveMenu("audit")}
                     />
                 )}
@@ -703,7 +705,7 @@ function getMemberDepartment(member) {
         || "";
 }
 
-function DashboardContent({ stats, logs, loading, error, onAddAdmin, onOpenAdminDashboard, onViewLogs }) {
+function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs }) {
     const [networkRange, setNetworkRange] = useState("24H");
 
     if (loading) {
@@ -850,28 +852,12 @@ function DashboardContent({ stats, logs, loading, error, onAddAdmin, onOpenAdmin
 
                         <button
                             type="button"
-                            onClick={onOpenAdminDashboard}
-                            className="flex w-full items-center gap-3 rounded-[8px] border border-[#39a80f] bg-green-50 px-5 py-4 text-left text-base font-bold text-[#003f17] transition hover:bg-green-100"
-                        >
-                            <Icon name="suitcase" className="h-5 w-5" />
-                            Open Admin Dashboard
-                        </button>
-
-                        <button
-                            type="button"
                             onClick={handleGenerateReport}
                             className="flex w-full items-center gap-3 rounded-[8px] border border-slate-400 px-5 py-4 text-left text-base font-bold text-slate-800 transition hover:bg-slate-50"
                         >
                             <Icon name="fileText" className="h-5 w-5 text-[#003f17]" />
                             Generate Report
                         </button>
-                    </div>
-
-                    <div className="mt-7 rounded-[8px] bg-[#dbe8db] p-5">
-                        <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-700">Pro Tip</p>
-                        <p className="mt-2 text-[13px] italic leading-relaxed text-slate-600">
-                            Monthly performance audits can be automated in System Settings.
-                        </p>
                     </div>
                 </div>
             </div>
@@ -1460,4 +1446,3 @@ function AuditLogsContent({ logs, loading, error }) {
         </div>
     );
 }
-
