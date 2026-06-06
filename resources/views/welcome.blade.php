@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Judul disini</title>
+    <title>Sistem Management Data Anggota HMIF</title>
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 </head>
 <body>

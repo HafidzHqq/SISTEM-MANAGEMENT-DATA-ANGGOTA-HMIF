@@ -8,7 +8,7 @@ import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
 
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
+    { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
     { label: "Anggota", icon: iconProfile, to: "/dashboard/anggota" },
     { label: "Acara", icon: iconKegiatan, to: "/dashboard/acara" },
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
@@ -20,6 +20,11 @@ const getAuthHeaders = () => {
         Accept: "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
+};
+
+// Generate QR token — pakai qr_token dari DB, fallback ke event_id
+const generateQrToken = (event) => {
+    return event.qr_token || String(event.event_id);
 };
 
 // Helper: cek apakah event masih aktif
@@ -411,7 +416,7 @@ export default function DashboardAdminAcara() {
                                                 <div className="mt-5 rounded-[18px] border-2 border-[#b6cbf6] bg-white p-3 shadow-sm">
                                                     <img
                                                         key={featuredEvent.event_id}
-                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
+                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(generateQrToken(featuredEvent))}`}
                                                         alt="QR Code"
                                                         className="h-[170px] w-[170px] object-contain"
                                                     />
@@ -421,7 +426,7 @@ export default function DashboardAdminAcara() {
                                                 </p>
                                                 <p className="mt-1 text-center text-[0.78rem] text-slate-300">Scan untuk presensi kehadiran</p>
                                                 <a
-                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(featuredEvent.qr_token || featuredEvent.event_id)}`}
+                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(generateQrToken(featuredEvent))}`}
                                                     download={`QR-${featuredEvent.title}.png`}
                                                     target="_blank"
                                                     rel="noreferrer"
