@@ -235,7 +235,7 @@ export default function DashboardAdminAnggota() {
     const pathname = location.pathname;
 
     const [search, setSearch] = useState("");
-    const [division, setDivision] = useState("Semua Divisi");
+    const [division, setDivision] = useState("Semua Departemen");
     const [year, setYear] = useState("Semua Angkatan");
     const [status, setStatus] = useState("Semua Status");
     const [rows, setRows] = useState([]);
@@ -270,7 +270,7 @@ export default function DashboardAdminAnggota() {
             const matchesSearch = search
                 ? `${row.nama} ${row.nim} ${row.roleLabel}`.toLowerCase().includes(search.toLowerCase())
                 : true;
-            const matchesDivision = division === "Semua Divisi" || row.divisi === division;
+            const matchesDivision = division === "Semua Departemen" || row.divisi === division;
             const matchesYear = year === "Semua Angkatan" || String(row.angkatan) === String(year);
             const matchesStatus = status === "Semua Status" || row.status === status;
             return matchesSearch && matchesDivision && matchesYear && matchesStatus;
@@ -678,7 +678,7 @@ export default function DashboardAdminAnggota() {
                                     onChange={(e) => setDivision(e.target.value)}
                                     className="h-12 w-full min-w-0 rounded-[6px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
                                 >
-                                    <option>Semua Divisi</option>
+                                    <option>Semua Departemen</option>
                                     <option>Technopreneur</option>
                                     <option>Eksternal</option>
                                     <option>Internal</option>
@@ -711,7 +711,7 @@ export default function DashboardAdminAnggota() {
                                     type="button"
                                     onClick={() => {
                                         setSearch("");
-                                        setDivision("Semua Divisi");
+                                        setDivision("Semua Departemen");
                                         setYear("Semua Angkatan");
                                         setStatus("Semua Status");
                                         setCurrentPage(1);
