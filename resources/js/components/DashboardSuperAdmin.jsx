@@ -331,10 +331,6 @@ export default function DashboardSuperAdmin() {
                         logs={auditLogs}
                         loading={loadingStats}
                         error={statsError}
-                        onAddAdmin={() => {
-                            setActiveMenu("admins");
-                            setShowAddAdmin(true);
-                        }}
                         onViewLogs={() => setActiveMenu("audit")}
                     />
                 )}
@@ -624,29 +620,6 @@ function downloadCsv(filename, rows) {
     URL.revokeObjectURL(url);
 }
 
-function buildBarData(stats, range = "24H") {
-    const chartData = stats?.charts?.attendance_trend_by_event || [];
-    const maxBars = range === "7D" ? 7 : 12;
-
-    if (chartData.length > 0) {
-        return chartData.slice(0, maxBars).map((event, index) => ({
-            key: event.event_id || `${event.title}-${index}`,
-            title: `${range} - ${event.title || "Event"}: ${event.total_present ?? 0}`,
-            height: Math.max(18, Math.min(96, (event.total_present || 1) * (range === "7D" ? 10 : 12))),
-        }));
-    }
-
-    const samples = range === "7D"
-        ? [38, 54, 46, 72, 64, 80, 58]
-        : [45, 58, 30, 70, 55, 78, 50, 42, 66, 82, 55, 38];
-
-    return samples.map((height, index) => ({
-        key: `${range}-${index}`,
-        title: `${range} sample activity`,
-        height,
-    }));
-}
-
 function buildDashboardLogs(logs) {
     if (logs?.length > 0) {
         return logs.slice(0, 3).map((log, index) => ({
@@ -705,8 +678,7 @@ function getMemberDepartment(member) {
         || "";
 }
 
-function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs }) {
-    const [networkRange, setNetworkRange] = useState("24H");
+function DashboardContent({ stats, logs, loading, error, onViewLogs }) {
 
     if (loading) {
         return (
@@ -753,28 +725,6 @@ function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs 
         },
     ];
 
-    const handleGenerateReport = () => {
-        const reportDate = new Date().toISOString().slice(0, 10);
-        const recentLogs = buildDashboardLogs(logs);
-        const rows = [
-            ["Dashboard Report"],
-            ["Generated At", new Date().toLocaleString("id-ID")],
-            [],
-            ["Metric", "Value"],
-            ["Total Members", summary.total_members ?? 0],
-            ["Active Admins", summary.total_admins ?? 0],
-            ["Total Events", summary.total_events ?? 0],
-            ["Attendance Rate", `${summary.attendance_rate ?? 0}%`],
-            ["Network Range", networkRange],
-            [],
-            ["Recent Activity Logs"],
-            ["Action", "Entity", "Timestamp", "Status"],
-            ...recentLogs.map((log) => [log.action, log.entity, log.timestamp, log.status]),
-        ];
-
-        downloadCsv(`dashboard-report-${reportDate}.csv`, rows);
-    };
-
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -797,69 +747,6 @@ function DashboardContent({ stats, logs, loading, error, onAddAdmin, onViewLogs 
                         </h3>
                     </div>
                 ))}
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[2fr_0.62fr]">
-                <div className="rounded-[10px] bg-white p-5 shadow-sm">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h2 className="text-xl font-extrabold text-[#003f17]">Network Stability</h2>
-                            <p className="mt-1 text-[12px] text-slate-600">Real-time system performance across all nodes.</p>
-                        </div>
-                        <div className="flex rounded-full bg-slate-100 p-1 text-[11px] font-extrabold text-slate-700">
-                            {["24H", "7D"].map((range) => (
-                                <button
-                                    key={range}
-                                    type="button"
-                                    onClick={() => setNetworkRange(range)}
-                                    className={`rounded-full px-4 py-1 transition ${
-                                        networkRange === range
-                                            ? "bg-white text-slate-900 shadow-sm"
-                                            : "text-slate-600 hover:text-slate-900"
-                                    }`}
-                                >
-                                    {range}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mt-5 flex h-[225px] items-end gap-2 overflow-hidden bg-gradient-to-b from-[#39a80f] via-[#82bd72] to-white p-5">
-                        {buildBarData(stats, networkRange).map((event) => (
-                            <div
-                                key={event.key}
-                                className="flex-1 rounded-t-[3px] bg-green-950/15"
-                                style={{
-                                    height: `${event.height}%`,
-                                }}
-                                title={event.title}
-                            />
-                        ))}
-                    </div>
-                </div>
-
-                <div className="rounded-[10px] bg-white p-5 shadow-sm">
-                    <h2 className="text-xl font-extrabold text-[#003f17]">Quick Actions</h2>
-
-                    <div className="mt-5 space-y-4">
-                        <button
-                            onClick={onAddAdmin}
-                            className="flex w-full items-center gap-3 rounded-[8px] bg-[#39a80f] px-5 py-4 text-left text-base font-bold text-white transition hover:bg-[#2f8d0d]"
-                        >
-                            <Icon name="userPlus" className="h-5 w-5" />
-                            Add New Admin
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={handleGenerateReport}
-                            className="flex w-full items-center gap-3 rounded-[8px] border border-slate-400 px-5 py-4 text-left text-base font-bold text-slate-800 transition hover:bg-slate-50"
-                        >
-                            <Icon name="fileText" className="h-5 w-5 text-[#003f17]" />
-                            Generate Report
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <div className="overflow-hidden rounded-[10px] bg-white shadow-sm">
