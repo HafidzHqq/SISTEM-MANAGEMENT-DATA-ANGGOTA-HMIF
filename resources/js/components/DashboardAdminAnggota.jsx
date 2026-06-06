@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
@@ -8,6 +8,9 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
+import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
+import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png";
+import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
@@ -19,8 +22,8 @@ const NAV_ITEMS = [
 const METRIC_CONFIG = [
     {
         label: "Total Anggota",
-        key: "total",
-        help: "Live",
+        value: "1,248",
+        help: "+12% peningkatan",
         icon: iconTotalAnggota,
         valueClass: "text-[#1f5e22]",
         accentClass: "bg-[#1f5e22]",
@@ -54,7 +57,23 @@ const METRIC_CONFIG = [
         iconBgClass: "bg-blue-50",
         valueClass: "text-blue-500",
         accentClass: "bg-blue-500",
+        accentWidth: "w-[43px]",
     },
+];
+
+const SAMPLE_ROWS = [
+    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "Eksternal", jabatan: "Ketua Divisi", status: "TETAP", email: "aditya.k@hmif.org" },
+    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "siti.p@hmif.org" },
+    { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "rizky.r@hmif.org" },
+    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
+    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
+    { id: 6, nim: "124140090", nama: "Ridho Maulana Saputa", kontak: "0813-6728-9083", angkatan: 2024, divisi: "Technopreneur", jabatan: "Staff", status: "MUDA", email: "ridho.124140090@student.itera.ac.id" },
+    { id: 7, nim: "121140011", nama: "Nadia Putri", kontak: "0812-3456-7895", angkatan: 2021, divisi: "Internal", jabatan: "Bendahara", status: "TETAP", email: "nadia.p@hmif.org" },
+    { id: 8, nim: "122140078", nama: "Bagas Pratama", kontak: "0812-3456-7896", angkatan: 2022, divisi: "Eksternal", jabatan: "Staff", status: "TETAP", email: "bagas.p@hmif.org" },
+    { id: 9, nim: "123140044", nama: "Dewi Kartika", kontak: "0812-3456-7897", angkatan: 2023, divisi: "Minat Bakat", jabatan: "Staff", status: "MUDA", email: "dewi.k@hmif.org" },
+    { id: 10, nim: "120140066", nama: "Raka Mahendra", kontak: "0812-3456-7898", angkatan: 2020, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "raka.m@hmif.org" },
+    { id: 11, nim: "124140099", nama: "Maya Salsabila", kontak: "0812-3456-7899", angkatan: 2024, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "maya.s@hmif.org" },
+    { id: 12, nim: "121140073", nama: "Aldi Firmansyah", kontak: "0812-3456-7900", angkatan: 2021, divisi: "Technopreneur", jabatan: "Koordinator", status: "TETAP", email: "aldi.f@hmif.org" },
 ];
 
 const statusClasses = {
@@ -208,7 +227,7 @@ function MetricCard({ metric }) {
             </div>
             <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{metric.label}</p>
             <h2 className={`mt-1 text-[2.3rem] font-extrabold leading-none ${metric.valueClass}`}>{metric.value}</h2>
-            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth }} />
+            <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth || "82px" }} />
         </div>
     );
 }
@@ -237,9 +256,12 @@ export default function DashboardAdminAnggota() {
     const [isApiBacked, setIsApiBacked] = useState(false);
     const [isLoadingMembers, setIsLoadingMembers] = useState(false);
     const [memberActionError, setMemberActionError] = useState("");
+    const [user, setUser] = useState(null);
+    const [fotoUrl, setFotoUrl] = useState(null);
+    const [userDivision, setUserDivision] = useState("Admin");
 
-    const userName = localStorage.getItem("name") || "Admin User";
-    const nim = localStorage.getItem("nim") || "124140056";
+    const userName = user?.name || localStorage.getItem("name") || "Admin User";
+    const nim = user?.nim || localStorage.getItem("nim") || "124140056";
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -282,10 +304,22 @@ export default function DashboardAdminAnggota() {
                 const data = await response.json();
                 if (!isActive) return;
 
-                setRows(Array.isArray(data) ? data.map(mapMemberRow) : []);
-                setSelectedIds([]);
-                setCurrentPage(1);
-                setIsApiBacked(true);
+                const memberArray = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data.data)
+                        ? data.data
+                        : Array.isArray(data.members)
+                            ? data.members
+                            : null;
+
+                if (memberArray) {
+                    setRows(memberArray.map(mapMemberRow));
+                    setSelectedIds([]);
+                    setCurrentPage(1);
+                    setIsApiBacked(true);
+                } else {
+                    throw new Error("Data anggota tidak sesuai format.");
+                }
             } catch (error) {
                 if (!isActive) return;
                 setIsApiBacked(false);
@@ -305,6 +339,75 @@ export default function DashboardAdminAnggota() {
             window.removeEventListener("focus", fetchMembers);
         };
     }, []);
+
+    React.useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+
+        fetch("/api/me", {
+            headers: getAuthHeaders(),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Tidak dapat memuat profil pengguna.");
+                return res.json();
+            })
+            .then((data) => {
+                setUser(data);
+                setFotoUrl(data?.profile?.foto ? `/storage/${data.profile.foto}` : null);
+                setUserDivision(data?.profile?.departemen || data?.profile?.Departemen || "Admin");
+            })
+            .catch(() => {
+                // ignore; still fallback to localStorage values
+            });
+    }, []);
+
+    const memberStats = useMemo(() => {
+        const totalAnggota = rows.length;
+        const anggotaMuda = rows.filter((row) => row.status === "MUDA").length;
+        const anggotaTetap = rows.filter((row) => row.status === "TETAP").length;
+        const luarBiasa = rows.filter((row) => row.status === "LUAR BIASA").length;
+
+        return { totalAnggota, anggotaMuda, anggotaTetap, luarBiasa };
+    }, [rows]);
+
+    const metrics = [
+        {
+            label: "Total Anggota",
+            value: new Intl.NumberFormat("id-ID").format(memberStats.totalAnggota),
+            help: "",
+            icon: iconTotalAnggota,
+            valueClass: "text-[#1f5e22]",
+            accentClass: "bg-[#1f5e22]",
+            accentWidth: "w-[82px]",
+        },
+        {
+            label: "Anggota Muda",
+            value: new Intl.NumberFormat("id-ID").format(memberStats.anggotaMuda),
+            help: "",
+            icon: iconAcaraAktif,
+            valueClass: "text-[#f5bf17]",
+            accentClass: "bg-[#f5bf17]",
+            accentWidth: "w-[82px]",
+        },
+        {
+            label: "Anggota Tetap",
+            value: new Intl.NumberFormat("id-ID").format(memberStats.anggotaTetap),
+            help: "",
+            icon: iconHadirHariIni,
+            valueClass: "text-emerald-600",
+            accentClass: "bg-emerald-500",
+            accentWidth: "w-[145px]",
+        },
+        {
+            label: "Luar Biasa",
+            value: new Intl.NumberFormat("id-ID").format(memberStats.luarBiasa),
+            help: "",
+            icon: iconPersentaseKeaktifan,
+            valueClass: "text-blue-500",
+            accentClass: "bg-blue-500",
+            accentWidth: "w-[43px]",
+        },
+    ];
 
     const totalPages = Math.max(1, Math.ceil(filteredRows.length / ITEMS_PER_PAGE));
     const safePage = Math.min(currentPage, totalPages);
@@ -535,7 +638,7 @@ export default function DashboardAdminAnggota() {
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#e7f5e5] font-sans text-slate-900">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[252px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
+                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
                         <img
                             src={hmifLogo}
@@ -548,17 +651,17 @@ export default function DashboardAdminAnggota() {
                         </p>
                     </div>
 
-                    <nav className="flex-1 px-4 pt-2 space-y-2">
+                    <nav className="flex-1 px-3 pt-4 space-y-1">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.to;
                             return (
                                 <Link
                                     key={item.label}
                                     to={item.to}
-                                    className={`group relative flex items-center gap-3 px-4 py-3.5 text-[0.98rem] font-medium transition ${
+                                    className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
                                         isActive
-                                            ? "bg-white/10 text-white before:absolute before:right-0 before:top-0 before:h-full before:w-1 before:bg-[#7bd02c]"
-                                            : "text-white/75 hover:bg-white/10 hover:text-white"
+                                            ? "bg-white/15 text-white"
+                                            : "text-white/65 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
                                     <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
@@ -569,53 +672,42 @@ export default function DashboardAdminAnggota() {
                     </nav>
 
                     <div className="p-4">
-                        <div className="rounded-[14px] bg-white/10 px-4 py-3 shadow-inner shadow-black/10">
-                            <div className="flex items-center gap-3">
-                                <div className="h-11 w-11 overflow-hidden rounded-full border border-white/20 bg-white/10">
-                                    <img src={fotoProfile} alt="Admin" className="h-full w-full object-cover" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-white">{userName}</p>
-                                    <p className="truncate text-[0.7rem] text-white/55">{nim}</p>
-                                </div>
-                            </div>
+                        <div className="bg-white/10 rounded-2xl px-4 py-3">
+                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
+                            <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
+                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">
+                                ⤷ Logout
+                            </button>
                         </div>
                     </div>
                 </aside>
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[252px]">
-                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
+                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
+                    <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">
-                            Logout
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
+                        </div>
                     </header>
 
-                    <header className="sticky top-0 z-40 hidden items-center justify-between border-b border-slate-200/70 bg-white px-8 py-4 md:flex">
-                        <div>
-                            <p className="text-[1.05rem] font-semibold text-slate-800">Member Management</p>
-                        </div>
-                        <div className="flex items-center gap-4 text-slate-600">
-                            <button className="transition hover:text-slate-900" aria-label="Notifikasi">
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={1.8}
-                                        d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                    />
-                                </svg>
-                            </button>
-                            <span className="h-7 w-px bg-slate-300" />
-                            <button onClick={handleLogout} className="flex items-center gap-2 text-[0.98rem] transition hover:text-slate-900">
+                    <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
+                        <h2 className="text-[1.05rem] font-bold text-gray-800">Member Management</h2>
+                        <div className="flex items-center gap-4">
+                            <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">
+                                {userDivision}
+                            </span>
+                            <div className="h-5 w-px bg-gray-200" />
+                            <button className="text-gray-400 hover:text-gray-600 transition" aria-label="Notifikasi">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15 17l5-5m0 0l-5-5m5 5H9m4 8a8 8 0 100-16" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
-                                Logout
                             </button>
+                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                         </div>
                     </header>
 
