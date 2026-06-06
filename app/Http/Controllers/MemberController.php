@@ -14,11 +14,13 @@ use App\Models\AuditLog;
 
 class MemberController extends Controller
 {
+    private const MEMBER_DIRECTORY_ROLES = ['anggota', 'admin', 'super_admin'];
+
     // GET /api/members — ambil semua anggota beserta profilnya
     public function index(Request $request)
     {
         $query = User::with('memberProfile')
-            ->where('role', 'anggota');
+            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES);
 
         // Filter by departemen
         if ($request->has('departemen')) {
@@ -57,7 +59,7 @@ class MemberController extends Controller
     {
         $user = User::with('memberProfile')
             ->where('user_id', $id)
-            ->where('role', 'anggota')
+            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES)
             ->first();
 
         if (!$user) {
@@ -70,7 +72,9 @@ class MemberController extends Controller
     // PUT /api/members/{id} — update data anggota oleh admin
     public function update(Request $request, $id)
     {
-        $user = User::where('user_id', $id)->where('role', 'anggota')->first();
+        $user = User::where('user_id', $id)
+            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES)
+            ->first();
 
         if (!$user) {
             return response()->json(['message' => 'Anggota tidak ditemukan'], 404);
@@ -113,10 +117,18 @@ class MemberController extends Controller
     // DELETE /api/members/{id} — hapus anggota
     public function destroy(Request $request, $id)
     {
-        $user = User::where('user_id', $id)->where('role', 'anggota')->first();
+        $user = User::where('user_id', $id)
+            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES)
+            ->first();
 
         if (!$user) {
             return response()->json(['message' => 'Anggota tidak ditemukan'], 404);
+        }
+
+        if (in_array($user->role, ['admin', 'super_admin'], true)) {
+            return response()->json([
+                'message' => 'Admin dan super admin tidak dapat dihapus dari manajemen anggota. Kelola aksesnya melalui panel super admin.',
+            ], 403);
         }
 
         AuditLog::catat($request->user()->user_id, 'delete', 'member', $id);
