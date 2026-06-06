@@ -13,7 +13,7 @@ import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png"
 import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
 
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+    { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
     { label: "Anggota", icon: iconProfile, to: "/dashboard/anggota" },
     { label: "Acara", icon: iconKegiatan, to: "/dashboard/acara" },
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
