@@ -83,6 +83,18 @@ const statusClasses = {
     "NON-ANGGOTA": "bg-slate-200 text-slate-600",
 };
 
+const roleClasses = {
+    anggota: "bg-slate-100 text-slate-600",
+    admin: "bg-emerald-100 text-emerald-700",
+    super_admin: "bg-[#1f5e22] text-white",
+};
+
+const roleLabels = {
+    anggota: "Anggota",
+    admin: "Admin",
+    super_admin: "Super Admin",
+};
+
 const JABATAN_OPTIONS = [
     "-",
     "Ketua Departemen",
@@ -178,6 +190,7 @@ const getStatusBadgeLabel = (status) => {
 
 const mapMemberRow = (member, index) => {
     const profile = member.member_profile || member.memberProfile || member.profile || {};
+    const role = member.role || "anggota";
 
     return {
         id: member.user_id ?? member.id ?? index + 1,
@@ -188,6 +201,9 @@ const mapMemberRow = (member, index) => {
         divisi: profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-",
         jabatan: normalizeJabatan(profile.jabatan ?? member.jabatan),
         status: normalizeMemberStatus(profile.status_keanggotaan ?? member.status_keanggotaan),
+        role,
+        roleLabel: roleLabels[role] || role,
+        canDelete: role === "anggota",
         email: member.email ?? "-",
     };
 };
@@ -273,7 +289,9 @@ export default function DashboardAdminAnggota() {
 
     const filteredRows = useMemo(() => {
         return rows.filter((row) => {
-            const matchesSearch = search ? `${row.nama} ${row.nim}`.toLowerCase().includes(search.toLowerCase()) : true;
+            const matchesSearch = search
+                ? `${row.nama} ${row.nim} ${row.roleLabel}`.toLowerCase().includes(search.toLowerCase())
+                : true;
             const matchesDivision = division === "Semua Departemen" || row.divisi === division;
             const matchesYear = year === "Semua Angkatan" || String(row.angkatan) === String(year);
             const matchesStatus = status === "Semua Status" || row.status === status;
@@ -415,7 +433,7 @@ export default function DashboardAdminAnggota() {
     const endIndex = Math.min(safePage * ITEMS_PER_PAGE, filteredRows.length);
     const paginatedRows = filteredRows.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
     const paginationPages = getPaginationPages(safePage, totalPages);
-    const visibleIds = paginatedRows.map((row) => row.id);
+    const visibleIds = paginatedRows.filter((row) => row.canDelete).map((row) => row.id);
     const isAllVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
     const memberMetrics = useMemo(() => {
         const total = rows.length;
@@ -450,6 +468,9 @@ export default function DashboardAdminAnggota() {
     }, [currentPage, totalPages]);
 
     const handleToggleRow = (id) => {
+        const row = rows.find((item) => item.id === id);
+        if (!row?.canDelete) return;
+
         setSelectedIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]));
     };
 
@@ -465,7 +486,7 @@ export default function DashboardAdminAnggota() {
     };
 
     const handleExportCsv = () => {
-        const headers = ["No", "NIM", "Nama", "Kontak", "Email", "Angkatan", "Departemen", "Jabatan", "Status"];
+        const headers = ["No", "NIM", "Nama", "Kontak", "Email", "Angkatan", "Departemen", "Jabatan", "Status", "Akses Sistem"];
         const csvRows = [
             headers.map(csvEscape).join(","),
             ...filteredRows.map((row, index) =>
@@ -479,6 +500,7 @@ export default function DashboardAdminAnggota() {
                     row.divisi,
                     row.jabatan,
                     row.status,
+                    row.roleLabel,
                 ].map(csvEscape).join(",")
             ),
         ];
@@ -496,6 +518,11 @@ export default function DashboardAdminAnggota() {
     const handleDeleteMember = async (id) => {
         const member = rows.find((row) => row.id === id);
         if (!member) return;
+
+        if (!member.canDelete) {
+            setMemberActionError("Admin dan super admin tidak dapat dihapus dari manajemen anggota. Kelola aksesnya melalui panel super admin.");
+            return;
+        }
 
         const confirmed = window.confirm(`Hapus anggota ${member.nama}?`);
         if (!confirmed) return;
@@ -528,9 +555,10 @@ export default function DashboardAdminAnggota() {
     };
 
     const handleBulkDelete = async () => {
-        if (selectedIds.length === 0) return;
+        const deletableSelectedIds = selectedIds.filter((id) => rows.some((row) => row.id === id && row.canDelete));
+        if (deletableSelectedIds.length === 0) return;
 
-        const confirmed = window.confirm(`Hapus ${selectedIds.length} anggota terpilih?`);
+        const confirmed = window.confirm(`Hapus ${deletableSelectedIds.length} anggota terpilih?`);
         if (!confirmed) return;
 
         setMemberActionError("");
@@ -538,7 +566,7 @@ export default function DashboardAdminAnggota() {
         if (isApiBacked) {
             const failedIds = [];
 
-            for (const id of selectedIds) {
+            for (const id of deletableSelectedIds) {
                 try {
                     const response = await fetch(`/api/members/${id}`, {
                         method: "DELETE",
@@ -553,7 +581,7 @@ export default function DashboardAdminAnggota() {
                 }
             }
 
-            const deletedIds = selectedIds.filter((id) => !failedIds.includes(id));
+            const deletedIds = deletableSelectedIds.filter((id) => !failedIds.includes(id));
             setRows((current) => current.filter((row) => !deletedIds.includes(row.id)));
             setSelectedIds(failedIds);
 
@@ -564,7 +592,7 @@ export default function DashboardAdminAnggota() {
             return;
         }
 
-        setRows((current) => current.filter((row) => !selectedIds.includes(row.id)));
+        setRows((current) => current.filter((row) => !deletableSelectedIds.includes(row.id)));
         setSelectedIds([]);
     };
 
@@ -838,6 +866,7 @@ export default function DashboardAdminAnggota() {
                                                     className="h-4 w-4 rounded border-slate-300 text-emerald-600"
                                                     checked={isAllVisibleSelected}
                                                     onChange={handleToggleAll}
+                                                    disabled={visibleIds.length === 0}
                                                 />
                                             </th>
                                             <th className="w-[125px] py-4 px-4">NIM</th>
@@ -863,14 +892,19 @@ export default function DashboardAdminAnggota() {
                                                 <td className="py-5 pl-5 pr-2 align-middle">
                                                     <input
                                                         type="checkbox"
-                                                        className="h-4 w-4 rounded border-slate-300 text-emerald-600"
+                                                        className="h-4 w-4 rounded border-slate-300 text-emerald-600 disabled:cursor-not-allowed disabled:opacity-40"
                                                         checked={selectedIds.includes(row.id)}
                                                         onChange={() => handleToggleRow(row.id)}
+                                                        disabled={!row.canDelete}
+                                                        title={row.canDelete ? "Pilih anggota" : "Admin dan super admin tidak bisa dihapus massal"}
                                                     />
                                                 </td>
                                                 <td className="py-5 px-4 align-middle font-medium text-[#8fb9ff]">{row.nim}</td>
                                                 <td className="py-5 px-4 align-middle font-semibold text-slate-800">
                                                     <div className="truncate" title={row.nama}>{row.nama}</div>
+                                                    <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-[0.1em] ${roleClasses[row.role] || roleClasses.anggota}`}>
+                                                        {row.roleLabel}
+                                                    </span>
                                                 </td>
                                                 <td className="py-5 px-4 align-middle text-slate-600">
                                                     <div className="truncate" title={row.kontak}>{row.kontak}</div>
@@ -903,10 +937,14 @@ export default function DashboardAdminAnggota() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleDeleteMember(row.id)}
-                                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-red-50 transition"
+                                                            disabled={!row.canDelete}
+                                                            title={row.canDelete ? `Hapus ${row.nama}` : "Admin dan super admin dikelola lewat panel super admin"}
+                                                            className={`inline-flex h-8 w-8 items-center justify-center rounded-md transition ${
+                                                                row.canDelete ? "hover:bg-red-50" : "cursor-not-allowed opacity-40"
+                                                            }`}
                                                             aria-label={`Hapus ${row.nama}`}
                                                         >
-                                                            <svg className="h-4.5 w-4.5 text-slate-400 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className={`h-4.5 w-4.5 ${row.canDelete ? "text-slate-400 hover:text-red-500" : "text-slate-300"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 7h12M9 7V5h6v2m-8 0h10l-1 12H8L7 7z" />
                                                             </svg>
                                                         </button>
