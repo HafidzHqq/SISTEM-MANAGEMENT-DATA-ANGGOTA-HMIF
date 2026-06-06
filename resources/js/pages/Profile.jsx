@@ -14,11 +14,11 @@ const JABATAN_BY_DEPARTEMEN = {
     "Kesekjenan": ["Ketua Himpunan", "Sekretaris Jenderal", "Sekretaris Umum", "Bendahara Umum"],
     "Senator": ["Senator", "Sekretaris Umum", "Staff"],
     "DPA": ["Koordinator DPA", "Sekretaris Jenderal", "Sekretaris Umum", "Ketua Komisi", "Staff Ahli", "Staff"],
-    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
-    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
-    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
-    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
-    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen", "Staff Ahli", "Staff"],
+    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
 };
 
 export default function Profile() {
@@ -29,6 +29,8 @@ export default function Profile() {
     const toastTimer = React.useRef(null);
     const [fotoUrl, setFotoUrl] = React.useState(null);
     const [uploadingFoto, setUploadingFoto] = React.useState(false);
+    const [fotoFile, setFotoFile] = React.useState(null);
+    const [fotoPreview, setFotoPreview] = React.useState(null);
 
     const showToast = () => {
         setToast(true);
@@ -96,7 +98,8 @@ export default function Profile() {
     const hasChanges =
         form.departemen !== savedForm.departemen ||
         form.jabatan !== savedForm.jabatan ||
-        form.no_telepon !== savedForm.no_telepon;
+        form.no_telepon !== savedForm.no_telepon ||
+        fotoFile !== null;
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -114,33 +117,11 @@ export default function Profile() {
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFotoChange = async (e) => {
+    const handleFotoChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        setUploadingFoto(true);
-        const token = localStorage.getItem("auth_token");
-        const formData = new FormData();
-        formData.append("foto", file);
-
-        try {
-            const res = await fetch("/api/profile/foto", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Accept": "application/json",
-                },
-                body: formData,
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || "Gagal upload foto");
-            setFotoUrl(data.foto_url);
-            showToast();
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setUploadingFoto(false);
-        }
+        setFotoFile(file);
+        setFotoPreview(URL.createObjectURL(file));
     };
 
     const handleSave = async () => {
@@ -150,6 +131,26 @@ export default function Profile() {
         setSaving(true);
         const token = localStorage.getItem("auth_token");
         try {
+            // Upload foto dulu kalau ada
+            if (fotoFile) {
+                const formData = new FormData();
+                formData.append("foto", fotoFile);
+                const fotoRes = await fetch("/api/profile/foto", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Accept": "application/json",
+                    },
+                    body: formData,
+                });
+                const fotoData = await fotoRes.json();
+                if (!fotoRes.ok) throw new Error(fotoData.message || "Gagal upload foto");
+                setFotoUrl(fotoData.foto_url);
+                setFotoFile(null);
+                setFotoPreview(null);
+            }
+
+            // Save data profile
             const res = await fetch("/api/profile", {
                 method: "PUT",
                 headers: {
@@ -166,7 +167,7 @@ export default function Profile() {
             setSavedForm({ ...form });
             showToast();
         } catch (err) {
-
+            console.error(err);
         } finally {
             setSaving(false);
         }
@@ -246,7 +247,7 @@ export default function Profile() {
                         <button className="text-gray-400 hover:text-gray-600 transition">
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                         </button>
-                        <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                        <img src={fotoPreview || fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                     </div>
                 </header>
 
@@ -279,7 +280,7 @@ export default function Profile() {
                         <div className="flex flex-col items-center md:hidden mb-2">
                             <div className="relative mb-3">
                                 <img
-                                    src={fotoUrl || fotoProfile}
+                                    src={fotoPreview || fotoUrl || fotoProfile}
                                     alt="Profile"
                                     className="h-24 w-24 rounded-2xl object-cover shadow"
                                 />
@@ -296,7 +297,7 @@ export default function Profile() {
                         </div>
                         <div className="hidden md:flex items-center gap-6">
                             <div className="relative">
-                                <img src={fotoUrl || fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
+                                <img src={fotoPreview || fotoUrl || fotoProfile} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" />
                                 <label className={`absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer ${uploadingFoto ? "opacity-50" : ""}`}>
                                     <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
