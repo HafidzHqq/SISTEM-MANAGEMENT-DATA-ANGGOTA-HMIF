@@ -6,18 +6,6 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 
-const ATTENDED_EVENTS = [
-    { name: "National Tech Seminar 2024", date: "Oct 12, 2024", division: "Academic Division" },
-    { name: "HMIF Internal Workshop", date: "Oct 05, 2024", division: "Media & Information" },
-    { name: "Career Talk: UI/UX Design", date: "Sep 28, 2024", division: "External Affairs" },
-];
-
-const UPCOMING_ACTIVITIES = [
-    { name: "Annual General Meeting", time: "Tomorrow, 14:00", location: "Hall A" },
-    { name: "Code Jam: Semester Finale", time: "Oct 25, 09:00", location: "Lab 3" },
-    { name: "Internal Bonding Night", time: "Nov 02, 18:30", location: "Student Lounge" },
-];
-
 const DEPARTEMEN_LIST = [
     "Kesekjenan", "Senator", "DPA", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo",
 ];
@@ -57,30 +45,46 @@ export default function Profile() {
     const [savedForm, setSavedForm] = React.useState({ ...form });
     const [phoneError, setPhoneError] = React.useState("");
 
+    const [attendedEvents, setAttendedEvents] = React.useState([]);
+    const [upcomingActivities, setUpcomingActivities] = React.useState([]);
+
     React.useEffect(() => {
         const token = localStorage.getItem("auth_token");
-        fetch("/api/me", {
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "application/json",
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            setProfile(data);
-            setFotoUrl(data?.profile?.foto
-                ? `/storage/${data.profile.foto}`
-                : null
-            );
-            const initial = {
-                departemen: data?.profile?.departemen || "",
-                jabatan: data?.profile?.jabatan || "",
-                no_telepon: data?.profile?.no_telepon || "",
-            };
-            setForm(initial);
-            setSavedForm(initial);
-        })
-        .catch(err => console.error("Gagal fetch profil:", err));
+        const headers = {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json",
+        };
+
+        // Fetch profile
+        fetch("/api/me", { headers })
+            .then(res => res.json())
+            .then(data => {
+                setProfile(data);
+                setFotoUrl(data?.profile?.foto
+                    ? `/storage/${data.profile.foto}`
+                    : null
+                );
+                const initial = {
+                    departemen: data?.profile?.departemen || "",
+                    jabatan: data?.profile?.jabatan || "",
+                    no_telepon: data?.profile?.no_telepon || "",
+                };
+                setForm(initial);
+                setSavedForm(initial);
+            })
+            .catch(err => console.error("Gagal fetch profil:", err));
+
+        // Fetch attended events
+        fetch("/api/attendances/me", { headers })
+            .then(res => res.json())
+            .then(data => setAttendedEvents(data))
+            .catch(err => console.error("Gagal fetch history:", err));
+
+        // Fetch upcoming events
+        fetch("/api/events", { headers })
+            .then(res => res.json())
+            .then(data => setUpcomingActivities(data))
+            .catch(err => console.error("Gagal fetch events:", err));
     }, []);
 
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
@@ -242,7 +246,7 @@ export default function Profile() {
                         <button className="text-gray-400 hover:text-gray-600 transition">
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                         </button>
-                        <img src={fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                        <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                     </div>
                 </header>
 
@@ -453,20 +457,20 @@ export default function Profile() {
                                 <h3 className="text-base font-bold text-gray-800">Attended Events</h3>
                             </div>
                             <div className="divide-y divide-gray-100">
-                                {ATTENDED_EVENTS.map((ev, i) => (
-                                    <div key={i} className="flex items-center justify-between py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                                <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-semibold text-gray-800">{ev.name}</p>
-                                                <p className="text-[0.72rem] text-gray-400">{ev.date} • {ev.division}</p>
-                                            </div>
+                            {attendedEvents.slice(0, 3).map((ev, i) => (
+                                <div key={i} className="flex items-center justify-between py-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                            <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                                         </div>
-                                        <span className="text-[0.62rem] font-bold tracking-wider text-green-600 border border-green-300 bg-green-50 px-2.5 py-1 rounded-full uppercase">Verified</span>
+                                        <div>
+                                            <p className="text-sm font-semibold text-gray-800">{ev.event_name}</p>
+                                            <p className="text-[0.72rem] text-gray-400">{ev.date}</p>
+                                        </div>
                                     </div>
-                                ))}
+                                    <span className="text-[0.62rem] font-bold tracking-wider text-green-600 border border-green-300 bg-green-50 px-2.5 py-1 rounded-full uppercase">Verified</span>
+                                </div>
+                            ))}
                             </div>
                         </div>
                         <div className="p-6">
@@ -475,14 +479,14 @@ export default function Profile() {
                                 <h3 className="text-base font-bold text-gray-800">Upcoming Activities</h3>
                             </div>
                             <div className="divide-y divide-gray-100">
-                                {UPCOMING_ACTIVITIES.map((act, i) => (
+                                {upcomingActivities.slice(0, 3).map((act, i) => (
                                     <div key={i} className="flex items-center gap-3 py-3">
                                         <div className="h-9 w-9 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                                             <svg className="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold text-gray-800">{act.name}</p>
-                                            <p className="text-[0.72rem] text-gray-400">{act.time} • {act.location}</p>
+                                            <p className="text-sm font-semibold text-gray-800">{act.title}</p>
+                                            <p className="text-[0.72rem] text-gray-400">{act.date_time} • {act.location_name || "-"}</p>
                                         </div>
                                     </div>
                                 ))}
