@@ -20,6 +20,7 @@ export default function DashboardAnggota() {
     const [user, setUser] = React.useState(null);
     const [historyData, setHistoryData] = React.useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = React.useState(true);
+    const [fotoUrl, setFotoUrl] = React.useState(null);
 
 React.useEffect(() => {
     const token = localStorage.getItem("auth_token");
@@ -33,7 +34,10 @@ React.useEffect(() => {
         headers
     })
     .then(res => res.json())
-    .then(data => setUser(data))
+    .then(data => {
+    setUser(data);
+    setFotoUrl(data?.profile?.foto ? `/storage/${data.profile.foto}` : null);
+    })
     .catch(err => console.error("Gagal fetch user:", err));
 
     fetch("/api/attendances/me", {
@@ -163,7 +167,7 @@ const attendanceLabel =
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                         </button>
-                        <img src={fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                        <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                     </div>
                 </header>
 
@@ -185,7 +189,7 @@ const attendanceLabel =
                         <div className="bg-white rounded-2xl p-5 shadow-sm relative">
                             {/* Photo — pinned to top-right corner */}
                             <img
-                                src={fotoProfile}
+                                src={fotoUrl || fotoProfile}
                                 alt="Profile"
                                 className="absolute top-4 right-4 h-14 w-14 rounded-xl object-cover shadow"
                             />
