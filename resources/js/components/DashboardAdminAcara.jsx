@@ -33,6 +33,250 @@ const isEventActive = (event) => {
     return end && end >= new Date();
 };
 
+const normalizeDateInput = (value) => {
+    const normalized = String(value ?? "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
+
+    const dateMatch = normalized.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+    if (!dateMatch) return normalized;
+
+    const [, day, month, year] = dateMatch;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
+const normalizeTimeInput = (value) => {
+    const normalized = String(value ?? "").trim();
+    if (/^\d{2}:\d{2}$/.test(normalized)) return normalized;
+
+    const compact = normalized.replace(/\D/g, "");
+    if (compact.length === 4) return `${compact.slice(0, 2)}:${compact.slice(2)}`;
+
+    return normalized;
+};
+
+const isValidDateInput = (value) => {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return false;
+
+    const [, year, month, day] = match.map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+};
+
+const isValidTimeInput = (value) => {
+    const match = value.match(/^(\d{2}):(\d{2})$/);
+    if (!match) return false;
+
+    const [, hour, minute] = match.map(Number);
+    return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+};
+
+const MONTH_LABELS = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+];
+const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+const padNumber = (value) => String(value).padStart(2, "0");
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => padNumber(index));
+const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, index) => padNumber(index));
+
+const parseDateValue = (value) => {
+    if (!isValidDateInput(value)) return null;
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day);
+};
+
+const formatDateValue = (year, month, day) => `${year}-${padNumber(month + 1)}-${padNumber(day)}`;
+
+const formatDateDisplay = (value) => {
+    const date = parseDateValue(value);
+    if (!date) return "Pilih tanggal";
+    return date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+};
+
+function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
+    const [visibleMonth, setVisibleMonth] = useState(() => {
+        const baseDate = parseDateValue(value) || new Date();
+        return new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    });
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const baseDate = parseDateValue(value) || new Date();
+        setVisibleMonth(new Date(baseDate.getFullYear(), baseDate.getMonth(), 1));
+    }, [isOpen, value]);
+
+    const selectedDate = parseDateValue(value);
+    const today = new Date();
+    const year = visibleMonth.getFullYear();
+    const month = visibleMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const changeMonth = (direction) => {
+        setVisibleMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
+    };
+
+    return (
+        <div className={`relative ${isOpen ? "z-50" : ""}`}>
+            <button
+                type="button"
+                onClick={() => onOpenChange(!isOpen)}
+                className="flex w-full items-center justify-between rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-left text-[0.95rem] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+                <span className={value ? "font-medium text-slate-800" : "text-slate-400"}>{formatDateDisplay(value)}</span>
+                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3M4 11h16M6 5h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-full rounded-[14px] border border-emerald-100 bg-emerald-50 p-3 shadow-xl shadow-slate-900/10">
+                    <div className="mb-3 flex items-center justify-between">
+                        <button
+                            type="button"
+                            onClick={() => changeMonth(-1)}
+                            className="rounded-[9px] bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
+                            aria-label="Bulan sebelumnya"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <p className="text-[0.92rem] font-extrabold text-slate-900">
+                            {MONTH_LABELS[month]} {year}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => changeMonth(1)}
+                            className="rounded-[9px] bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
+                            aria-label="Bulan berikutnya"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1 text-center">
+                        {DAY_LABELS.map(day => (
+                            <span key={day} className="py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-slate-400">
+                                {day}
+                            </span>
+                        ))}
+                        {Array.from({ length: firstDay }).map((_, index) => (
+                            <span key={`empty-${index}`} className="h-8" />
+                        ))}
+                        {Array.from({ length: daysInMonth }).map((_, index) => {
+                            const day = index + 1;
+                            const dateValue = formatDateValue(year, month, day);
+                            const isSelected = selectedDate && value === dateValue;
+                            const isToday =
+                                today.getFullYear() === year &&
+                                today.getMonth() === month &&
+                                today.getDate() === day;
+
+                            return (
+                                <button
+                                    type="button"
+                                    key={dateValue}
+                                    onClick={() => {
+                                        onChange(dateValue);
+                                        onOpenChange(false);
+                                    }}
+                                    className={`h-8 rounded-[8px] text-[0.82rem] font-bold transition ${
+                                        isSelected
+                                            ? "bg-emerald-600 text-white shadow-sm"
+                                            : isToday
+                                                ? "bg-white text-emerald-700 ring-1 ring-emerald-200"
+                                                : "text-slate-700 hover:bg-white"
+                                    }`}
+                                >
+                                    {day}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function TimePickerField({ value, placeholder, onChange, isOpen, onOpenChange }) {
+    const [selectedHour = "", selectedMinute = ""] = isValidTimeInput(value) ? value.split(":") : [];
+
+    const selectHour = (hour) => {
+        onChange(`${hour}:${selectedMinute || "00"}`);
+    };
+
+    const selectMinute = (minute) => {
+        onChange(`${selectedHour || "00"}:${minute}`);
+        onOpenChange(false);
+    };
+
+    return (
+        <div className={`relative ${isOpen ? "z-50" : ""}`}>
+            <button
+                type="button"
+                onClick={() => onOpenChange(!isOpen)}
+                className="flex w-full items-center justify-between rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-left text-[0.95rem] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            >
+                <span className={value ? "font-medium text-slate-800" : "text-slate-400"}>{value || placeholder}</span>
+                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 7v5l3 2m7-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-full rounded-[14px] border border-emerald-100 bg-emerald-50 p-3 shadow-xl shadow-slate-900/10">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-400">Jam</p>
+                            <div className="grid max-h-40 grid-cols-3 gap-1 overflow-y-auto pr-1">
+                                {HOUR_OPTIONS.map(hour => (
+                                    <button
+                                        type="button"
+                                        key={hour}
+                                        onClick={() => selectHour(hour)}
+                                        className={`rounded-[8px] px-2 py-1.5 text-[0.78rem] font-bold transition ${
+                                            selectedHour === hour
+                                                ? "bg-emerald-600 text-white shadow-sm"
+                                                : "bg-white text-slate-700 hover:bg-emerald-100"
+                                        }`}
+                                    >
+                                        {hour}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-400">Menit</p>
+                            <div className="grid max-h-40 grid-cols-3 gap-1 overflow-y-auto pr-1">
+                                {MINUTE_OPTIONS.map(minute => (
+                                    <button
+                                        type="button"
+                                        key={minute}
+                                        onClick={() => selectMinute(minute)}
+                                        className={`rounded-[8px] px-2 py-1.5 text-[0.78rem] font-bold transition ${
+                                            selectedMinute === minute
+                                                ? "bg-emerald-600 text-white shadow-sm"
+                                                : "bg-white text-slate-700 hover:bg-emerald-100"
+                                        }`}
+                                    >
+                                        {minute}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    <p className="mt-2 text-[0.72rem] text-slate-500">Pilih jam dulu, lalu menit.</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
 function MetaRow({ children, type }) {
     return (
         <div className="flex items-start gap-3 text-[0.98rem] text-slate-800">
@@ -52,7 +296,7 @@ function MetaRow({ children, type }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.9} d="M12 7v5l3 2m7-2a10 10 0 11-20 0 10 10 0 0120 0z" />
                 </svg>
             )}
-            <span>{children}</span>
+            <span className="min-w-0 break-words [overflow-wrap:anywhere]">{children}</span>
         </div>
     );
 }
@@ -95,11 +339,11 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-lg rounded-[18px] bg-white p-6 shadow-2xl">
+            <div className="w-full max-w-lg overflow-hidden rounded-[18px] bg-white p-6 shadow-2xl">
                 <div className="flex items-start justify-between mb-4">
-                    <div>
+                    <div className="min-w-0">
                         <StatusBadge event={event} />
-                        <h2 className="mt-2 text-[1.4rem] font-bold text-slate-900 leading-snug">{event.title}</h2>
+                        <h2 className="mt-2 break-words text-[1.4rem] font-bold leading-snug text-slate-900 [overflow-wrap:anywhere]">{event.title}</h2>
                     </div>
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600 ml-4 shrink-0">
                         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,9 +359,9 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                 </div>
 
                 {event.description && (
-                    <div className="rounded-[12px] bg-slate-50 border border-slate-200 px-4 py-3 mb-1">
+                    <div className="mb-1 max-w-full overflow-hidden rounded-[12px] border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-slate-400 mb-1">Deskripsi</p>
-                        <p className="text-[0.95rem] text-slate-700 leading-relaxed">{event.description}</p>
+                        <p className="whitespace-pre-wrap break-words text-[0.95rem] leading-relaxed text-slate-700 [overflow-wrap:anywhere]">{event.description}</p>
                     </div>
                 )}
 
@@ -158,6 +402,7 @@ export default function DashboardAdminAcara() {
     const [createFormError, setCreateFormError] = useState("");
     const [featuredEvent, setFeaturedEvent] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+    const [openPicker, setOpenPicker] = useState(null);
     const isSuperAdmin = localStorage.getItem("role") === "super_admin";
 
     const [form, setForm] = useState({
@@ -251,6 +496,10 @@ export default function DashboardAdminAcara() {
         setForm(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleFormValueChange = (name, value) => {
+        setForm(prev => ({ ...prev, [name]: value }));
+    };
+
     const handleCreateEvent = async (e) => {
         e.preventDefault();
         if (!form.title.trim()) { setCreateFormError("Judul acara tidak boleh kosong"); return; }
@@ -258,12 +507,27 @@ export default function DashboardAdminAcara() {
         if (!form.time) { setCreateFormError("Jam acara wajib diisi"); return; }
         if (!form.window_start || !form.window_end) { setCreateFormError("Jam presensi wajib diisi"); return; }
 
+        const eventDate = normalizeDateInput(form.date);
+        const eventTime = normalizeTimeInput(form.time);
+        const windowStart = normalizeTimeInput(form.window_start);
+        const windowEnd = normalizeTimeInput(form.window_end);
+
+        if (!isValidDateInput(eventDate)) {
+            setCreateFormError("Pilih tanggal dari kalender");
+            return;
+        }
+
+        if (!isValidTimeInput(eventTime) || !isValidTimeInput(windowStart) || !isValidTimeInput(windowEnd)) {
+            setCreateFormError("Pilih jam acara dan window presensi");
+            return;
+        }
+
         setIsSubmittingEvent(true);
         setCreateFormError("");
 
-        const date_time = `${form.date}T${form.time}:00`;
-        const attendance_window_start = `${form.date}T${form.window_start}:00`;
-        const attendance_window_end = `${form.date}T${form.window_end}:00`;
+        const date_time = `${eventDate}T${eventTime}:00`;
+        const attendance_window_start = `${eventDate}T${windowStart}:00`;
+        const attendance_window_end = `${eventDate}T${windowEnd}:00`;
 
         try {
             const res = await fetch("/api/events", {
@@ -281,6 +545,7 @@ export default function DashboardAdminAcara() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Gagal membuat acara");
             setForm({ title: "", description: "", location: "", date: "", time: "", window_start: "", window_end: "" });
+            setOpenPicker(null);
             setShowCreateModal(false);
             await fetchEvents();
         } catch (err) {
@@ -332,7 +597,13 @@ export default function DashboardAdminAcara() {
                         <div className="bg-white/10 rounded-2xl px-4 py-3">
                             <p className="text-sm font-semibold text-white truncate">{userName}</p>
                             <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">⤷ Logout</button>
+                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -350,7 +621,11 @@ export default function DashboardAdminAcara() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </button>
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <img
+                                src={fotoUrl || fotoProfile}
+                                alt="Foto profil"
+                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                            />
                         </div>
                     </header>
 
@@ -360,19 +635,26 @@ export default function DashboardAdminAcara() {
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        >
+                            Logout
+                        </button>
                     </header>
 
                     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-7 pb-28 md:pb-10">
                         <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <h1 className="text-[2.25rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Acara</h1>
-                                <p className="mt-2 text-[1rem] text-slate-700">Kelola jadwal, presensi, dan logistik acara HMIF.</p>
+                                <h1 className="text-[1.7rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Acara</h1>
+                                <p className="mt-1.5 text-[0.82rem] leading-relaxed text-slate-700 sm:mt-2 sm:text-[1rem]">Kelola jadwal, presensi, dan logistik acara HMIF.</p>
                             </div>
                             <button
                                 onClick={() => {
                                     setShowCreateModal(true);
                                     setCreateFormError("");
+                                    setOpenPicker(null);
                                     setForm({ title: "", description: "", location: "", date: "", time: "", window_start: "", window_end: "" });
                                 }}
                                 className="inline-flex items-center justify-center gap-3 rounded-[14px] bg-[#f5bf17] px-5 py-3.5 text-[0.98rem] font-semibold text-slate-900 shadow-[0_10px_22px_rgba(245,191,23,0.28)] transition hover:bg-[#ffd033]"
@@ -557,11 +839,17 @@ export default function DashboardAdminAcara() {
 
             {/* MODAL BUAT ACARA */}
             {showCreateModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-                    <div className="w-full max-w-lg rounded-[18px] bg-white p-6 shadow-2xl my-6">
+                <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:items-center">
+                    <div className="my-4 max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-y-auto rounded-[18px] bg-white p-5 shadow-2xl sm:my-6 sm:p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-[1.4rem] font-bold text-slate-900">Buat Acara Baru</h2>
-                            <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-slate-600">
+                            <button
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    setOpenPicker(null);
+                                }}
+                                className="text-slate-400 hover:text-slate-600"
+                            >
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -586,27 +874,46 @@ export default function DashboardAdminAcara() {
                                     rows={3} placeholder="Deskripsi singkat acara..."
                                     className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 resize-none" />
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <label className="block text-[0.85rem] font-semibold text-slate-700 mb-1.5">Tanggal <span className="text-red-500">*</span></label>
-                                    <input type="date" name="date" value={form.date} onChange={handleFormChange}
-                                        className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                                    <DatePickerField
+                                        value={form.date}
+                                        onChange={(value) => handleFormValueChange("date", value)}
+                                        isOpen={openPicker === "date"}
+                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "date" : null)}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-[0.85rem] font-semibold text-slate-700 mb-1.5">Jam Acara <span className="text-red-500">*</span></label>
-                                    <input type="time" name="time" value={form.time} onChange={handleFormChange}
-                                        className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                                    <TimePickerField
+                                        value={form.time}
+                                        placeholder="Pilih jam"
+                                        onChange={(value) => handleFormValueChange("time", value)}
+                                        isOpen={openPicker === "time"}
+                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "time" : null)}
+                                    />
                                 </div>
                             </div>
                             <div>
                                 <label className="block text-[0.85rem] font-semibold text-slate-700 mb-1.5">Window Presensi <span className="text-red-500">*</span></label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="time" name="window_start" value={form.window_start} onChange={handleFormChange}
-                                        className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
-                                    <input type="time" name="window_end" value={form.window_end} onChange={handleFormChange}
-                                        className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <TimePickerField
+                                        value={form.window_start}
+                                        placeholder="Mulai"
+                                        onChange={(value) => handleFormValueChange("window_start", value)}
+                                        isOpen={openPicker === "window_start"}
+                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "window_start" : null)}
+                                    />
+                                    <TimePickerField
+                                        value={form.window_end}
+                                        placeholder="Selesai"
+                                        onChange={(value) => handleFormValueChange("window_end", value)}
+                                        isOpen={openPicker === "window_end"}
+                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "window_end" : null)}
+                                    />
                                 </div>
-                                <p className="mt-1 text-[0.75rem] text-slate-400">Jam presensi anggota bisa check-in (hari yang sama)</p>
+                                <p className="mt-1 text-[0.75rem] text-slate-400">Klik untuk memilih jam presensi hari yang sama</p>
                             </div>
                             {createFormError && (
                                 <div className="rounded-[10px] bg-red-50 border border-red-200 px-4 py-3">
@@ -614,7 +921,13 @@ export default function DashboardAdminAcara() {
                                 </div>
                             )}
                             <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setShowCreateModal(false)} disabled={isSubmittingEvent}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowCreateModal(false);
+                                        setOpenPicker(null);
+                                    }}
+                                    disabled={isSubmittingEvent}
                                     className="flex-1 rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-[0.95rem] font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50">
                                     Batal
                                 </button>
