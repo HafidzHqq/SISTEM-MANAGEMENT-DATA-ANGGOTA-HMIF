@@ -114,6 +114,7 @@ export default function DashboardAdmin() {
     const [fotoUrl, setFotoUrl] = useState(null);
     const [userDivision, setUserDivision] = useState("Admin");
     const userName = localStorage.getItem("name") || "Admin User";
+    const firstName = userName.split(" ")[0];
     const nim = user?.nim || localStorage.getItem("nim") || "-";
     const isSuperAdmin = localStorage.getItem("role") === "super_admin";
 
@@ -266,27 +267,34 @@ export default function DashboardAdmin() {
                         <div className="bg-white/10 rounded-2xl px-4 py-3">
                             <p className="text-sm font-semibold text-white truncate">{userName}</p>
                             <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">
-                                ⤷ Logout
+                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                                </svg>
+                                <span>Logout</span>
                             </button>
                         </div>
                     </div>
                 </aside>
 
                 <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
-                    <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
-                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        >
+                            Logout
+                        </button>
                     </header>
 
                     <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
-                        <h2 className="text-[1.05rem] font-bold text-gray-800">Admin Dashboard</h2>
+                        <h2 className="text-[1.05rem] font-bold text-gray-800">Dashboard Admin</h2>
                         <div className="flex items-center gap-4">
                             <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">
                                 {userDivision}
@@ -298,22 +306,33 @@ export default function DashboardAdmin() {
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </button>
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <img
+                                src={fotoUrl || fotoProfile}
+                                alt="Foto profil"
+                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                            />
                         </div>
                     </header>
 
                     <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-32 md:pb-10">
-                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+                        <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-gray-400">
+                            Dashboard Admin
+                        </p>
+                        <h1 className="mb-6 text-[1.85rem] font-extrabold text-gray-900 md:text-[2.1rem]">
+                            Welcome, {firstName}.
+                        </h1>
+
+                        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
                             {summaryCards.map((card) => (
-                                <div key={card.label} className="rounded-[12px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
+                                <div key={card.label} className="rounded-[12px] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70 md:p-6">
                                     <div className="flex items-start justify-between">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                                            <img src={card.icon} alt={card.label} className="h-5 w-5 object-contain" />
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 md:h-10 md:w-10">
+                                            <img src={card.icon} alt={card.label} className="h-4 w-4 object-contain md:h-5 md:w-5" />
                                         </div>
-                                        <span className={`text-xs font-semibold ${card.helperTone}`}>{card.help}</span>
+                                        <span className={`text-[0.68rem] font-semibold md:text-xs ${card.helperTone}`}>{card.help}</span>
                                     </div>
-                                    <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{card.label}</p>
-                                    <h2 className="mt-1 text-[2.3rem] font-extrabold leading-none text-slate-900">{card.value}</h2>
+                                    <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-slate-700 md:text-[0.8rem] md:tracking-[0.18em]">{card.label}</p>
+                                    <h2 className="mt-1 text-[1.8rem] font-extrabold leading-none text-slate-900 md:text-[2.3rem]">{card.value}</h2>
                                 </div>
                             ))}
                         </div>
