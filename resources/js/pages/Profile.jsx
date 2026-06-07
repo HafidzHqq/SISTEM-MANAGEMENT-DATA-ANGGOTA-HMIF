@@ -5,7 +5,6 @@ import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
-import MemberMobileSidebar, { MemberMenuButton } from "../components/MemberMobileSidebar";
 
 const DEPARTEMEN_LIST = [
     "Kesekjenan", "Senator", "DPA", "Technopreneur", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo", "Akbes", "Minat Bakat",
@@ -51,7 +50,6 @@ export default function Profile() {
     const [uploadingFoto, setUploadingFoto] = React.useState(false);
     const [fotoFile, setFotoFile] = React.useState(null);
     const [fotoPreview, setFotoPreview] = React.useState(null);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
     const showToast = () => {
         setToast(true);
@@ -147,6 +145,9 @@ export default function Profile() {
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
     const nim = profile?.nim || "-";
     const statusKeanggotaan = profile?.profile?.status_keanggotaan || "Anggota Muda";
+    const statusLabel = statusKeanggotaan.toLowerCase().startsWith("anggota")
+        ? statusKeanggotaan
+        : `Anggota ${statusKeanggotaan}`;
     const email = profile?.email || "-";
     const angkatan = nim.length >= 3 ? "20" + nim.replace(/\D/g, "").substring(1, 3) : "-";
 
@@ -276,16 +277,6 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
-            <MemberMobileSidebar
-                open={isMobileSidebarOpen}
-                onClose={() => setIsMobileSidebarOpen(false)}
-                navItems={navItems}
-                name={name}
-                nim={nim}
-                avatarSrc={fotoPreview || fotoUrl || fotoProfile}
-                onLogout={handleLogout}
-            />
-
             {/* ════ SIDEBAR ════ */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                 <div className="flex flex-col items-center pt-8 pb-5 px-4">
@@ -319,9 +310,15 @@ export default function Profile() {
             <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
 
                 {/* Mobile Header */}
-                <header className="md:hidden sticky top-0 z-40 flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
-                    <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
+                <header className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
                     <span className="text-base font-bold text-gray-800">Profil</span>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                    >
+                        Logout
+                    </button>
                 </header>
 
                 {/* Desktop Topbar */}
@@ -379,7 +376,7 @@ export default function Profile() {
                                 </label>
                             </div>
                             <h2 className="text-xl font-extrabold text-gray-900">{name}</h2>
-                            <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusKeanggotaan}</span>
+                            <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusLabel}</span>
                         </div>
                         <div className="hidden md:flex items-center gap-6">
                             <div className="relative">
@@ -395,7 +392,7 @@ export default function Profile() {
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
                                     <h2 className="text-2xl font-extrabold text-gray-900">{name}</h2>
-                                    <span className="bg-yellow-400 text-yellow-900 text-[0.72rem] font-bold px-3 py-0.5 rounded-full">{statusKeanggotaan}</span>
+                                    <span className="bg-yellow-400 text-yellow-900 text-[0.72rem] font-bold px-3 py-0.5 rounded-full">{statusLabel}</span>
                                 </div>
                                 <p className="text-gray-400 text-sm">{nim}</p>
                             </div>
