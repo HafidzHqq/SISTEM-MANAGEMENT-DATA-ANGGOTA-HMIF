@@ -6,28 +6,26 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 
+// HAPUS JABATAN_LIST lama
+
+// GANTI DEPARTEMEN_LIST dan tambah mapping:
 const DEPARTEMEN_LIST = [
-    "Kesekjenan", "Senator", "DPA", "Technopreneur", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo", "Akbes", "Minat Bakat",
+    "Kesekjenan", "Senator", "DPA", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo",
 ];
 
-const JABATAN_LIST = [
-    "-",
-    "Ketua Departemen",
-    "Ketua Divisi",
-    "Sekertaris Departemen",
-    "Staf Ahli",
-    "Staf",
-];
+const JABATAN_BY_DEPARTEMEN = {
+    "Kesekjenan": ["Ketua Himpunan", "Sekretaris Jenderal", "Sekretaris Umum", "Bendahara Umum"],
+    "Senator": ["Senator", "Sekretaris Umum", "Staff"],
+    "DPA": ["Koordinator DPA", "Sekretaris Jenderal", "Sekretaris Umum", "Ketua Komisi", "Staff Ahli", "Staff"],
+    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi","Staff Ahli", "Staff"],
+    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen","Kepala Divisi", "Staff Ahli", "Staff"],
+};
 
 const normalizeJabatan = (value) => {
-    const normalized = String(value ?? "").trim();
-
-    if (!normalized) return "-";
-    if (normalized.toLowerCase() === "staff") return "Staf";
-    if (normalized.toLowerCase() === "staff ahli") return "Staf Ahli";
-    if (normalized.toLowerCase() === "sekretaris departemen") return "Sekertaris Departemen";
-
-    return normalized;
+    return String(value ?? "").trim() || "";
 };
 
 const normalizeProfileForm = (data) => {
@@ -128,18 +126,16 @@ export default function Profile() {
         fetchProfileLists();
 
         const handleFocus = () => {
+            // Kalau ada unsaved changes, skip fetch profile
+            // tapi tetap fetch lists
             if (!hasUnsavedChangesRef.current) {
                 fetchProfile().catch(err => console.error("Gagal sinkron profil:", err));
             }
-
             fetchProfileLists();
         };
 
         window.addEventListener("focus", handleFocus);
-
-        return () => {
-            window.removeEventListener("focus", handleFocus);
-        };
+        return () => window.removeEventListener("focus", handleFocus);
     }, [fetchProfile, fetchProfileLists]);
 
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
@@ -163,6 +159,7 @@ export default function Profile() {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log("handleChange:", name, value); 
         if (name === "no_telepon") {
             if (!/^\d*$/.test(value)) {
                 setPhoneError("Nomor telepon hanya boleh berisi angka");
@@ -171,7 +168,8 @@ export default function Profile() {
             setPhoneError("");
         }
         if (name === "departemen") {
-            setForm(prev => ({ ...prev, departemen: value, jabatan: value ? "-" : "" }));
+            const firstJabatan = JABATAN_BY_DEPARTEMEN[value]?.[0] || "";
+            setForm(prev => ({ ...prev, departemen: value, jabatan: firstJabatan }));
             return;
         }
         setForm(prev => ({ ...prev, [name]: value }));
@@ -226,15 +224,14 @@ export default function Profile() {
                 throw new Error(data.message || "Gagal menyimpan");
             }
 
-            const nextForm = normalizeProfileForm({
-                profile: {
-                    ...form,
-                    ...(data.profile || {}),
-                },
-            });
+            const nextForm = {
+            departemen: form.departemen,
+            jabatan: form.jabatan,
+            no_telepon: form.no_telepon,
+        };
 
-            setForm(nextForm);
-            setSavedForm(nextForm);
+        setForm(nextForm);
+        setSavedForm(nextForm);
             setProfile((current) => ({
                 ...(current || {}),
                 profile: {
@@ -427,11 +424,11 @@ export default function Profile() {
                             className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
                         >
                             {!form.departemen
-                                ? <option value="">Pilih departemen dulu</option>
-                                : JABATAN_LIST.map(j => (
-                                    <option key={j} value={j}>{j}</option>
-                                ))
-                            }
+                            ? <option value="">Pilih departemen dulu</option>
+                            : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                <option key={j} value={j}>{j}</option>
+                            ))
+                        }
                         </select>
                         </div>
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 pt-1">Kontak</p>
@@ -488,11 +485,11 @@ export default function Profile() {
                                     className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
                                 >
                                     {!form.departemen
-                                        ? <option value="">Pilih departemen dulu</option>
-                                        : JABATAN_LIST.map(j => (
-                                            <option key={j} value={j}>{j}</option>
-                                        ))
-                                    }
+                                    ? <option value="">Pilih departemen dulu</option>
+                                    : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
+                                        <option key={j} value={j}>{j}</option>
+                                    ))
+                                }
                                 </select>
                                 </div>
                             </div>
