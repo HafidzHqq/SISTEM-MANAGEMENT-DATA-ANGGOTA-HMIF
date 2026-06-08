@@ -14,7 +14,6 @@ import iconTidakHadir from "../assets/icon-tidakhadir.png";
 import iconArchive from "../assets/icon-archive.png";
 import iconPrint from "../assets/icon-print.png";
 import iconRingkasan from "../assets/icon-ringkasan.png";
-import MemberMobileSidebar, { MemberMenuButton } from "./MemberMobileSidebar";
 
 const ITEMS_PER_PAGE = 3;
 const DEFAULT_LOCATION = "Lokasi belum diatur";
@@ -112,7 +111,6 @@ export default function DashboardHistory() {
     const [isArchiving, setIsArchiving] = useState(false);
     const [archiveNotice, setArchiveNotice] = useState("");
     const [fotoUrl, setFotoUrl] = useState(null);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
     const name = user?.name || localStorage.getItem("name") || "Anggota HMIF";
     const nim = user?.nim || "-";
@@ -467,29 +465,24 @@ export default function DashboardHistory() {
     if (selectedEvent) {
         return (
             <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
-                <MemberMobileSidebar
-                    open={isMobileSidebarOpen}
-                    onClose={() => setIsMobileSidebarOpen(false)}
-                    navItems={navItems}
-                    name={name}
-                    nim={nim}
-                    avatarSrc={fotoUrl || fotoProfile}
-                    onLogout={handleLogout}
-                />
                 {renderSidebar()}
                 <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
                     <header className="flex items-center justify-between bg-white px-5 py-4 shadow-sm md:hidden">
-                        <div className="flex items-center gap-3">
-                            <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
-                            <button
-                                type="button"
-                                onClick={() => setSelectedEvent(null)}
-                                className="flex items-center gap-2 text-sm font-bold text-gray-800"
-                            >
-                                <ChevronLeftIcon />
-                                Detail Acara
-                            </button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setSelectedEvent(null)}
+                            className="flex items-center gap-2 text-sm font-bold text-gray-800"
+                        >
+                            <ChevronLeftIcon />
+                            Detail Acara
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        >
+                            Logout
+                        </button>
                     </header>
                     {renderTopbar("Detail Acara", true)}
 
@@ -623,28 +616,20 @@ export default function DashboardHistory() {
 
     return (
         <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
-            <MemberMobileSidebar
-                open={isMobileSidebarOpen}
-                onClose={() => setIsMobileSidebarOpen(false)}
-                navItems={navItems}
-                name={name}
-                nim={nim}
-                avatarSrc={fotoUrl || fotoProfile}
-                onLogout={handleLogout}
-            />
             {renderSidebar()}
             <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
                 <header className="sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm md:hidden">
-                    <div className="flex items-center gap-3">
-                        <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
+                    <div className="flex items-center gap-2">
                         <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                         <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
                     </div>
-                    <Link to="/dashboard/profile">
-                        <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z" />
-                        </svg>
-                    </Link>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                    >
+                        Logout
+                    </button>
                 </header>
                 {renderTopbar("History")}
 

@@ -8,7 +8,6 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 import { calculateAttendanceSummary } from "../utils/attendanceHistory";
-import MemberMobileSidebar, { MemberMenuButton } from "./MemberMobileSidebar";
 
 
 
@@ -19,7 +18,6 @@ export default function DashboardAnggota() {
     const [historyData, setHistoryData] = React.useState([]);
     const [isHistoryLoading, setIsHistoryLoading] = React.useState(true);
     const [fotoUrl, setFotoUrl] = React.useState(null);
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = React.useState(false);
 
 React.useEffect(() => {
     const token = localStorage.getItem("auth_token");
@@ -86,16 +84,6 @@ const attendanceLabel =
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
-            <MemberMobileSidebar
-                open={isMobileSidebarOpen}
-                onClose={() => setIsMobileSidebarOpen(false)}
-                navItems={navItems}
-                name={name}
-                nim={nim}
-                avatarSrc={fotoUrl || fotoProfile}
-                onLogout={handleLogout}
-            />
-
             {/* ════════ DESKTOP SIDEBAR ════════ */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                 {/* Logo */}
@@ -149,17 +137,17 @@ const attendanceLabel =
 
                 {/* Mobile Header */}
                 <header className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <MemberMenuButton onClick={() => setIsMobileSidebarOpen(true)} />
+                    <div className="flex items-center gap-2">
                         <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
                         <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
                     </div>
-                    <Link to="/dashboard/profile">
-                        <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                    </Link>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                    >
+                        Logout
+                    </button>
                 </header>
 
                 {/* Desktop Topbar */}
@@ -195,12 +183,12 @@ const attendanceLabel =
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] xl:grid-cols-[1fr_450px] gap-4 mb-5">
 
                         {/* Member Status Card */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm relative">
+                        <div className="bg-white rounded-2xl p-5 shadow-sm relative text-center md:text-left">
                             {/* Photo — pinned to top-right corner */}
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Profile"
-                                className="absolute top-4 right-4 h-14 w-14 rounded-xl object-cover shadow"
+                                className="mx-auto mb-4 h-24 w-24 rounded-2xl object-cover shadow md:absolute md:right-4 md:top-4 md:mx-0 md:mb-0 md:h-14 md:w-14 md:rounded-xl"
                             />
 
                             {/* Label + Badge */}
@@ -212,11 +200,11 @@ const attendanceLabel =
                             </span>
 
                             {/* Name & Division */}
-                            <h3 className="text-lg font-extrabold text-gray-900 pr-16">{name}</h3>
+                            <h3 className="text-lg font-extrabold text-gray-900 md:pr-16">{name}</h3>
                             <p className="text-sm text-gray-400 mt-0.5 mb-4">{division}</p>
 
                             {/* NIM — full width */}
-                            <div className="flex items-center justify-between bg-[#1c5e22] rounded-xl px-4 py-3 max-w-[250px]">
+                            <div className="mx-auto flex max-w-[250px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-3 text-left md:mx-0">
                                 <div>
                                     <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white">NIM</p>
                                     <p className="text-[1rem] font-bold text-white tracking-widest">{nim}</p>

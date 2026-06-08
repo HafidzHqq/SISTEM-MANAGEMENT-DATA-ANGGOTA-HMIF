@@ -36,6 +36,187 @@ const monthStartStr = () => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
 };
 
+const MONTH_LABELS = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+];
+const DAY_LABELS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+const padNumber = (value) => String(value).padStart(2, "0");
+
+const isValidDateInput = (value) => {
+    const match = String(value ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return false;
+
+    const [, year, month, day] = match.map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+};
+
+const parseDateValue = (value) => {
+    if (!isValidDateInput(value)) return null;
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day);
+};
+
+const formatDateValue = (year, month, day) => `${year}-${padNumber(month + 1)}-${padNumber(day)}`;
+
+const formatDateDisplay = (value) => {
+    const date = parseDateValue(value);
+    if (!date) return "Pilih tanggal";
+    return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+function SelectPickerField({ value, options, onChange, isOpen, onOpenChange }) {
+    const selectedLabel = options.find(option => String(option.value) === String(value))?.label || "Pilih";
+
+    return (
+        <div className={`relative ${isOpen ? "z-50" : ""}`}>
+            <button
+                type="button"
+                onClick={() => onOpenChange(!isOpen)}
+                className="flex min-h-10 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-700 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+            >
+                <span className="min-w-0 break-words [overflow-wrap:anywhere]">{selectedLabel}</span>
+                <svg className={`h-4 w-4 shrink-0 text-slate-400 transition ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m19 9-7 7-7-7" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-56 w-full overflow-y-auto rounded-[12px] border border-emerald-100 bg-white p-1 shadow-lg shadow-slate-900/10">
+                    {options.map(option => {
+                        const active = String(option.value) === String(value);
+                        return (
+                            <button
+                                type="button"
+                                key={option.value}
+                                onClick={() => {
+                                    onChange(option.value);
+                                    onOpenChange(false);
+                                }}
+                                className={`w-full rounded-[9px] px-3 py-2.5 text-left text-sm font-semibold transition ${
+                                    active ? "bg-emerald-600 text-white" : "text-slate-700 hover:bg-emerald-50"
+                                }`}
+                            >
+                                <span className="block min-w-0 break-words [overflow-wrap:anywhere]">{option.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
+    const [visibleMonth, setVisibleMonth] = useState(() => {
+        const baseDate = parseDateValue(value) || new Date();
+        return new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    });
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const baseDate = parseDateValue(value) || new Date();
+        setVisibleMonth(new Date(baseDate.getFullYear(), baseDate.getMonth(), 1));
+    }, [isOpen, value]);
+
+    const selectedDate = parseDateValue(value);
+    const today = new Date();
+    const year = visibleMonth.getFullYear();
+    const month = visibleMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const changeMonth = (direction) => {
+        setVisibleMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + direction, 1));
+    };
+
+    return (
+        <div className={`relative ${isOpen ? "z-50" : ""}`}>
+            <button
+                type="button"
+                onClick={() => onOpenChange(!isOpen)}
+                className="flex min-h-10 w-full items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-700 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+            >
+                <span className="min-w-0 font-medium">{formatDateDisplay(value)}</span>
+                <svg className="h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3M4 11h16M6 5h12a2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-full rounded-[14px] border border-emerald-100 bg-emerald-50 p-3 shadow-xl shadow-slate-900/10">
+                    <div className="mb-3 flex items-center justify-between">
+                        <button
+                            type="button"
+                            onClick={() => changeMonth(-1)}
+                            className="rounded-[9px] bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
+                            aria-label="Bulan sebelumnya"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <p className="text-[0.92rem] font-extrabold text-slate-900">
+                            {MONTH_LABELS[month]} {year}
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => changeMonth(1)}
+                            className="rounded-[9px] bg-white p-2 text-slate-600 shadow-sm transition hover:bg-slate-50"
+                            aria-label="Bulan berikutnya"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1 text-center">
+                        {DAY_LABELS.map(day => (
+                            <span key={day} className="py-1 text-[0.65rem] font-bold uppercase tracking-[0.08em] text-slate-400">
+                                {day}
+                            </span>
+                        ))}
+                        {Array.from({ length: firstDay }).map((_, index) => (
+                            <span key={`empty-${index}`} className="h-8" />
+                        ))}
+                        {Array.from({ length: daysInMonth }).map((_, index) => {
+                            const day = index + 1;
+                            const dateValue = formatDateValue(year, month, day);
+                            const isSelected = selectedDate && value === dateValue;
+                            const isToday =
+                                today.getFullYear() === year &&
+                                today.getMonth() === month &&
+                                today.getDate() === day;
+
+                            return (
+                                <button
+                                    type="button"
+                                    key={dateValue}
+                                    onClick={() => {
+                                        onChange(dateValue);
+                                        onOpenChange(false);
+                                    }}
+                                    className={`h-8 rounded-[8px] text-[0.82rem] font-bold transition ${
+                                        isSelected
+                                            ? "bg-emerald-600 text-white shadow-sm"
+                                            : isToday
+                                                ? "bg-white text-emerald-700 ring-1 ring-emerald-200"
+                                                : "text-slate-700 hover:bg-white"
+                                    }`}
+                                >
+                                    {day}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function DashboardAdminLaporan() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -61,6 +242,7 @@ export default function DashboardAdminLaporan() {
     const [dateStart, setDateStart] = useState(monthStartStr());
     const [dateEnd, setDateEnd] = useState(todayStr());
     const [page, setPage] = useState(1);
+    const [openFilterPicker, setOpenFilterPicker] = useState(null);
 
     const handleLogout = () => {
         ["auth_token", "role", "name", "nim"].forEach(k => localStorage.removeItem(k));
@@ -92,7 +274,7 @@ export default function DashboardAdminLaporan() {
             .catch(() => setEvents([]));
     }, []);
 
-    // Fetch attendances — endpoint: GET /api/events/{eventId}/attendances
+    // Fetch attendances â€” endpoint: GET /api/events/{eventId}/attendances
     useEffect(() => {
         if (events.length === 0) return;
 
@@ -157,6 +339,16 @@ export default function DashboardAdminLaporan() {
         return [...s].sort();
     }, [attendances]);
 
+    const eventFilterOptions = useMemo(() => [
+        { value: "semua", label: "Semua Acara" },
+        ...events.map(ev => ({ value: String(ev.event_id), label: ev.title || "Tanpa Judul" })),
+    ], [events]);
+
+    const divisionFilterOptions = useMemo(() => [
+        { value: "Semua Divisi", label: "Semua Divisi" },
+        ...divisions.map(division => ({ value: division, label: division })),
+    ], [divisions]);
+
     const totalHadir = rows.filter(r => r.status === "HADIR").length;
     const totalTidak = rows.filter(r => r.status === "TIDAK HADIR").length;
     const persen = rows.length > 0 ? ((totalHadir / rows.length) * 100).toFixed(1) : "0.0";
@@ -166,7 +358,7 @@ export default function DashboardAdminLaporan() {
     const safePage = Math.min(page, totalPages);
     const paginated = rows.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
-    // Export — pakai endpoint BE langsung kalau satu event, fallback CSV manual kalau semua
+    // Export â€” pakai endpoint BE langsung kalau satu event, fallback CSV manual kalau semua
     const handleExportCsv = () => {
         if (filterEventId !== "semua") {
             window.open(`/api/events/${filterEventId}/attendances/export-csv`, "_blank");
@@ -229,7 +421,13 @@ export default function DashboardAdminLaporan() {
                         <div className="bg-white/10 rounded-2xl px-4 py-3">
                             <p className="text-sm font-semibold text-white truncate">{userName}</p>
                             <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">⤷ Logout</button>
+                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
                         </div>
                     </div>
                 </aside>
@@ -247,7 +445,11 @@ export default function DashboardAdminLaporan() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </button>
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <img
+                                src={fotoUrl || fotoProfile}
+                                alt="Foto profil"
+                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                            />
                         </div>
                     </header>
 
@@ -257,7 +459,13 @@ export default function DashboardAdminLaporan() {
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        >
+                            Logout
+                        </button>
                     </header>
 
                     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-7 pb-28 md:pb-10">
@@ -265,8 +473,8 @@ export default function DashboardAdminLaporan() {
                         {/* Title + Export */}
                         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h1 className="text-[2.25rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Laporan</h1>
-                                <p className="mt-1 text-[1rem] text-slate-600">Analisis kehadiran anggota HMIF secara komprehensif.</p>
+                                <h1 className="text-[1.7rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Laporan</h1>
+                                <p className="mt-1.5 text-[0.82rem] leading-relaxed text-slate-600 sm:text-[1rem]">Analisis kehadiran anggota HMIF secara komprehensif.</p>
                             </div>
                             <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-end">
                                 <button onClick={handleExportCsv} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
@@ -281,49 +489,56 @@ export default function DashboardAdminLaporan() {
                         </div>
 
                         {/* Top Row: Filters + Stats */}
-                        <div className="grid gap-5 xl:grid-cols-[1fr_auto] mb-6">
-                            <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200/70">
-                                <div className="flex items-center gap-2 mb-5">
+                        <div className="mb-6 flex flex-col gap-5">
+                            <div className="order-2 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70">
+                                <div className="mb-4 flex items-center gap-2">
                                     <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
                                     <h3 className="text-lg font-bold text-slate-800">Parameter Laporan</h3>
                                 </div>
-                                <div className="grid gap-4 sm:grid-cols-3">
-                                    {/* Filter Acara */}
+                                <div className="grid gap-x-4 gap-y-4 md:grid-cols-2">
                                     <div>
-                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">Pilih Acara</label>
-                                        <select value={filterEventId} onChange={(e) => setFilterEventId(e.target.value)} className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
-                                            <option value="semua">Semua Acara</option>
-                                            {events.map(ev => (
-                                                <option key={ev.event_id} value={ev.event_id}>{ev.title}</option>
-                                            ))}
-                                        </select>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Pilih Acara</label>
+                                        <SelectPickerField
+                                            value={filterEventId}
+                                            options={eventFilterOptions}
+                                            onChange={setFilterEventId}
+                                            isOpen={openFilterPicker === "event"}
+                                            onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "event" : null)}
+                                        />
                                     </div>
-                                    {/* Filter Divisi */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">Filter Divisi</label>
-                                        <select value={filterDivisi} onChange={(e) => setFilterDivisi(e.target.value)} className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400">
-                                            <option value="Semua Divisi">Semua Divisi</option>
-                                            {divisions.map(d => (
-                                                <option key={d} value={d}>{d}</option>
-                                            ))}
-                                        </select>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Filter Divisi</label>
+                                        <SelectPickerField
+                                            value={filterDivisi}
+                                            options={divisionFilterOptions}
+                                            onChange={setFilterDivisi}
+                                            isOpen={openFilterPicker === "division"}
+                                            onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "division" : null)}
+                                        />
                                     </div>
-                                    {/* Date Range */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">Date Range</label>
-                                        <div className="flex items-center justify-between gap-1.5 h-11 w-full rounded-lg border border-slate-200 bg-white px-2 shadow-sm focus-within:ring-2 focus-within:ring-emerald-200 focus-within:border-emerald-400">
-                                            <input type="date" value={dateStart} onChange={(e) => setDateStart(e.target.value)}
-                                                className="bg-transparent border-none p-0 text-xs text-slate-700 outline-none w-full min-w-0 focus:ring-0 cursor-pointer" />
-                                            <span className="text-slate-400 text-xs font-medium shrink-0">-</span>
-                                            <input type="date" value={dateEnd} onChange={(e) => setDateEnd(e.target.value)}
-                                                className="bg-transparent border-none p-0 text-xs text-slate-700 outline-none w-full min-w-0 focus:ring-0 cursor-pointer" />
-                                        </div>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Tanggal Mulai</label>
+                                        <DatePickerField
+                                            value={dateStart}
+                                            onChange={setDateStart}
+                                            isOpen={openFilterPicker === "dateStart"}
+                                            onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "dateStart" : null)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Tanggal Selesai</label>
+                                        <DatePickerField
+                                            value={dateEnd}
+                                            onChange={setDateEnd}
+                                            isOpen={openFilterPicker === "dateEnd"}
+                                            onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "dateEnd" : null)}
+                                        />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Stats Cards */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-4 xl:w-[320px] w-full">
+                            <div className="order-1 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
                                 <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 flex flex-col justify-center">
                                     <div className="flex items-center gap-2 mb-3">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
@@ -332,7 +547,7 @@ export default function DashboardAdminLaporan() {
                                         <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-500">Total Hadir</span>
                                     </div>
                                     <p className="text-[2rem] font-extrabold text-slate-900 leading-none">
-                                        {isLoading ? "—" : totalHadir.toLocaleString()}
+                                        {isLoading ? "â€”" : totalHadir.toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 flex flex-col justify-center">
@@ -343,14 +558,14 @@ export default function DashboardAdminLaporan() {
                                         <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-500">Tidak Hadir</span>
                                     </div>
                                     <p className="text-[2rem] font-extrabold text-slate-900 leading-none">
-                                        {isLoading ? "—" : totalTidak.toLocaleString()}
+                                        {isLoading ? "â€”" : totalTidak.toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-[#1f7a2c] p-5 shadow-sm flex items-center justify-between">
                                     <div>
                                         <p className="text-[0.7rem] font-bold uppercase tracking-wider text-white/70">Persentase Kehadiran</p>
                                         <p className="text-[2.2rem] font-extrabold text-white leading-none mt-1">
-                                            {isLoading ? "—" : `${persen}%`}
+                                            {isLoading ? "â€”" : `${persen}%`}
                                         </p>
                                     </div>
                                     <div className="relative flex items-center justify-center shrink-0">

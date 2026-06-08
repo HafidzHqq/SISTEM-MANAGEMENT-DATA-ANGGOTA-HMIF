@@ -19,6 +19,10 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
+const DEPARTMENT_FILTER_OPTIONS = ["Semua Departemen", "Technopreneur", "Eksternal", "Internal", "Minat Bakat"];
+const YEAR_FILTER_OPTIONS = ["Semua Angkatan", "2020", "2021", "2022", "2023", "2024"];
+const STATUS_FILTER_OPTIONS = ["Semua Status", "TETAP", "MUDA", "LUAR BIASA", "NON-ANGGOTA"];
+
 const METRIC_CONFIG = [
     {
         label: "Total Anggota",
@@ -226,24 +230,71 @@ function PersonMetricIcon({ className = "" }) {
 
 function MetricCard({ metric }) {
     return (
-        <div className="rounded-[12px] bg-white p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70">
+        <div className="rounded-[12px] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70 md:p-6">
             <div className="flex items-start justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${metric.iconBgClass || "bg-slate-50"}`}>
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl md:h-10 md:w-10 ${metric.iconBgClass || "bg-slate-50"}`}>
                     {metric.iconType === "person" ? (
                         <PersonMetricIcon className={metric.iconClass} />
                     ) : (
-                        <img src={metric.icon} alt={metric.label} className="h-5 w-5 object-contain" />
+                        <img src={metric.icon} alt={metric.label} className="h-4 w-4 object-contain md:h-5 md:w-5" />
                     )}
                 </div>
                 {metric.help ? (
-                    <span className="text-xs font-semibold text-emerald-600">{metric.help}</span>
+                    <span className="text-[0.68rem] font-semibold text-emerald-600 md:text-xs">{metric.help}</span>
                 ) : (
-                    <span className="text-xs text-transparent">.</span>
+                    <span className="text-[0.68rem] text-transparent md:text-xs">.</span>
                 )}
             </div>
-            <p className="mt-4 text-[0.8rem] font-medium uppercase tracking-[0.18em] text-slate-700">{metric.label}</p>
-            <h2 className={`mt-1 text-[2.3rem] font-extrabold leading-none ${metric.valueClass}`}>{metric.value}</h2>
+            <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-slate-700 md:text-[0.8rem] md:tracking-[0.18em]">{metric.label}</p>
+            <h2 className={`mt-1 text-[1.8rem] font-extrabold leading-none md:text-[2.3rem] ${metric.valueClass}`}>{metric.value}</h2>
             <div className={`mt-5 h-1.5 rounded-full ${metric.accentClass}`} style={{ width: metric.accentWidth || "82px" }} />
+        </div>
+    );
+}
+
+function MobileFilterDropdown({ value, options, onChange }) {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <div className="min-w-0">
+            <button
+                type="button"
+                onClick={() => setOpen((current) => !current)}
+                aria-expanded={open}
+                className="flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-[6px] border border-white/20 bg-white/95 px-3 text-left text-[0.78rem] font-medium text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
+            >
+                <span className="min-w-0 flex-1 truncate">{value}</span>
+                <svg
+                    className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+            {open && (
+                <div className="mt-1 max-h-44 w-full overflow-y-auto rounded-[6px] bg-white shadow-sm ring-1 ring-black/5">
+                    {options.map((option) => (
+                        <button
+                            key={option}
+                            type="button"
+                            onClick={() => {
+                                onChange(option);
+                                setOpen(false);
+                            }}
+                            className={`block w-full truncate px-3 py-2 text-left text-[0.78rem] transition ${
+                                option === value
+                                    ? "bg-[#eaf6e8] font-semibold text-[#277a1e]"
+                                    : "text-slate-700 hover:bg-slate-50"
+                            }`}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -257,6 +308,7 @@ export default function DashboardAdminAnggota() {
     const [division, setDivision] = useState("Semua Departemen");
     const [year, setYear] = useState("Semua Angkatan");
     const [status, setStatus] = useState("Semua Status");
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [rows, setRows] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -286,6 +338,15 @@ export default function DashboardAdminAnggota() {
         localStorage.removeItem("name");
         localStorage.removeItem("nim");
         navigate("/login");
+    };
+
+    const handleResetFilters = () => {
+        setSearch("");
+        setDivision("Semua Departemen");
+        setYear("Semua Angkatan");
+        setStatus("Semua Status");
+        setCurrentPage(1);
+        setSelectedIds([]);
     };
 
     const filteredRows = useMemo(() => {
@@ -719,23 +780,30 @@ export default function DashboardAdminAnggota() {
                         <div className="bg-white/10 rounded-2xl px-4 py-3">
                             <p className="text-sm font-semibold text-white truncate">{userName}</p>
                             <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1">
-                                ⤷ Logout
+                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                                </svg>
+                                <span>Logout</span>
                             </button>
                         </div>
                     </div>
                 </aside>
 
                 <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
-                    <header className="flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
-                            <button onClick={handleLogout} className="text-sm font-semibold text-slate-700">Logout</button>
-                        </div>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        >
+                            Logout
+                        </button>
                     </header>
 
                     <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
@@ -751,26 +819,84 @@ export default function DashboardAdminAnggota() {
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </button>
-                            <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                            <img
+                                src={fotoUrl || fotoProfile}
+                                alt="Foto profil"
+                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                            />
                         </div>
                     </header>
 
                     <main className="flex-1 px-4 py-6 md:px-8 md:py-8 pb-28 md:pb-10">
                         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <h1 className="text-[2.25rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Anggota</h1>
-                                <p className="mt-2 text-[1rem] text-slate-700">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
+                                <h1 className="text-[1.7rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.7rem]">Manajemen Anggota</h1>
+                                <p className="mt-1.5 text-[0.82rem] leading-relaxed text-slate-700 sm:mt-2 sm:text-[1rem]">Kelola data seluruh anggota aktif dan luar biasa HMIF.</p>
                             </div>
                         </div>
 
-                        <div className="mb-8 grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
                             {memberMetrics.map((metric) => (
                                 <MetricCard key={metric.label} metric={metric} />
                             ))}
                         </div>
 
-                        <div className="mb-8 rounded-[10px] bg-[#4faa19] p-4 shadow-sm">
-                            <div className="grid items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.45fr)_minmax(180px,0.85fr)_minmax(190px,0.85fr)_minmax(175px,0.8fr)_auto]">
+                        <div className="mb-8 rounded-[10px] bg-[#4faa19] p-3 shadow-sm md:p-4">
+                            <div className="flex items-center gap-2 md:hidden">
+                                <div className="relative min-w-0 flex-1">
+                                    <img src={iconSearch} alt="" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 opacity-60" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Cari nama atau NIM..."
+                                        className="h-10 w-full rounded-[6px] border border-white/20 bg-white/95 pl-10 pr-3 text-[0.78rem] text-slate-700 shadow-sm outline-none placeholder:text-slate-500 focus:ring-2 focus:ring-white/40"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMobileFiltersOpen((open) => !open)}
+                                    aria-expanded={isMobileFiltersOpen}
+                                    className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-[6px] px-3 text-[0.78rem] font-semibold transition ${
+                                        isMobileFiltersOpen ? "bg-white text-[#4faa19]" : "bg-white/10 text-white hover:bg-white/15"
+                                    }`}
+                                >
+                                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M6 12h12M10 19h4" />
+                                    </svg>
+                                    Filter
+                                </button>
+                            </div>
+
+                            <div className={`${isMobileFiltersOpen ? "grid" : "hidden"} mt-2.5 gap-2.5 md:hidden`}>
+                                <MobileFilterDropdown
+                                    value={division}
+                                    options={DEPARTMENT_FILTER_OPTIONS}
+                                    onChange={setDivision}
+                                />
+                                <MobileFilterDropdown
+                                    value={year}
+                                    options={YEAR_FILTER_OPTIONS}
+                                    onChange={setYear}
+                                />
+                                <MobileFilterDropdown
+                                    value={status}
+                                    options={STATUS_FILTER_OPTIONS}
+                                    onChange={setStatus}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleResetFilters}
+                                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[6px] bg-white/10 px-4 text-[0.78rem] font-semibold text-white transition hover:bg-white/15"
+                                >
+                                    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h18M6 12h12M10 19h4" />
+                                    </svg>
+                                    Reset
+                                </button>
+                            </div>
+
+                            <div className="hidden items-center gap-3 md:grid md:grid-cols-2 xl:grid-cols-[minmax(260px,1.45fr)_minmax(180px,0.85fr)_minmax(190px,0.85fr)_minmax(175px,0.8fr)_auto]">
                                 <div className="relative min-w-0">
                                     <img src={iconSearch} alt="" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 opacity-60" />
                                     <input
@@ -817,14 +943,7 @@ export default function DashboardAdminAnggota() {
                                 </select>
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setSearch("");
-                                        setDivision("Semua Departemen");
-                                        setYear("Semua Angkatan");
-                                        setStatus("Semua Status");
-                                        setCurrentPage(1);
-                                        setSelectedIds([]);
-                                    }}
+                                    onClick={handleResetFilters}
                                     className="inline-flex h-12 min-w-[112px] items-center justify-center gap-2 rounded-[6px] px-4 text-[0.95rem] font-semibold text-white transition hover:bg-white/10"
                                 >
                                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
