@@ -91,6 +91,20 @@ const formatRelativeTime = (dateValue) => {
     return `${diffDays} hari lalu`;
 };
 
+const normalizeDepartment = (value) => {
+    const normalized = String(value ?? "").trim();
+    const lower = normalized.toLowerCase();
+
+    if (!normalized || normalized === "-") return "Belum Ditentukan";
+    if (["keprof", "keprofesian", "technopreneur", "minat bakat"].includes(lower)) return "KEPROF";
+    if (lower === "psda") return "PSDA";
+    if (lower === "internal") return "INTERNAL";
+    if (["external", "eksternal"].includes(lower)) return "EXTERNAL";
+    if (lower === "kominfo") return "KOMINFO";
+    if (lower === "kesekjenan") return "KESEKJENAN";
+
+    return normalized.toUpperCase();
+};
 const formatShortDate = (dateValue) => {
     const date = new Date(dateValue);
 
@@ -187,7 +201,7 @@ export default function DashboardAdmin() {
     const attendanceByDepartment = charts.attendance_by_department || [];
     const departmentTotal = attendanceByDepartment.reduce((total, item) => total + Number(item.total_present || 0), 0);
     const departmentStats = attendanceByDepartment.slice(0, 5).map((item) => ({
-        label: item.departemen || "Belum Ditentukan",
+        label: normalizeDepartment(item.departemen),
         value: departmentTotal > 0 ? Math.round((Number(item.total_present || 0) / departmentTotal) * 100) : 0,
         total: Number(item.total_present || 0),
     }));
@@ -215,7 +229,7 @@ export default function DashboardAdmin() {
     };
 
     return (
-        <div className="min-h-screen bg-[#e8f6ea] font-sans text-gray-900">
+        <div className="min-h-screen bg-[#f6f8f7] font-sans text-slate-950">
             <div className="min-h-screen flex">
                 <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
@@ -238,7 +252,7 @@ export default function DashboardAdmin() {
                                     to={item.to}
                                     className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
                                         isActive
-                                            ? "bg-white/15 text-white"
+                                            ? "bg-slate-100 text-white"
                                             : "text-white/65 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
@@ -252,7 +266,7 @@ export default function DashboardAdmin() {
                             <button
                                 type="button"
                                 onClick={() => navigate("/dashboard")}
-                                className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-white/15"
+                                className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-slate-100"
                             >
                                 <img
                                     src={iconDashboard}
@@ -296,11 +310,11 @@ export default function DashboardAdmin() {
                     <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
                         <h2 className="text-[1.05rem] font-bold text-gray-800">Dashboard Admin</h2>
                         <div className="flex items-center gap-4">
-                            <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">
+                            <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-slate-500">
                                 {userDivision}
                             </span>
                             <div className="h-5 w-px bg-gray-200" />
-                            <button className="text-gray-400 hover:text-gray-600 transition" aria-label="Notifikasi">
+                            <button className="text-slate-500 hover:text-gray-600 transition" aria-label="Notifikasi">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -315,16 +329,38 @@ export default function DashboardAdmin() {
                     </header>
 
                     <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-32 md:pb-10">
-                        <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-gray-400">
+                        <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-slate-500">
                             Dashboard Admin
                         </p>
-                        <h1 className="mb-6 text-[1.85rem] font-extrabold text-gray-900 md:text-[2.1rem]">
-                            Welcome, {firstName}.
-                        </h1>
+                        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                            <div>
+                                <h1 className="text-[1.85rem] font-extrabold text-slate-950 md:text-[2.1rem]">
+                                    Welcome, {firstName}.
+                                </h1>
+                                <p className="mt-1 text-sm font-medium text-slate-500">Scan QR anggota atau set hadir manual dari satu halaman.</p>
+                            </div>
+                            <div className="flex flex-col gap-3 sm:flex-row">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/scan")}
+                                    className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#1f7a2c] px-4 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#186322]"
+                                >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M7 12h10" /></svg>
+                                    Scan QR Anggota
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/scan")}
+                                    className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                                >
+                                    Set Hadir Manual
+                                </button>
+                            </div>
+                        </div>
 
-                        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+                        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                             {summaryCards.map((card) => (
-                                <div key={card.label} className="rounded-[12px] bg-white p-4 shadow-[0_8px_18px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/70 md:p-6">
+                                <div key={card.label} className="rounded-[10px] bg-white p-5 shadow-sm ring-1 ring-slate-200 md:p-6">
                                     <div className="flex items-start justify-between">
                                         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 md:h-10 md:w-10">
                                             <img src={card.icon} alt={card.label} className="h-4 w-4 object-contain md:h-5 md:w-5" />
@@ -344,22 +380,22 @@ export default function DashboardAdmin() {
                         )}
 
                         <div className="space-y-5">
-                            <section className="rounded-[10px] bg-[#7bbd36] p-5 shadow-[0_8px_18px_rgba(15,23,42,0.1)]">
-                                    <div className="flex items-start justify-between gap-4 text-white">
+                            <section className="rounded-[10px] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                                    <div className="flex items-start justify-between gap-4 text-slate-900">
                                         <div className="flex items-center gap-3">
-                                            <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-                                            <h3 className="text-[1.2rem] font-semibold">Participation Trend</h3>
+                                            <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain " />
+                                            <h3 className="text-[1.2rem] font-bold">Tren Partisipasi</h3>
                                         </div>
-                                        <button className="inline-flex items-center gap-3 rounded-[4px] bg-white/10 px-4 py-3 text-[0.95rem] text-white/95">
+                                        <button className="inline-flex items-center gap-3 rounded-[6px] bg-slate-100 px-4 py-3 text-[0.95rem] font-semibold text-slate-700">
                                             <span>Last 30 Days</span>
-                                            <svg className="h-4 w-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <svg className="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
                                     </div>
 
-                                    <div className="mt-10 rounded-[8px] bg-white/10 p-4">
-                                        <div className="h-[275px] rounded-[4px] bg-[#7bbd36] px-4 pb-4 pt-6">
+                                    <div className="mt-6 rounded-[8px] bg-slate-50 p-4 ring-1 ring-slate-100">
+                                        <div className="h-[275px] rounded-[4px] bg-white px-4 pb-4 pt-6">
                                             {trendItems.length > 0 ? (
                                                 <div className="flex h-full items-end gap-3">
                                                     {trendItems.map((item) => {
@@ -369,12 +405,12 @@ export default function DashboardAdmin() {
                                                             <div key={item.event_id} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
                                                                 <div className="flex w-full flex-1 items-end">
                                                                     <div
-                                                                        className="w-full rounded-t-[6px] bg-white/85 shadow-sm transition-all"
+                                                                        className="w-full rounded-t-[6px] bg-emerald-600 shadow-sm transition-all"
                                                                         style={{ height: `${barHeight}%` }}
                                                                         title={`${item.title}: ${formatNumber(item.total_present)} hadir`}
                                                                     />
                                                                 </div>
-                                                                <div className="w-full truncate text-center text-[0.68rem] font-semibold text-white/80">
+                                                                <div className="w-full truncate text-center text-[0.68rem] font-semibold text-slate-500">
                                                                     {formatShortDate(item.date_time)}
                                                                 </div>
                                                             </div>
@@ -384,13 +420,13 @@ export default function DashboardAdmin() {
                                             ) : (
                                                 <div className="flex h-full items-center justify-center px-4 text-center">
                                                     <div>
-                                                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white/85">
+                                                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
                                                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6" />
                                                             </svg>
                                                         </div>
-                                                        <p className="mt-4 text-[1rem] font-semibold text-white">Belum ada data presensi</p>
-                                                        <p className="mt-1 text-sm text-white/75">Grafik akan muncul setelah ada check-in.</p>
+                                                        <p className="mt-4 text-[1rem] font-semibold text-slate-900">Belum ada data presensi</p>
+                                                        <p className="mt-1 text-sm text-slate-500">Grafik akan muncul setelah ada check-in.</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -399,10 +435,10 @@ export default function DashboardAdmin() {
                                 </section>
 
                                 <div className="grid gap-5 md:grid-cols-2">
-                                    <section className="rounded-[10px] bg-[#9ccc75] p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)]">
+                                    <section className="rounded-[10px] bg-white p-6 shadow-sm ring-1 ring-slate-200">
                                         <div className="flex items-center gap-3">
-                                            <img src={iconHadirHariIni} alt="" className="h-5 w-5 object-contain brightness-0 invert" />
-                                            <h3 className="text-[1.2rem] font-semibold text-white">Attendance Status</h3>
+                                            <img src={iconHadirHariIni} alt="" className="h-5 w-5 object-contain " />
+                                            <h3 className="text-[1.2rem] font-bold text-slate-900">Status Kehadiran</h3>
                                         </div>
                                         <div className="mt-8 flex justify-center">
                                             <div className="relative flex h-[150px] w-[150px] items-center justify-center rounded-full sm:h-[190px] sm:w-[190px]">
@@ -412,49 +448,49 @@ export default function DashboardAdmin() {
                                                         background: `conic-gradient(#1d4b28 0deg ${attendanceRate * 3.6}deg, rgba(255,255,255,0.28) ${attendanceRate * 3.6}deg 360deg)`,
                                                     }}
                                                 />
-                                                <div className="absolute inset-[12%] rounded-full bg-[#b8dd9f]" />
-                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-[#9ccc75] text-center">
+                                                <div className="absolute inset-[12%] rounded-full bg-emerald-50" />
+                                                <div className="absolute inset-[24%] flex flex-col items-center justify-center rounded-full bg-white text-center">
                                                     <p className="text-[1.7rem] font-extrabold leading-none text-slate-900 sm:text-[2rem]">{formatPercent(attendanceRate)}</p>
-                                                    <p className="mt-1 text-[0.8rem] font-medium text-white/90 sm:text-[0.9rem]">Avg.</p>
+                                                    <p className="mt-1 text-[0.8rem] font-medium text-slate-500 sm:text-[0.9rem]">Rata-rata</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="mt-8 space-y-3 text-[0.95rem]">
-                                            <div className="flex items-center justify-between text-white/90">
+                                            <div className="flex items-center justify-between text-slate-700">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#1d4b28]" />
-                                                    <span className="text-white/80">Present</span>
+                                                    <span className="text-slate-500">Present</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_valid_radius || 0)}</span>
+                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_valid_radius || 0)}</span>
                                             </div>
-                                            <div className="flex items-center justify-between text-white/90">
+                                            <div className="flex items-center justify-between text-slate-700">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#ff8d2a]" />
-                                                    <span className="text-white/80">Absent</span>
+                                                    <span className="text-slate-500">Absent</span>
                                                 </div>
-                                                <span className="font-semibold text-white/90">{formatNumber(summary.total_invalid_radius || 0)}</span>
+                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_invalid_radius || 0)}</span>
                                             </div>
                                         </div>
                                     </section>
 
-                                    <section className="rounded-[10px] bg-[#52b316] p-6 shadow-[0_8px_18px_rgba(15,23,42,0.08)]">
-                                        <h3 className="text-[1.2rem] font-semibold text-white">By Department</h3>
+                                    <section className="rounded-[10px] bg-white p-6 shadow-sm ring-1 ring-slate-200">
+                                        <h3 className="text-[1.2rem] font-bold text-slate-900">Per Departemen</h3>
                                         <div className="mt-6 space-y-4">
                                             {departmentStats.length > 0 ? (
                                                 departmentStats.map((item) => (
                                                     <div key={item.label}>
-                                                        <div className="mb-1 flex items-center justify-between text-[0.85rem] font-medium text-white/95">
+                                                        <div className="mb-1 flex items-center justify-between text-[0.85rem] font-medium text-slate-700">
                                                             <span>{item.label}</span>
                                                             <span>{item.value}%</span>
                                                         </div>
-                                                        <div className="h-[8px] overflow-hidden rounded-full bg-white/15">
-                                                            <div className="h-full rounded-full bg-white" style={{ width: `${item.value}%` }} />
+                                                        <div className="h-[8px] overflow-hidden rounded-full bg-slate-100">
+                                                            <div className="h-full rounded-full bg-emerald-600" style={{ width: `${item.value}%` }} />
                                                         </div>
-                                                        <p className="mt-1 text-[0.72rem] font-medium text-white/70">{formatNumber(item.total)} check-in</p>
+                                                        <p className="mt-1 text-[0.72rem] font-medium text-slate-500">{formatNumber(item.total)} check-in</p>
                                                     </div>
                                                 ))
                                             ) : (
-                                                <div className="rounded-[8px] bg-white/10 px-4 py-5 text-sm font-medium text-white/80">
+                                                <div className="rounded-[8px] bg-white/10 px-4 py-5 text-sm font-medium text-slate-500">
                                                     Belum ada data departemen.
                                                 </div>
                                             )}
@@ -474,9 +510,9 @@ export default function DashboardAdmin() {
                             <Link
                                 key={item.label}
                                 to={item.to}
-                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "text-white bg-white/10" : "text-white/80 hover:text-white"}`}
+                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "text-white bg-white/10" : "text-slate-500 hover:text-white"}`}
                             >
-                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
+                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain " />
                                 {item.label}
                             </Link>
                         );

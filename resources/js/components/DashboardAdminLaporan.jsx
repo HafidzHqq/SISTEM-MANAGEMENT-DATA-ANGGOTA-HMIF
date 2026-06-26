@@ -15,6 +15,21 @@ const NAV_ITEMS = [
 ];
 
 const PER_PAGE = 5;
+const DEPARTMENT_OPTIONS = ["KEPROF", "PSDA", "INTERNAL", "EXTERNAL", "KOMINFO", "KESEKJENAN"];
+const normalizeDepartment = (value) => {
+    const normalized = String(value ?? "").trim();
+    const lower = normalized.toLowerCase();
+
+    if (!normalized || normalized === "-") return "-";
+    if (["keprof", "keprofesian", "technopreneur", "minat bakat"].includes(lower)) return "KEPROF";
+    if (lower === "psda") return "PSDA";
+    if (lower === "internal") return "INTERNAL";
+    if (["external", "eksternal"].includes(lower)) return "EXTERNAL";
+    if (lower === "kominfo") return "KOMINFO";
+    if (lower === "kesekjenan") return "KESEKJENAN";
+
+    return normalized.toUpperCase();
+};
 
 const csvEscape = (v) => {
     const s = String(v ?? "");
@@ -64,6 +79,35 @@ const formatDateDisplay = (value) => {
     const date = parseDateValue(value);
     if (!date) return "Pilih tanggal";
     return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+};
+
+const toDateKey = (value) => {
+    if (!value) return null;
+
+    const normalized = String(value).trim();
+    const match = normalized.match(/^\d{4}-\d{2}-\d{2}/);
+    if (match) return match[0];
+
+    const date = new Date(normalized.replace(" ", "T"));
+    if (Number.isNaN(date.getTime())) return null;
+
+    return formatDateValue(date.getFullYear(), date.getMonth(), date.getDate());
+};
+
+const formatDateTimeDisplay = (value) => {
+    if (!value) return "-";
+
+    const normalized = String(value).trim().replace(" ", "T");
+    const date = new Date(normalized);
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return date.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 };
 
 function SelectPickerField({ value, options, onChange, isOpen, onOpenChange }) {
@@ -238,7 +282,7 @@ export default function DashboardAdminLaporan() {
 
     // Filter state
     const [filterEventId, setFilterEventId] = useState("semua");
-    const [filterDivisi, setFilterDivisi] = useState("Semua Divisi");
+    const [filterDivisi, setFilterDivisi] = useState("Semua Departemen");
     const [dateStart, setDateStart] = useState(monthStartStr());
     const [dateEnd, setDateEnd] = useState(todayStr());
     const [page, setPage] = useState(1);
@@ -274,7 +318,7 @@ export default function DashboardAdminLaporan() {
             .catch(() => setEvents([]));
     }, []);
 
-    // Fetch attendances â€” endpoint: GET /api/events/{eventId}/attendances
+    // Fetch attendances endpoint: GET /api/events/{eventId}/attendances
     useEffect(() => {
         if (events.length === 0) return;
 
@@ -282,12 +326,23 @@ export default function DashboardAdminLaporan() {
         setError("");
 
         const fetchOne = (eventId) =>
-            fetch(`/api/events/${eventId}/attendances`, { headers: getAuthHeaders() })
+            fetch(`/api/events/${eventId}/attendances?per_page=1000`, { headers: getAuthHeaders() })
                 .then(res => {
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     return res.json();
                 })
-                .then(data => Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [])
+                .then(data => {
+                    const event = data.event || events.find(e => String(e.event_id) === String(eventId)) || null;
+                    const list = Array.isArray(data)
+                        ? data
+                        : Array.isArray(data.attendances)
+                            ? data.attendances
+                            : Array.isArray(data.data)
+                                ? data.data
+                                : [];
+
+                    return list.map(item => ({ ...item, event }));
+                })
                 .catch(() => []);
 
         const targets = filterEventId === "semua"
@@ -309,33 +364,34 @@ export default function DashboardAdminLaporan() {
     // Normalisasi & filter di FE (divisi + date range)
     const rows = useMemo(() => {
         return attendances
-            .map(r => ({
-                id: r.member?.nim ?? r.nim ?? r.user?.nim ?? "-",
-                nama: r.member?.name ?? r.user?.name ?? r.nama ?? "-",
-                divisi: r.member?.departemen ?? r.member?.Departemen ?? r.user?.profile?.departemen ?? r.divisi ?? "-",
-                acara: r.event?.title ?? events.find(e => e.event_id === r.event_id)?.title ?? "-",
-                acaraDate: r.event?.date_time ?? events.find(e => e.event_id === r.event_id)?.date_time ?? null,
-                waktu: r.checked_in_at
-                    ? new Date(r.checked_in_at).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                    : "-",
-                status: (r.status === "present" || r.status === "HADIR") ? "HADIR" : "TIDAK HADIR",
-                rawDate: r.checked_in_at
-                    ? r.checked_in_at.split("T")[0]
-                    : (r.event?.date_time ? r.event.date_time.split("T")[0] : null),
-            }))
+            .map(r => {
+                const event = r.event ?? events.find(e => String(e.event_id) === String(r.event_id)) ?? null;
+                const checkinValue = r.checkin_time || r.checked_in_at;
+
+                return {
+                    id: r.member?.nim ?? r.nim ?? r.user?.nim ?? "-",
+                    nama: r.member?.name ?? r.name ?? r.user?.name ?? r.nama ?? "-",
+                    divisi: normalizeDepartment(r.member?.departemen ?? r.member?.Departemen ?? r.departemen ?? r.user?.profile?.departemen ?? r.divisi ?? "-"),
+                    acara: event?.title ?? "-",
+                    acaraDate: event?.date_time ?? null,
+                    waktu: formatDateTimeDisplay(checkinValue),
+                    status: (r.status === "present" || r.status === "HADIR") ? "HADIR" : "TIDAK HADIR",
+                    rawDate: toDateKey(checkinValue) || toDateKey(event?.date_time),
+                };
+            })
             .filter(r => {
-                const matchDivisi = filterDivisi === "Semua Divisi" || r.divisi === filterDivisi;
+                const matchDivisi = filterDivisi === "Semua Departemen" || r.divisi === filterDivisi;
                 const matchDateStart = !dateStart || !r.rawDate || r.rawDate >= dateStart;
                 const matchDateEnd = !dateEnd || !r.rawDate || r.rawDate <= dateEnd;
                 return matchDivisi && matchDateStart && matchDateEnd;
             });
     }, [attendances, filterDivisi, dateStart, dateEnd, events]);
 
-    // Divisi unik dari data
+    // Departemen unik dari data
     const divisions = useMemo(() => {
         const s = new Set(attendances.map(r =>
-            r.member?.departemen ?? r.member?.Departemen ?? r.user?.profile?.departemen ?? r.divisi
-        ).filter(Boolean));
+            normalizeDepartment(r.member?.departemen ?? r.member?.Departemen ?? r.user?.profile?.departemen ?? r.divisi)
+        ).filter((department) => department && department !== "-"));
         return [...s].sort();
     }, [attendances]);
 
@@ -345,8 +401,8 @@ export default function DashboardAdminLaporan() {
     ], [events]);
 
     const divisionFilterOptions = useMemo(() => [
-        { value: "Semua Divisi", label: "Semua Divisi" },
-        ...divisions.map(division => ({ value: division, label: division })),
+        { value: "Semua Departemen", label: "Semua Departemen" },
+        ...Array.from(new Set([...DEPARTMENT_OPTIONS, ...divisions])).map(division => ({ value: division, label: division })),
     ], [divisions]);
 
     const totalHadir = rows.filter(r => r.status === "HADIR").length;
@@ -358,21 +414,51 @@ export default function DashboardAdminLaporan() {
     const safePage = Math.min(page, totalPages);
     const paginated = rows.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
-    // Export â€” pakai endpoint BE langsung kalau satu event, fallback CSV manual kalau semua
-    const handleExportCsv = () => {
+    // Export uses backend CSV for one event, or manual CSV for all events.
+    const downloadCsv = (content, filename) => {
+        const blob = content instanceof Blob
+            ? content
+            : new Blob([content], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleResetFilters = () => {
+        setFilterEventId("semua");
+        setFilterDivisi("Semua Departemen");
+        setDateStart(monthStartStr());
+        setDateEnd(todayStr());
+        setPage(1);
+        setOpenFilterPicker(null);
+    };
+
+    const handleExportCsv = async () => {
         if (filterEventId !== "semua") {
-            window.open(`/api/events/${filterEventId}/attendances/export-csv`, "_blank");
+            try {
+                const response = await fetch(`/api/events/${filterEventId}/attendances/export-csv`, {
+                    headers: getAuthHeaders(),
+                });
+
+                if (!response.ok) throw new Error("Gagal export CSV");
+
+                downloadCsv(await response.blob(), `rekap-kehadiran-event-${filterEventId}.csv`);
+            } catch (err) {
+                setError(err.message || "Gagal export CSV");
+            }
             return;
         }
-        // Export manual dari data yang sudah di-fetch
-        const h = ["ID Anggota", "Nama Lengkap", "Divisi", "Acara", "Waktu Presensi", "Status"];
+
+        const h = ["ID Anggota", "Nama Lengkap", "Departemen", "Acara", "Waktu Presensi", "Status"];
         const lines = [h.map(csvEscape).join(","), ...rows.map(r =>
             [r.id, r.nama, r.divisi, r.acara, r.waktu, r.status].map(csvEscape).join(",")
         )];
-        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = "laporan-kehadiran.csv";
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        downloadCsv(lines.join("\n"), "laporan-kehadiran.csv");
     };
 
     // SVG circular progress
@@ -481,9 +567,9 @@ export default function DashboardAdminLaporan() {
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     Export CSV
                                 </button>
-                                <button onClick={handleExportCsv} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg bg-[#1f7a2c] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#186322]">
-                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Export Excel
+                                <button onClick={handleResetFilters} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg bg-[#1f7a2c] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#186322]">
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5.5 18.5A8 8 0 0118.5 5.5M18.5 5.5H14M18.5 5.5V10" /></svg>
+                                    Reset Filter
                                 </button>
                             </div>
                         </div>
@@ -507,7 +593,7 @@ export default function DashboardAdminLaporan() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Filter Divisi</label>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Filter Departemen</label>
                                         <SelectPickerField
                                             value={filterDivisi}
                                             options={divisionFilterOptions}
@@ -547,7 +633,7 @@ export default function DashboardAdminLaporan() {
                                         <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-500">Total Hadir</span>
                                     </div>
                                     <p className="text-[2rem] font-extrabold text-slate-900 leading-none">
-                                        {isLoading ? "â€”" : totalHadir.toLocaleString()}
+                                            {isLoading ? "-" : totalHadir.toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 flex flex-col justify-center">
@@ -558,14 +644,14 @@ export default function DashboardAdminLaporan() {
                                         <span className="text-[0.7rem] font-bold uppercase tracking-wider text-slate-500">Tidak Hadir</span>
                                     </div>
                                     <p className="text-[2rem] font-extrabold text-slate-900 leading-none">
-                                        {isLoading ? "â€”" : totalTidak.toLocaleString()}
+                                            {isLoading ? "-" : totalTidak.toLocaleString()}
                                     </p>
                                 </div>
                                 <div className="rounded-xl bg-[#1f7a2c] p-5 shadow-sm flex items-center justify-between">
                                     <div>
                                         <p className="text-[0.7rem] font-bold uppercase tracking-wider text-white/70">Persentase Kehadiran</p>
                                         <p className="text-[2.2rem] font-extrabold text-white leading-none mt-1">
-                                            {isLoading ? "â€”" : `${persen}%`}
+                                            {isLoading ? "-" : `${persen}%`}
                                         </p>
                                     </div>
                                     <div className="relative flex items-center justify-center shrink-0">
@@ -600,7 +686,7 @@ export default function DashboardAdminLaporan() {
                                         <tr className="border-b border-slate-200 bg-[#fafafa] text-left text-xs uppercase tracking-[0.1em] text-slate-500">
                                             <th className="py-4 px-6">ID Anggota</th>
                                             <th className="py-4 px-4">Nama Lengkap</th>
-                                            <th className="py-4 px-4">Divisi</th>
+                                            <th className="py-4 px-4">Departemen</th>
                                             <th className="py-4 px-4">Acara</th>
                                             <th className="py-4 px-4">Waktu Presensi</th>
                                             <th className="py-4 px-4 text-center">Status</th>

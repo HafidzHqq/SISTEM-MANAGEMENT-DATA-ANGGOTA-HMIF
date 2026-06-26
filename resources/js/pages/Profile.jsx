@@ -7,7 +7,12 @@ import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 
 const DEPARTEMEN_LIST = [
-    "Kesekjenan", "Senator", "DPA", "Technopreneur", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo", "Akbes", "Minat Bakat",
+    "KEPROF",
+    "PSDA",
+    "INTERNAL",
+    "EXTERNAL",
+    "KOMINFO",
+    "KESEKJENAN",
 ];
 
 const JABATAN_LIST = [
@@ -277,7 +282,7 @@ export default function Profile() {
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
-            {/* ════ SIDEBAR ════ */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â SIDEBAR Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                 <div className="flex flex-col items-center pt-8 pb-5 px-4">
                     <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full object-contain border-4 border-white/20" />
@@ -301,12 +306,12 @@ export default function Profile() {
                     <div className="bg-white/10 rounded-2xl px-4 py-3">
                         <p className="text-sm font-semibold text-white truncate">{name}</p>
                         <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                        <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 flex items-center gap-1">⤷ Logout</button>
+                        <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 flex items-center gap-1">Ã¢Â¤Â· Logout</button>
                     </div>
                 </div>
             </aside>
 
-            {/* ════ MAIN ════ */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MAIN Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
 
                 {/* Mobile Header */}
@@ -358,7 +363,7 @@ export default function Profile() {
                     </div>
                 )}
 
-                    {/* ── PROFILE HEADER CARD ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ PROFILE HEADER CARD Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="bg-white rounded-2xl p-6 shadow-sm">
                         <div className="flex flex-col items-center md:hidden mb-2">
                             <div className="relative mb-3">
@@ -399,7 +404,7 @@ export default function Profile() {
                         </div>
                     </div>
 
-                    {/* ── MOBILE: FORM ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ MOBILE: FORM Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="md:hidden space-y-3">
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400">Informasi Identitas</p>
                         {[["Nama Lengkap", name], ["NIM", nim], ["Angkatan", angkatan]].map(([label, val]) => (
@@ -456,7 +461,7 @@ export default function Profile() {
                         </button>
                     </div>
 
-                    {/* ── DESKTOP: INFO ROWS ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ DESKTOP: INFO ROWS Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="hidden md:grid grid-cols-2 gap-5">
                         {/* Academic & Organization */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -533,7 +538,7 @@ export default function Profile() {
                         </div>
                     </div>
 
-                    {/* ── DESKTOP: EVENTS ROW ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ DESKTOP: EVENTS ROW Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="hidden md:grid grid-cols-2 bg-white rounded-2xl shadow-sm divide-x divide-gray-100 overflow-hidden">
                         <div className="p-6">
                             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
@@ -570,7 +575,7 @@ export default function Profile() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-gray-800">{act.title}</p>
-                                            <p className="text-[0.72rem] text-gray-400">{act.date_time} • {act.location_name || "-"}</p>
+                                            <p className="text-[0.72rem] text-gray-400">{act.date_time} Ã¢â‚¬Â¢ {act.location_name || "-"}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -581,7 +586,7 @@ export default function Profile() {
                 </main>
             </div>
 
-            {/* ════ MOBILE BOTTOM NAV ════ */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MOBILE BOTTOM NAV Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1c5e22] flex z-50">
                 {navItems.map((item) => {
                     const isActive = item.to === "/dashboard/profile";

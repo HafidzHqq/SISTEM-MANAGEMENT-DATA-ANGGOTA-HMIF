@@ -15,18 +15,20 @@ use App\Models\AuditLog;
 class MemberController extends Controller
 {
     private const MEMBER_DIRECTORY_ROLES = ['anggota', 'admin', 'super_admin'];
+    private const DEPARTMENT_OPTIONS = ['KEPROF', 'PSDA', 'INTERNAL', 'EXTERNAL', 'KOMINFO', 'KESEKJENAN'];
+    private const POSITION_OPTIONS = ['-', 'Ketua Departemen', 'Ketua Divisi', 'Sekertaris Departemen', 'Staf Ahli', 'Staf'];
 
-    // GET /api/members — ambil semua anggota beserta profilnya
+    // GET /api/members ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ambil semua anggota beserta profilnya
     public function index(Request $request)
     {
         $query = User::with('memberProfile')
             ->whereIn('role', self::MEMBER_DIRECTORY_ROLES);
 
         // Filter by departemen
-        if ($request->has('departemen')) {
-            $departmentColumn = Schema::hasColumn('member_profiles', 'Departemen')
-                ? 'Departemen'
-                : 'departemen';
+        if ($request->filled('departemen')) {
+            $departmentColumn = Schema::hasColumn('member_profiles', 'departemen')
+            ? 'departemen'
+            : 'Departemen';
 
             $query->whereHas('memberProfile', function ($q) use ($request, $departmentColumn) {
                 $q->where($departmentColumn, $request->departemen);
@@ -34,18 +36,18 @@ class MemberController extends Controller
         }
 
         // Filter by angkatan
-        if ($request->has('angkatan')) {
+        if ($request->filled('angkatan')) {
             $query->whereHas('memberProfile', function ($q) use ($request) {
                 $q->where('angkatan', $request->angkatan);
             });
         }
 
         // Search by nama atau nim
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'ilike', "%$search%")
-                  ->orWhere('nim', 'ilike', "%$search%");
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('nim', 'like', "%$search%");
             });
         }
 
@@ -54,7 +56,7 @@ class MemberController extends Controller
         return response()->json($members);
     }
 
-    // GET /api/members/{id} — ambil detail 1 anggota
+    // GET /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ambil detail 1 anggota
     public function show($id)
     {
         $user = User::with('memberProfile')
@@ -69,7 +71,7 @@ class MemberController extends Controller
         return response()->json($user);
     }
 
-    // PUT /api/members/{id} — update data anggota oleh admin
+    // PUT /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â update data anggota oleh admin
     public function update(Request $request, $id)
     {
         $user = User::where('user_id', $id)
@@ -81,8 +83,8 @@ class MemberController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'departemen'         => 'nullable|string|max:100',
-            'jabatan'            => 'nullable|string|max:100',
+            'departemen'         => 'nullable|in:' . implode(',', self::DEPARTMENT_OPTIONS),
+            'jabatan'            => 'nullable|in:' . implode(',', self::POSITION_OPTIONS),
             'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non-Anggota',
             'no_telepon'         => 'nullable|string|max:20',
         ]);
@@ -95,10 +97,10 @@ class MemberController extends Controller
         }
 
         $profileData = $request->only(['jabatan', 'status_keanggotaan', 'no_telepon']);
-        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
-            ? 'Departemen'
-            : 'departemen';
-        $profileData[$departemenColumn] = $request->input('departemen');
+        $departemenColumn = Schema::hasColumn('member_profiles', 'departemen')
+            ? 'departemen'
+            : 'Departemen';
+        $profileData[$departemenColumn] = $request->input('departemen') ?: null;
 
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
@@ -114,7 +116,7 @@ class MemberController extends Controller
 
     }
 
-    // DELETE /api/members/{id} — hapus anggota
+    // DELETE /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â hapus anggota
     public function destroy(Request $request, $id)
     {
         $user = User::where('user_id', $id)
@@ -139,7 +141,7 @@ class MemberController extends Controller
 
     }
 
-        // POST /api/members/import — import bulk via CSV
+        // POST /api/members/import ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â import bulk via CSV
         public function import(Request $request)
         {
             $validator = Validator::make($request->all(), [

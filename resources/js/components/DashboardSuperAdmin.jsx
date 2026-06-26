@@ -932,7 +932,7 @@ function AdminManagementContent({
                                     type="text"
                                     value={memberSearch}
                                     onChange={(event) => setMemberSearch(event.target.value)}
-                                    placeholder="Cari nama, email, NIM, atau divisi anggota..."
+                                    placeholder="Cari nama, email, NIM, atau departemen anggota..."
                                     className="w-full bg-transparent text-sm outline-none"
                                     autoFocus
                                 />
@@ -981,7 +981,7 @@ function AdminManagementContent({
                                                 {member.email || "-"}
                                             </p>
                                             <p className="mt-1 text-xs font-semibold text-slate-500">
-                                                {member.nim || "NIM tidak tersedia"} - {getMemberDepartment(member) || "Divisi belum tersedia"}
+                                                {member.nim || "NIM tidak tersedia"} - {getMemberDepartment(member) || "Departemen belum tersedia"}
                                             </p>
                                         </div>
 
@@ -1120,7 +1120,7 @@ function AdminManagementContent({
                         <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-600">
                             <tr>
                                 <th className="px-5 py-4">Admin</th>
-                                <th className="px-5 py-4">Divisi</th>
+                                <th className="px-5 py-4">Departemen</th>
                                 <th className="px-5 py-4">Status</th>
                                 <th className="px-5 py-4">Login Terakhir</th>
                                 <th className="px-5 py-4 text-right">Aksi</th>

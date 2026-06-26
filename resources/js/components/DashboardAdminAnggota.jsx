@@ -19,7 +19,22 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
-const DEPARTMENT_FILTER_OPTIONS = ["Semua Departemen", "Technopreneur", "Eksternal", "Internal", "Minat Bakat"];
+const DEPARTMENT_OPTIONS = ["KEPROF", "PSDA", "INTERNAL", "EXTERNAL", "KOMINFO", "KESEKJENAN"];
+const DEPARTMENT_FILTER_OPTIONS = ["Semua Departemen", ...DEPARTMENT_OPTIONS];
+const normalizeDepartment = (value) => {
+    const normalized = String(value ?? "").trim();
+    const lower = normalized.toLowerCase();
+
+    if (!normalized || normalized === "-") return "-";
+    if (["keprof", "keprofesian", "technopreneur", "minat bakat"].includes(lower)) return "KEPROF";
+    if (["psda"].includes(lower)) return "PSDA";
+    if (["internal"].includes(lower)) return "INTERNAL";
+    if (["external", "eksternal"].includes(lower)) return "EXTERNAL";
+    if (["kominfo"].includes(lower)) return "KOMINFO";
+    if (["kesekjenan"].includes(lower)) return "KESEKJENAN";
+
+    return normalized.toUpperCase();
+};
 const YEAR_FILTER_OPTIONS = ["Semua Angkatan", "2020", "2021", "2022", "2023", "2024"];
 const STATUS_FILTER_OPTIONS = ["Semua Status", "TETAP", "MUDA", "LUAR BIASA", "NON-ANGGOTA"];
 
@@ -66,18 +81,18 @@ const METRIC_CONFIG = [
 ];
 
 const SAMPLE_ROWS = [
-    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "Eksternal", jabatan: "Ketua Divisi", status: "TETAP", email: "aditya.k@hmif.org" },
-    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "siti.p@hmif.org" },
+    { id: 1, nim: "121140090", nama: "Aditya Kusuma", kontak: "0812-3456-7890", angkatan: 2021, divisi: "EXTERNAL", jabatan: "Ketua Divisi", status: "TETAP", email: "aditya.k@hmif.org" },
+    { id: 2, nim: "123140152", nama: "Siti Pertiwi", kontak: "0812-3456-7891", angkatan: 2023, divisi: "INTERNAL", jabatan: "Staff", status: "MUDA", email: "siti.p@hmif.org" },
     { id: 3, nim: "122140032", nama: "Rizky Ramadhan", kontak: "0812-3456-7892", angkatan: 2022, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "rizky.r@hmif.org" },
-    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "Minat Bakat", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
-    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "Eksternal", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
-    { id: 6, nim: "124140090", nama: "Ridho Maulana Saputa", kontak: "0813-6728-9083", angkatan: 2024, divisi: "Technopreneur", jabatan: "Staff", status: "MUDA", email: "ridho.124140090@student.itera.ac.id" },
-    { id: 7, nim: "121140011", nama: "Nadia Putri", kontak: "0812-3456-7895", angkatan: 2021, divisi: "Internal", jabatan: "Bendahara", status: "TETAP", email: "nadia.p@hmif.org" },
-    { id: 8, nim: "122140078", nama: "Bagas Pratama", kontak: "0812-3456-7896", angkatan: 2022, divisi: "Eksternal", jabatan: "Staff", status: "TETAP", email: "bagas.p@hmif.org" },
-    { id: 9, nim: "123140044", nama: "Dewi Kartika", kontak: "0812-3456-7897", angkatan: 2023, divisi: "Minat Bakat", jabatan: "Staff", status: "MUDA", email: "dewi.k@hmif.org" },
+    { id: 4, nim: "124140051", nama: "Farhan Naufal", kontak: "0812-3456-7893", angkatan: 2024, divisi: "KEPROF", jabatan: "Sekretaris", status: "TETAP", email: "farhan.n@hmif.org" },
+    { id: 5, nim: "123140014", nama: "Luthfi Wijaya", kontak: "0812-3456-7894", angkatan: 2023, divisi: "EXTERNAL", jabatan: "Staff", status: "MUDA", email: "luthfi.w@hmif.org" },
+    { id: 6, nim: "124140090", nama: "Ridho Maulana Saputa", kontak: "0813-6728-9083", angkatan: 2024, divisi: "KEPROF", jabatan: "Staff", status: "MUDA", email: "ridho.124140090@student.itera.ac.id" },
+    { id: 7, nim: "121140011", nama: "Nadia Putri", kontak: "0812-3456-7895", angkatan: 2021, divisi: "INTERNAL", jabatan: "Bendahara", status: "TETAP", email: "nadia.p@hmif.org" },
+    { id: 8, nim: "122140078", nama: "Bagas Pratama", kontak: "0812-3456-7896", angkatan: 2022, divisi: "EXTERNAL", jabatan: "Staff", status: "TETAP", email: "bagas.p@hmif.org" },
+    { id: 9, nim: "123140044", nama: "Dewi Kartika", kontak: "0812-3456-7897", angkatan: 2023, divisi: "KEPROF", jabatan: "Staff", status: "MUDA", email: "dewi.k@hmif.org" },
     { id: 10, nim: "120140066", nama: "Raka Mahendra", kontak: "0812-3456-7898", angkatan: 2020, divisi: "-", jabatan: "Alumni", status: "LUAR BIASA", email: "raka.m@hmif.org" },
-    { id: 11, nim: "124140099", nama: "Maya Salsabila", kontak: "0812-3456-7899", angkatan: 2024, divisi: "Internal", jabatan: "Staff", status: "MUDA", email: "maya.s@hmif.org" },
-    { id: 12, nim: "121140073", nama: "Aldi Firmansyah", kontak: "0812-3456-7900", angkatan: 2021, divisi: "Technopreneur", jabatan: "Koordinator", status: "TETAP", email: "aldi.f@hmif.org" },
+    { id: 11, nim: "124140099", nama: "Maya Salsabila", kontak: "0812-3456-7899", angkatan: 2024, divisi: "INTERNAL", jabatan: "Staff", status: "MUDA", email: "maya.s@hmif.org" },
+    { id: 12, nim: "121140073", nama: "Aldi Firmansyah", kontak: "0812-3456-7900", angkatan: 2021, divisi: "KEPROF", jabatan: "Koordinator", status: "TETAP", email: "aldi.f@hmif.org" },
 ];
 
 const statusClasses = {
@@ -202,7 +217,7 @@ const mapMemberRow = (member, index) => {
         nama: member.name ?? member.nama ?? "-",
         kontak: profile.no_telepon ?? profile.no_telp ?? profile.phone ?? member.no_telepon ?? "-",
         angkatan: profile.angkatan ?? member.angkatan ?? "-",
-        divisi: profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-",
+        divisi: normalizeDepartment(profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-"),
         jabatan: normalizeJabatan(profile.jabatan ?? member.jabatan),
         status: normalizeMemberStatus(profile.status_keanggotaan ?? member.status_keanggotaan),
         role,
@@ -913,10 +928,9 @@ export default function DashboardAdminAnggota() {
                                     className="h-12 w-full min-w-0 rounded-[6px] border border-white/20 bg-white/95 px-4 text-[0.95rem] text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-white/40"
                                 >
                                     <option>Semua Departemen</option>
-                                    <option>Technopreneur</option>
-                                    <option>Eksternal</option>
-                                    <option>Internal</option>
-                                    <option>Minat Bakat</option>
+                                    {DEPARTMENT_OPTIONS.map((department) => (
+                                        <option key={department} value={department}>{department}</option>
+                                    ))}
                                 </select>
                                 <select
                                     value={year}
@@ -1191,13 +1205,9 @@ export default function DashboardAdminAnggota() {
                                                 className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
                                             >
                                                 <option value="">Belum Ditentukan</option>
-                                                <option value="Technopreneur">Technopreneur</option>
-                                                <option value="Eksternal">Eksternal</option>
-                                                <option value="Internal">Internal</option>
-                                                <option value="Minat Bakat">Minat Bakat</option>
-                                                <option value="PSDA">PSDA</option>
-                                                <option value="Kominfo">Kominfo</option>
-                                                <option value="Akbes">Akbes</option>
+                                                {DEPARTMENT_OPTIONS.map((department) => (
+                                                    <option key={department} value={department}>{department}</option>
+                                                ))}
                                             </select>
                                         </label>
 
@@ -1272,7 +1282,7 @@ export default function DashboardAdminAnggota() {
                                     </div>
 
                                     <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 pt-4 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                                        <span>HMIF ITERA • MEMBER RECORDS DIVISION</span>
+                                        <span>HMIF ITERA ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ MEMBER RECORDS DIVISION</span>
                                         <span className="text-slate-500">LAST UPDATED: OCT 24, 2023</span>
                                     </div>
                                 </div>

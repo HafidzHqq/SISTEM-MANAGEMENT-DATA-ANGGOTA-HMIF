@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Archive;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Carbon\Carbon;
 
@@ -31,13 +33,13 @@ class AttendanceController extends Controller
 
         $now = Carbon::now();
 
-        if ($now->lt($event->attendance_window_start)) {
+        if ($enforceWindow && $now->lt($event->attendance_window_start)) {
             return response()->json([
                 'message' => 'Presensi belum dibuka'
             ], 403);
         }
 
-        if ($now->gt($event->attendance_window_end)) {
+        if ($enforceWindow && $now->gt($event->attendance_window_end)) {
             return response()->json([
                 'message' => 'Presensi sudah ditutup'
             ], 403);
@@ -74,6 +76,120 @@ class AttendanceController extends Controller
         ], 201);
     }
 
+    public function adminScanCheckIn(Request $request)
+    {
+        $validated = $request->validate([
+            'qr_payload' => 'required|string',
+        ]);
+
+        $payload = $this->parseAttendanceQrPayload($validated['qr_payload']);
+
+        if (!$payload || ($payload['type'] ?? null) !== 'hmif_user_attendance') {
+            return response()->json(['message' => 'QR user tidak valid'], 422);
+        }
+
+        $event = Event::find($payload['event_id'] ?? null);
+        $user = User::where('user_id', $payload['user_id'] ?? null)
+            ->whereIn('role', ['anggota', 'admin'])
+            ->where('status', 'aktif')
+            ->first();
+
+        return $this->recordAdminAttendance($event, $user, 'Check-in dari QR user oleh admin');
+    }
+
+    public function manualCheckIn(Request $request)
+    {
+        $validated = $request->validate([
+            'event_id' => 'required|integer|exists:events,event_id',
+            'user_id' => 'required|integer|exists:users,user_id',
+            'remarks' => 'nullable|string|max:255',
+        ]);
+
+        $event = Event::find($validated['event_id']);
+        $user = User::where('user_id', $validated['user_id'])
+            ->whereIn('role', ['anggota', 'admin'])
+            ->where('status', 'aktif')
+            ->first();
+
+        return $this->recordAdminAttendance(
+            $event,
+            $user,
+            $validated['remarks'] ?? 'Set hadir manual oleh admin',
+            false
+        );
+    }
+
+    private function recordAdminAttendance(?Event $event, ?User $user, string $remarks, bool $enforceWindow = true)
+    {
+        if (!$event) {
+            return response()->json(['message' => 'Acara tidak ditemukan'], 404);
+        }
+
+        if (!$user) {
+            return response()->json(['message' => 'Anggota tidak ditemukan atau tidak aktif'], 404);
+        }
+
+        $now = Carbon::now();
+
+        if ($enforceWindow && $now->lt($event->attendance_window_start)) {
+            return response()->json(['message' => 'Presensi belum dibuka'], 403);
+        }
+
+        if ($enforceWindow && $now->gt($event->attendance_window_end)) {
+            return response()->json(['message' => 'Presensi sudah ditutup'], 403);
+        }
+
+        $alreadyCheckedIn = Attendance::where('user_id', $user->user_id)
+            ->where('event_id', $event->event_id)
+            ->exists();
+
+        if ($alreadyCheckedIn) {
+            return response()->json([
+                'message' => $user->name . ' sudah tercatat hadir pada acara ini'
+            ], 409);
+        }
+
+        try {
+            $attendance = Attendance::create([
+                'user_id' => $user->user_id,
+                'event_id' => $event->event_id,
+                'checkin_time' => $now,
+                'is_in_radius' => true,
+                'status' => 'present',
+                'remarks' => $remarks,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'message' => $user->name . ' sudah tercatat hadir pada acara ini'
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => $user->name . ' berhasil diset hadir untuk ' . $event->title,
+            'attendance' => $attendance,
+        ], 201);
+    }
+
+    private function parseAttendanceQrPayload(string $payload): ?array
+    {
+        $payload = trim($payload);
+        $decoded = json_decode($payload, true);
+
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        $query = parse_url($payload, PHP_URL_QUERY);
+        if ($query) {
+            parse_str($query, $params);
+            if (isset($params['attendance'])) {
+                $decoded = json_decode($params['attendance'], true);
+                return is_array($decoded) ? $decoded : null;
+            }
+        }
+
+        return null;
+    }
 
     // Fitur: Export CSV Kehadiran Event
     // Deskripsi: Mengunduh rekap kehadiran anggota pada event tertentu dalam format CSV.
@@ -87,17 +203,11 @@ class AttendanceController extends Controller
             ], 404);
         }
 
-        $attendances = Attendance::with([
-                'user:user_id,name,nim',
-                'user.memberProfile:profile_id,user_id,Departemen,jabatan,status_keanggotaan',
-            ])
-            ->where('event_id', $event->event_id)
-            ->orderBy('checkin_time')
-            ->get();
-
+        $departmentColumn = $this->departmentColumn();
+        $rows = $this->attendanceReportRows($event, $departmentColumn);
         $fileName = 'rekap-kehadiran-event-' . $event->event_id . '.csv';
 
-        return new StreamedResponse(function () use ($attendances) {
+        return new StreamedResponse(function () use ($rows) {
             $handle = fopen('php://output', 'w');
 
             fputcsv($handle, [
@@ -113,21 +223,18 @@ class AttendanceController extends Controller
                 'Keterangan',
             ]);
 
-            foreach ($attendances as $index => $attendance) {
-                $user = $attendance->user;
-                $profile = $user?->memberProfile;
-
+            foreach ($rows as $index => $row) {
                 fputcsv($handle, [
                     $index + 1,
-                    $this->sanitizeCsvValue($user?->name),
-                    $this->sanitizeCsvValue($user?->nim),
-                    $this->sanitizeCsvValue($profile?->getAttribute('Departemen')),
-                    $this->sanitizeCsvValue($profile?->jabatan),
-                    $this->sanitizeCsvValue($profile?->status_keanggotaan),
-                    $attendance->checkin_time,
-                    $this->sanitizeCsvValue($attendance->status),
-                    $attendance->is_in_radius ? 'Valid' : 'Tidak Valid',
-                    $this->sanitizeCsvValue($attendance->remarks),
+                    $this->sanitizeCsvValue($row['name']),
+                    $this->sanitizeCsvValue($row['nim']),
+                    $this->sanitizeCsvValue($row['departemen']),
+                    $this->sanitizeCsvValue($row['jabatan']),
+                    $this->sanitizeCsvValue($row['status_keanggotaan']),
+                    $row['checkin_time'],
+                    $this->sanitizeCsvValue($row['status'] === 'present' ? 'HADIR' : 'TIDAK HADIR'),
+                    $row['is_in_radius'] === null ? '-' : ($row['is_in_radius'] ? 'Valid' : 'Tidak Valid'),
+                    $this->sanitizeCsvValue($row['remarks']),
                 ]);
             }
 
@@ -143,10 +250,12 @@ class AttendanceController extends Controller
     public function monitorByEvent(Request $request, $eventId)
     {
         $validated = $request->validate([
-            'per_page' => 'sometimes|integer|min:1|max:100',
+            'per_page' => 'sometimes|integer|min:1|max:1000',
+            'page' => 'sometimes|integer|min:1',
         ]);
 
         $perPage = $validated['per_page'] ?? 20;
+        $page = $validated['page'] ?? 1;
 
         try {
             $event = Event::find($eventId);
@@ -157,38 +266,19 @@ class AttendanceController extends Controller
                 ], 404);
             }
 
-            $baseQuery = Attendance::where('event_id', $event->event_id);
+            $departmentColumn = $this->departmentColumn();
+            $rows = $this->attendanceReportRows($event, $departmentColumn);
 
-            $totalPresent = (clone $baseQuery)->count();
-            $totalInRadius = (clone $baseQuery)->where('is_in_radius', true)->count();
-            $totalOutRadius = (clone $baseQuery)->where('is_in_radius', false)->count();
+            $total = count($rows);
+            $lastPage = max(1, (int) ceil($total / $perPage));
+            $page = min($page, $lastPage);
+            $offset = ($page - 1) * $perPage;
+            $pagedRows = array_slice($rows, $offset, $perPage);
 
-            $attendances = (clone $baseQuery)
-                ->with([
-                    'user:user_id,name,nim',
-                    'user.memberProfile:profile_id,user_id,Departemen,jabatan,status_keanggotaan',
-                ])
-                ->orderByDesc('checkin_time')
-                ->paginate($perPage);
-
-            $attendanceData = $attendances->getCollection()->map(function ($attendance) {
-                $user = $attendance->user;
-                $profile = $user?->memberProfile;
-
-                return [
-                    'attendance_id' => $attendance->attendance_id,
-                    'user_id' => $user?->user_id,
-                    'name' => $user?->name,
-                    'nim' => $user?->nim,
-                    'departemen' => $profile?->getAttribute('Departemen'),
-                    'jabatan' => $profile?->jabatan,
-                    'status_keanggotaan' => $profile?->status_keanggotaan,
-                    'checkin_time' => $attendance->checkin_time,
-                    'status' => $attendance->status,
-                    'is_in_radius' => (bool) $attendance->is_in_radius,
-                    'remarks' => $attendance->remarks,
-                ];
-            });
+            $totalPresent = count(array_filter($rows, fn ($row) => $row['status'] === 'present'));
+            $totalAbsent = $total - $totalPresent;
+            $totalInRadius = count(array_filter($rows, fn ($row) => $row['is_in_radius'] === true));
+            $totalOutRadius = count(array_filter($rows, fn ($row) => $row['is_in_radius'] === false));
 
             return response()->json([
                 'event' => [
@@ -200,15 +290,17 @@ class AttendanceController extends Controller
                 ],
                 'summary' => [
                     'total_present' => $totalPresent,
+                    'total_absent' => $totalAbsent,
+                    'total_members' => $total,
                     'total_in_radius' => $totalInRadius,
                     'total_out_radius' => $totalOutRadius,
                 ],
-                'attendances' => $attendanceData,
+                'attendances' => $pagedRows,
                 'pagination' => [
-                    'current_page' => $attendances->currentPage(),
-                    'per_page' => $attendances->perPage(),
-                    'total' => $attendances->total(),
-                    'last_page' => $attendances->lastPage(),
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                    'last_page' => $lastPage,
                 ],
             ]);
         } catch (\Throwable $e) {
@@ -221,6 +313,44 @@ class AttendanceController extends Controller
                 'message' => 'Gagal memuat monitoring kehadiran'
             ], 500);
         }
+    }
+
+    private function attendanceReportRows(Event $event, string $departmentColumn): array
+    {
+        $attendances = Attendance::where('event_id', $event->event_id)
+            ->with(['user:user_id,name,nim'])
+            ->get()
+            ->keyBy('user_id');
+
+        return User::with("memberProfile:profile_id,user_id,{$departmentColumn},jabatan,status_keanggotaan")
+            ->whereIn('role', ['anggota', 'admin'])
+            ->where('status', 'aktif')
+            ->orderBy('name')
+            ->get(['user_id', 'name', 'nim'])
+            ->map(function ($user) use ($attendances, $departmentColumn) {
+                $attendance = $attendances->get($user->user_id);
+                $profile = $user->memberProfile;
+
+                return [
+                    'attendance_id' => $attendance?->attendance_id,
+                    'user_id' => $user->user_id,
+                    'name' => $user->name,
+                    'nim' => $user->nim,
+                    'departemen' => $profile?->getAttribute($departmentColumn),
+                    'jabatan' => $profile?->jabatan,
+                    'status_keanggotaan' => $profile?->status_keanggotaan,
+                    'checkin_time' => $attendance?->checkin_time,
+                    'status' => $attendance ? $attendance->status : 'absent',
+                    'is_in_radius' => $attendance ? (bool) $attendance->is_in_radius : null,
+                    'remarks' => $attendance?->remarks ?? 'Belum melakukan presensi',
+                ];
+            })
+            ->all();
+    }
+
+    private function departmentColumn(): string
+    {
+        return Schema::hasColumn('member_profiles', 'departemen') ? 'departemen' : 'Departemen';
     }
 
     private function sanitizeCsvValue($value)

@@ -48,6 +48,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
     Route::apiResource('events', EventController::class)->only(['store', 'update', 'destroy']);
 
+    Route::post('/attendances/admin-scan', [AttendanceController::class, 'adminScanCheckIn']);
+    Route::post('/attendances/manual', [AttendanceController::class, 'manualCheckIn']);
+
     Route::get('/events/{eventId}/attendances', [AttendanceController::class, 'monitorByEvent']);
     Route::get('/events/{eventId}/attendances/export-csv', [AttendanceController::class, 'exportCsv']);
     Route::get('/dashboard/attendance-statistics', [DashboardController::class, 'attendanceStatistics']);

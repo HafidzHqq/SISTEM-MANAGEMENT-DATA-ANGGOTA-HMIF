@@ -28,7 +28,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Parse angkatan dari NIM (digit ke-2 dan ke-3)
-        // Contoh: 124140097 → angkatan 2024
+        // Contoh: 124140097 â†’ angkatan 2024
         $nim = preg_replace('/\D/', '', $user->nim ?? '');
         $angkatan = null;
         if (strlen($nim) >= 3) {
@@ -36,9 +36,9 @@ class ProfileController extends Controller
         }
 
         $profileData = $request->only(['jabatan', 'status_keanggotaan', 'no_telepon']);
-        $departemenColumn = Schema::hasColumn('member_profiles', 'Departemen')
-            ? 'Departemen'
-            : 'departemen';
+        $departemenColumn = Schema::hasColumn('member_profiles', 'departemen')
+            ? 'departemen'
+            : 'Departemen';
         $profileData[$departemenColumn] = $request->input('departemen');
         $profileData['angkatan'] = $angkatan;
 

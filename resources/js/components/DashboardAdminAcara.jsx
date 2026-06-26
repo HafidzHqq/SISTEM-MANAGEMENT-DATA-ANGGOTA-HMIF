@@ -22,7 +22,7 @@ const getAuthHeaders = () => {
     };
 };
 
-// Generate QR token — pakai qr_token dari DB, fallback ke event_id
+// Generate QR token â€” pakai qr_token dari DB, fallback ke event_id
 const generateQrToken = (event) => {
     return event.qr_token || String(event.event_id);
 };
@@ -324,7 +324,7 @@ function StatusBadge({ event }) {
     );
 }
 
-// Modal Detail — tombol Hapus dipindah ke sini, di bawah tombol Tutup
+// Modal Detail â€” tombol Hapus dipindah ke sini, di bawah tombol Tutup
 function DetailModal({ event, onClose, onDelete, deletingId }) {
     if (!event) return null;
     const formatDate = (dt) => dt ? new Date(dt).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "-";
@@ -355,7 +355,7 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                 <div className="space-y-3 mb-4">
                     <MetaRow type="calendar">{formatDate(event.date_time)}</MetaRow>
                     <MetaRow type="pin">{event.location || "-"}</MetaRow>
-                    <MetaRow type="clock">Window: {windowStart} – {windowEnd} WIB</MetaRow>
+                    <MetaRow type="clock">Window: {windowStart} â€“ {windowEnd} WIB</MetaRow>
                 </div>
 
                 {event.description && (
@@ -373,7 +373,7 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                     Tutup
                 </button>
 
-                {/* Tombol Hapus — di bawah Tutup */}
+                {/* Tombol Hapus â€” di bawah Tutup */}
                 <button
                     onClick={() => onDelete(event.event_id, event.title)}
                     disabled={isDeleting}
@@ -668,7 +668,7 @@ export default function DashboardAdminAcara() {
                             </button>
                         </div>
 
-                        {/* FEATURED EVENT — update otomatis saat card diklik */}
+                        {/* FEATURED EVENT â€” update otomatis saat card diklik */}
                         {featuredEvent && (
                             <section className="grid gap-5 xl:grid-cols-[1.95fr_0.92fr] mb-6">
                                 <div className="overflow-hidden rounded-[16px] border border-slate-300 bg-white shadow-[0_9px_18px_rgba(15,23,42,0.13)]">
@@ -690,7 +690,7 @@ export default function DashboardAdminAcara() {
                                                     {featuredEvent.attendance_window_start
                                                         ? new Date(featuredEvent.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
                                                         : "-"}{" "}
-                                                    –{" "}
+                                                    â€“{" "}
                                                     {featuredEvent.attendance_window_end
                                                         ? new Date(featuredEvent.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
                                                         : "-"}{" "}
@@ -707,40 +707,39 @@ export default function DashboardAdminAcara() {
                                             </div>
                                         </div>
 
-                                        {/* QR Panel — otomatis ganti sesuai featuredEvent */}
+                                        {/* Admin attendance panel */}
                                         <div className="border-t border-slate-200 xl:border-l xl:border-t-0">
-                                            <div className="flex h-full flex-col items-center justify-center p-6 sm:p-8">
-                                                <p className="text-[0.9rem] font-semibold uppercase tracking-[0.12em] text-slate-400">QR Presensi</p>
-                                                <div className="mt-5 rounded-[18px] border-2 border-[#b6cbf6] bg-white p-3 shadow-sm">
-                                                    <img
-                                                        key={featuredEvent.event_id}
-                                                        src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=${encodeURIComponent(generateQrToken(featuredEvent))}`}
-                                                        alt="QR Code"
-                                                        className="h-[170px] w-[170px] object-contain"
-                                                    />
-                                                </div>
-                                                <p className="mt-3 text-center text-[0.82rem] text-slate-400 max-w-[160px]">
-                                                    {featuredEvent.title}
-                                                </p>
-                                                <p className="mt-1 text-center text-[0.78rem] text-slate-300">Scan untuk presensi kehadiran</p>
-                                                <a
-                                                    href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(generateQrToken(featuredEvent))}`}
-                                                    download={`QR-${featuredEvent.title}.png`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="mt-4 inline-flex items-center gap-2 rounded-[10px] bg-[#63bc2b] px-4 py-2.5 text-[0.95rem] font-medium text-slate-900 transition hover:bg-[#73cd35]"
-                                                >
-                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v9m0 0l-3-3m3 3l3-3M5 19h14" />
+                                            <div className="flex h-full flex-col items-center justify-center p-6 text-center sm:p-8">
+                                                <p className="text-[0.82rem] font-semibold uppercase tracking-[0.14em] text-slate-400">Presensi Admin</p>
+                                                <div className="mt-5 flex h-[150px] w-[150px] items-center justify-center rounded-[22px] border border-emerald-100 bg-emerald-50 text-emerald-700 shadow-sm">
+                                                    <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M7 12h10" />
                                                     </svg>
-                                                    Download QR
-                                                </a>
+                                                </div>
+                                                <h3 className="mt-4 text-[1.15rem] font-extrabold text-slate-900">Scan QR Anggota</h3>
+                                                <p className="mt-2 max-w-[220px] text-[0.82rem] leading-relaxed text-slate-500">
+                                                    Anggota menampilkan QR dari dashboard, admin memindai untuk mencatat hadir.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate("/scan")}
+                                                    className="mt-5 inline-flex items-center gap-2 rounded-[10px] bg-[#63bc2b] px-4 py-2.5 text-[0.95rem] font-bold text-slate-900 transition hover:bg-[#73cd35]"
+                                                >
+                                                    Buka Scanner Admin
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate("/scan")}
+                                                    className="mt-3 text-[0.82rem] font-bold text-slate-500 transition hover:text-slate-800"
+                                                >
+                                                    Set hadir manual tanpa QR
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* STATS PANEL — spesifik ke featuredEvent */}
+                                {/* STATS PANEL â€” spesifik ke featuredEvent */}
                                 <aside className="rounded-[16px] bg-[#5fae14] p-5 text-white shadow-[0_10px_22px_rgba(68,131,19,0.24)]">
                                     <p className="text-[0.78rem] uppercase tracking-[0.18em] text-white/70">Total Acara</p>
                                     <h3 className="mt-1 text-[3.1rem] font-extrabold leading-none">{totalEvents}</h3>
@@ -762,7 +761,7 @@ export default function DashboardAdminAcara() {
                             </section>
                         )}
 
-                        {/* EVENT LIST — klik card = ganti featured */}
+                        {/* EVENT LIST â€” klik card = ganti featured */}
                         <section className="grid gap-5 lg:grid-cols-3">
                             {isLoadingEvents ? (
                                 <div className="col-span-3 rounded-[14px] border border-slate-300 bg-white p-6 text-center text-slate-500">Memuat acara...</div>
@@ -811,7 +810,7 @@ export default function DashboardAdminAcara() {
                                                 <div className="my-3 h-px bg-slate-100" />
                                                 <div className="flex items-center justify-between gap-3">
                                                     <p className="text-[0.88rem] text-slate-500">Check-in: {event.attendances_count ?? 0}</p>
-                                                    {/* Hanya tombol Detail — Hapus sudah dipindah ke dalam modal */}
+                                                    {/* Hanya tombol Detail â€” Hapus sudah dipindah ke dalam modal */}
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation(); // jangan trigger klik card
@@ -819,7 +818,7 @@ export default function DashboardAdminAcara() {
                                                         }}
                                                         className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition"
                                                     >
-                                                        Detail →
+                                                        Detail â†’
                                                     </button>
                                                 </div>
                                             </div>
@@ -941,7 +940,7 @@ export default function DashboardAdminAcara() {
                 </div>
             )}
 
-            {/* MODAL DETAIL — Hapus ada di sini */}
+            {/* MODAL DETAIL â€” Hapus ada di sini */}
             <DetailModal
                 event={detailEvent}
                 onClose={() => setDetailEvent(null)}

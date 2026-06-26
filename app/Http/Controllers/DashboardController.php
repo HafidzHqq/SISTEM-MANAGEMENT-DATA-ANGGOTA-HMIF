@@ -38,9 +38,9 @@ class DashboardController extends Controller
             'invalid' => $totalInvalidRadius,
         ];
 
-        $departmentColumn = Schema::hasColumn('member_profiles', 'Departemen')
-            ? 'Departemen'
-            : 'departemen';
+        $departmentColumn = Schema::hasColumn('member_profiles', 'departemen')
+            ? 'departemen'
+            : 'Departemen';
 
         $attendanceByDepartment = Attendance::query()
             ->join('users', 'attendances.user_id', '=', 'users.user_id')

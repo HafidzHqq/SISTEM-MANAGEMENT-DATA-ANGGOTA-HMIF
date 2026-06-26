@@ -4,8 +4,20 @@ import hmifLogo from "../assets/logo-hmif.png";
 import googleLogo from "../assets/logo-google.png";
 
 const ERROR_LABEL = {
+    google_session_expired:
+        "Sesi login Google gagal atau kedaluwarsa. Silakan coba login kembali.",
     domain_tidak_valid:
         "Akun tidak valid. Gunakan email dengan domain @student.itera.ac.id.",
+    format_email_tidak_valid:
+        "Format email mahasiswa tidak valid. Pastikan email berformat nama.nim@student.itera.ac.id.",
+    bukan_sarjana:
+        "Akun ini tidak terdaftar sebagai mahasiswa sarjana.",
+    angkatan_tidak_valid:
+        "Angkatan akun ini belum diizinkan untuk login.",
+    bukan_informatika:
+        "Login hanya tersedia untuk mahasiswa Informatika.",
+    akun_nonaktif:
+        "Akun Anda sedang nonaktif. Hubungi admin HMIF.",
 };
 
 export default function Login() {
@@ -36,7 +48,7 @@ export default function Login() {
                 </header>
             )}
 
-            {/* ── CARD WRAPPER ── */}
+            {/* Ã¢â€â‚¬Ã¢â€â‚¬ CARD WRAPPER Ã¢â€â‚¬Ã¢â€â‚¬ */}
             <div className="w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
 
                 <div
@@ -97,7 +109,7 @@ export default function Login() {
 
                 <div className="flex flex-col bg-white md:w-[58%] flex-1">
 
-                    {/* ── Main Content (centered) ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Main Content (centered) Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="flex flex-col items-center flex-1 px-8 sm:px-14 pt-16 pb-8">
 
                         {/* Logo */}
@@ -162,20 +174,20 @@ export default function Login() {
                         </a>
                     </div>
 
-                    {/* ── Footer ── */}
+                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Footer Ã¢â€â‚¬Ã¢â€â‚¬ */}
                     <div className="px-8 pb-8 text-center">
                         <hr className="border-gray-100 mb-5" />
                         <div className="flex items-center justify-center gap-3 text-[0.72rem] font-semibold tracking-[0.1em] uppercase text-gray-400">
                             <a href="#" className="transition hover:text-gray-600">
                                 Help &amp; Support
                             </a>
-                            <span className="text-gray-300">•</span>
+                            <span className="text-gray-300">Ã¢â‚¬Â¢</span>
                             <a href="#" className="transition hover:text-gray-600">
                                 Privacy Policy
                             </a>
                         </div>
                         <p className="mt-3 text-[0.72rem] text-gray-400">
-                            © 2026 HMIF
+                            Ã‚(c) 2026 HMIF
                         </p>
                     </div>
                 </div>
