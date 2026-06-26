@@ -16,6 +16,7 @@ import Anggota from "./pages/Anggota";
 import DashboardAdmin from "./components/DashboardAdmin";
 import DashboardAdminAcara from "./components/DashboardAdminAcara";
 import DashboardAdminLaporan from "./components/DashboardAdminLaporan";
+import DashboardAnggota from "./components/DashboardAnggota";
 
 function App() {
     return (
@@ -37,6 +38,11 @@ function App() {
                 <Route path="/dashboard/admin-overview" element={
                     <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
                         <DashboardAdmin />
+                    </ProtectedRoute>
+                } />
+                <Route path="/dashboard/member" element={
+                    <ProtectedRoute allowedRoles={["anggota", "admin"]}>
+                        <DashboardAnggota />
                     </ProtectedRoute>
                 } />
                 <Route path="/dashboard/acara" element={

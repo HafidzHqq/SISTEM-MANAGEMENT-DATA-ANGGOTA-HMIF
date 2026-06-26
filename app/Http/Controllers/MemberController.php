@@ -18,7 +18,7 @@ class MemberController extends Controller
     private const DEPARTMENT_OPTIONS = ['KEPROF', 'PSDA', 'INTERNAL', 'EXTERNAL', 'KOMINFO', 'KESEKJENAN'];
     private const POSITION_OPTIONS = ['-', 'Ketua Departemen', 'Ketua Divisi', 'Sekertaris Departemen', 'Staf Ahli', 'Staf'];
 
-    // GET /api/members ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ambil semua anggota beserta profilnya
+    // GET /api/members ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ambil semua anggota beserta profilnya
     public function index(Request $request)
     {
         $query = User::with('memberProfile')
@@ -56,7 +56,7 @@ class MemberController extends Controller
         return response()->json($members);
     }
 
-    // GET /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ambil detail 1 anggota
+    // GET /api/members/{id} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ambil detail 1 anggota
     public function show($id)
     {
         $user = User::with('memberProfile')
@@ -71,7 +71,7 @@ class MemberController extends Controller
         return response()->json($user);
     }
 
-    // PUT /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â update data anggota oleh admin
+    // PUT /api/members/{id} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â update data anggota oleh admin
     public function update(Request $request, $id)
     {
         $user = User::where('user_id', $id)
@@ -85,7 +85,7 @@ class MemberController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|in:' . implode(',', self::DEPARTMENT_OPTIONS),
             'jabatan'            => 'nullable|in:' . implode(',', self::POSITION_OPTIONS),
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non-Anggota',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
             'no_telepon'         => 'nullable|string|max:20',
         ]);
 
@@ -116,7 +116,7 @@ class MemberController extends Controller
 
     }
 
-    // DELETE /api/members/{id} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â hapus anggota
+    // DELETE /api/members/{id} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â hapus anggota
     public function destroy(Request $request, $id)
     {
         $user = User::where('user_id', $id)
@@ -141,7 +141,7 @@ class MemberController extends Controller
 
     }
 
-        // POST /api/members/import ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â import bulk via CSV
+        // POST /api/members/import ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â import bulk via CSV
         public function import(Request $request)
         {
             $validator = Validator::make($request->all(), [

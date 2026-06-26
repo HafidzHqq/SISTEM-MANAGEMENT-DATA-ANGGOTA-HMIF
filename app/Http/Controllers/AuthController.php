@@ -98,7 +98,7 @@ class AuthController extends Controller
 
         $statusKeanggotaan = in_array($angkatan, ['22', '23'], true)
             ? 'Tetap'
-            : ($angkatan === '24' ? 'Muda' : 'Non-Anggota');
+            : ($angkatan === '24' ? 'Muda' : 'Luar Biasa');
 
         $user->memberProfile()->firstOrCreate(
             ['user_id' => $user->user_id],

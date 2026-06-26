@@ -59,6 +59,8 @@ const firstName = name.split(" ")[0];
 const attendanceSummary = React.useMemo(() => calculateAttendanceSummary(historyData), [historyData]);
 const recentActivities = attendanceSummary.normalized.slice(0, 3);
 const attendance = attendanceSummary.rate;
+const role = localStorage.getItem("role");
+const isAdminView = role === "admin";
 const attendanceLabel =
     attendanceSummary.total === 0
         ? "Belum ada data"
@@ -75,16 +77,16 @@ const attendanceLabel =
         navigate("/login");
     };
 
-    /* â”€â”€â”€ NAV ITEMS â”€â”€â”€ */
+    /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ NAV ITEMS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
     const navItems = [
-        { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+        { label: isAdminView ? "Admin" : "Dashboard", icon: iconDashboard, to: isAdminView ? "/dashboard/admin-overview" : "/dashboard" },
         { label: "History", icon: iconHistory, to: "/dashboard/history" },
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
-            {/* â•â•â•â•â•â•â•â• DESKTOP SIDEBAR â•â•â•â•â•â•â•â• */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â DESKTOP SIDEBAR Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                 {/* Logo */}
                 <div className="flex flex-col items-center pt-8 pb-5 px-4">
@@ -126,13 +128,13 @@ const attendanceLabel =
                             onClick={handleLogout}
                             className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1"
                         >
-                            â¤· Logout
+                            Ã¢Â¤Â· Logout
                         </button>
                     </div>
                 </div>
             </aside>
 
-            {/* â•â•â•â•â•â•â•â• MAIN AREA â•â•â•â•â•â•â•â• */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MAIN AREA Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
 
                 {/* Mobile Header */}
@@ -168,7 +170,7 @@ const attendanceLabel =
                     </div>
                 </header>
 
-                {/* â”€â”€ PAGE CONTENT â”€â”€ */}
+                {/* Ã¢â€â‚¬Ã¢â€â‚¬ PAGE CONTENT Ã¢â€â‚¬Ã¢â€â‚¬ */}
                 <main className="flex-1 px-5 py-7 md:px-8 md:py-8 pb-28 md:pb-10">
 
                     {/* Welcome */}
@@ -179,12 +181,12 @@ const attendanceLabel =
                         Welcome, {firstName}.
                     </h1>
 
-                    {/* ROW 1 â€” Member Card + QR Card */}
+                    {/* ROW 1 Ã¢â‚¬â€ Member Card + QR Card */}
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] xl:grid-cols-[1fr_450px] gap-4 mb-5">
 
                         {/* Member Status Card */}
                         <div className="bg-white rounded-2xl p-5 shadow-sm relative text-center md:text-left">
-                            {/* Photo â€” pinned to top-right corner */}
+                            {/* Photo Ã¢â‚¬â€ pinned to top-right corner */}
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Profile"
@@ -203,7 +205,7 @@ const attendanceLabel =
                             <h3 className="text-lg font-extrabold text-gray-900 md:pr-16">{name}</h3>
                             <p className="text-sm text-gray-400 mt-0.5 mb-4">{division}</p>
 
-                            {/* NIM â€” full width */}
+                            {/* NIM Ã¢â‚¬â€ full width */}
                             <div className="mx-auto flex max-w-[250px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-3 text-left md:mx-0">
                                 <div>
                                     <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white">NIM</p>
@@ -215,7 +217,7 @@ const attendanceLabel =
 
                         {/* Scan QR Card */}
                         <button
-                            onClick={() => navigate("/scan")}
+                            onClick={() => navigate(isAdminView ? "/scan?mode=user" : "/scan")}
                             className="flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-white text-center w-full cursor-pointer hover:opacity-90 active:scale-95 transition-all duration-200"
                             style={{ background: "linear-gradient(160deg, #3db53d 0%, #228b22 100%)" }}
                         >
@@ -227,7 +229,7 @@ const attendanceLabel =
                         </button>
                     </div>
 
-                    {/* ROW 2 â€” Recent Activity + Right Column */}
+                    {/* ROW 2 Ã¢â‚¬â€ Recent Activity + Right Column */}
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_600px] gap-4">
 
                         {/* Recent Activity */}
@@ -299,7 +301,7 @@ const attendanceLabel =
                 </main>
             </div>
 
-            {/* â•â•â•â•â•â•â•â• MOBILE BOTTOM NAV â•â•â•â•â•â•â•â• */}
+            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MOBILE BOTTOM NAV Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1c5e22] flex z-50">
                 {navItems.map((item) => (
                     <Link

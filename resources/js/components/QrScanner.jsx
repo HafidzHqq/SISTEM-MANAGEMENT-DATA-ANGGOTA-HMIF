@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import jsQR from "jsqr";
 import iconQr from "../assets/icon-qrscan.png";
 import hmifLogo from "../assets/logo-hmif.png";
@@ -410,8 +410,10 @@ function AdminScannerView({ navigate }) {
 
 export default function QrScanner() {
     const navigate = useNavigate();
+    const location = useLocation();
     const role = localStorage.getItem("role");
-    const isAdmin = role === "admin" || role === "super_admin";
+    const forceMemberQr = new URLSearchParams(location.search).get("mode") === "user";
+    const isAdminScanner = (role === "admin" || role === "super_admin") && !(role === "admin" && forceMemberQr);
 
-    return isAdmin ? <AdminScannerView navigate={navigate} /> : <MemberQrView navigate={navigate} />;
+    return isAdminScanner ? <AdminScannerView navigate={navigate} /> : <MemberQrView navigate={navigate} />;
 }

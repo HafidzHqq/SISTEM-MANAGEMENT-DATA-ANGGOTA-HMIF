@@ -22,7 +22,7 @@ const getAuthHeaders = () => {
     };
 };
 
-// Generate QR token â€” pakai qr_token dari DB, fallback ke event_id
+// Generate QR token ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â pakai qr_token dari DB, fallback ke event_id
 const generateQrToken = (event) => {
     return event.qr_token || String(event.event_id);
 };
@@ -324,7 +324,7 @@ function StatusBadge({ event }) {
     );
 }
 
-// Modal Detail â€” tombol Hapus dipindah ke sini, di bawah tombol Tutup
+// Modal Detail
 function DetailModal({ event, onClose, onDelete, deletingId }) {
     if (!event) return null;
     const formatDate = (dt) => dt ? new Date(dt).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "-";
@@ -355,7 +355,7 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                 <div className="space-y-3 mb-4">
                     <MetaRow type="calendar">{formatDate(event.date_time)}</MetaRow>
                     <MetaRow type="pin">{event.location || "-"}</MetaRow>
-                    <MetaRow type="clock">Window: {windowStart} â€“ {windowEnd} WIB</MetaRow>
+                    <MetaRow type="clock">Window: {windowStart} - {windowEnd} WIB</MetaRow>
                 </div>
 
                 {event.description && (
@@ -373,7 +373,7 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                     Tutup
                 </button>
 
-                {/* Tombol Hapus â€” di bawah Tutup */}
+                {/* Tombol Hapus ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â di bawah Tutup */}
                 <button
                     onClick={() => onDelete(event.event_id, event.title)}
                     disabled={isDeleting}
@@ -577,19 +577,31 @@ export default function DashboardAdminAcara() {
                                 </Link>
                             );
                         })}
-
+                        {!isSuperAdmin && (
+                            <Link
+                                to="/dashboard/member"
+                                className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
+                                    pathname === "/dashboard/member"
+                                        ? "bg-white/15 text-white"
+                                        : "text-white/65 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
+                                Absen Saya
+                            </Link>
+                        )}
                         {isSuperAdmin && (
                             <button
                                 type="button"
                                 onClick={() => navigate("/dashboard")}
-                                className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-white/15"
+                                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
                                     src={iconDashboard}
                                     alt="Super Admin Dashboard"
                                     className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
                                 />
-                                <span>Super Admin Dashboard</span>
+                                <span className="truncate">Super Admin Dashboard</span>
                             </button>
                         )}
                     </nav>
@@ -668,7 +680,7 @@ export default function DashboardAdminAcara() {
                             </button>
                         </div>
 
-                        {/* FEATURED EVENT â€” update otomatis saat card diklik */}
+                        {/* FEATURED EVENT ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â update otomatis saat card diklik */}
                         {featuredEvent && (
                             <section className="grid gap-5 xl:grid-cols-[1.95fr_0.92fr] mb-6">
                                 <div className="overflow-hidden rounded-[16px] border border-slate-300 bg-white shadow-[0_9px_18px_rgba(15,23,42,0.13)]">
@@ -690,7 +702,7 @@ export default function DashboardAdminAcara() {
                                                     {featuredEvent.attendance_window_start
                                                         ? new Date(featuredEvent.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
                                                         : "-"}{" "}
-                                                    â€“{" "}
+                                                    -{" "}
                                                     {featuredEvent.attendance_window_end
                                                         ? new Date(featuredEvent.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
                                                         : "-"}{" "}
@@ -739,7 +751,7 @@ export default function DashboardAdminAcara() {
                                     </div>
                                 </div>
 
-                                {/* STATS PANEL â€” spesifik ke featuredEvent */}
+                                {/* STATS PANEL ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â spesifik ke featuredEvent */}
                                 <aside className="rounded-[16px] bg-[#5fae14] p-5 text-white shadow-[0_10px_22px_rgba(68,131,19,0.24)]">
                                     <p className="text-[0.78rem] uppercase tracking-[0.18em] text-white/70">Total Acara</p>
                                     <h3 className="mt-1 text-[3.1rem] font-extrabold leading-none">{totalEvents}</h3>
@@ -761,7 +773,7 @@ export default function DashboardAdminAcara() {
                             </section>
                         )}
 
-                        {/* EVENT LIST â€” klik card = ganti featured */}
+                        {/* EVENT LIST ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â klik card = ganti featured */}
                         <section className="grid gap-5 lg:grid-cols-3">
                             {isLoadingEvents ? (
                                 <div className="col-span-3 rounded-[14px] border border-slate-300 bg-white p-6 text-center text-slate-500">Memuat acara...</div>
@@ -810,15 +822,14 @@ export default function DashboardAdminAcara() {
                                                 <div className="my-3 h-px bg-slate-100" />
                                                 <div className="flex items-center justify-between gap-3">
                                                     <p className="text-[0.88rem] text-slate-500">Check-in: {event.attendances_count ?? 0}</p>
-                                                    {/* Hanya tombol Detail â€” Hapus sudah dipindah ke dalam modal */}
                                                     <button
                                                         onClick={(e) => {
-                                                            e.stopPropagation(); // jangan trigger klik card
+                                                            e.stopPropagation();
                                                             setDetailEvent(event);
                                                         }}
                                                         className="text-[0.94rem] font-medium text-[#5baa19] hover:text-[#3d8a0e] transition"
                                                     >
-                                                        Detail â†’
+                                                        Detail
                                                     </button>
                                                 </div>
                                             </div>
@@ -940,7 +951,7 @@ export default function DashboardAdminAcara() {
                 </div>
             )}
 
-            {/* MODAL DETAIL â€” Hapus ada di sini */}
+            {/* MODAL Detail
             <DetailModal
                 event={detailEvent}
                 onClose={() => setDetailEvent(null)}

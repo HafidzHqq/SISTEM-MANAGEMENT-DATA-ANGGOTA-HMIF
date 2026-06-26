@@ -14,7 +14,7 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|string|max:100',
             'jabatan'            => 'nullable|string|max:100',
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non-Anggota',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
             'no_telepon'         => 'nullable|string|max:20'
         ]);
 
@@ -28,7 +28,7 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Parse angkatan dari NIM (digit ke-2 dan ke-3)
-        // Contoh: 124140097 â†’ angkatan 2024
+        // Contoh: 124140097 Ã¢â€ â€™ angkatan 2024
         $nim = preg_replace('/\D/', '', $user->nim ?? '');
         $angkatan = null;
         if (strlen($nim) >= 3) {

@@ -15,9 +15,9 @@ import iconArchive from "../assets/icon-archive.png";
 
 const SUMMARY_CARD_CONFIG = [
     {
-        key: "total_members",
+        key: "total_attendance_participants",
         label: "Total Anggota",
-        help: "Terdaftar",
+        help: "Aktif",
         icon: iconTotalAnggota,
         helperTone: "text-emerald-600",
         accent: "bg-[#1f5e22]",
@@ -40,7 +40,7 @@ const SUMMARY_CARD_CONFIG = [
     },
     {
         key: "attendance_rate",
-        label: "Persentase Keaktifan",
+        label: "Persentase Kehadiran",
         help: "Global",
         icon: iconPersentaseKeaktifan,
         helperTone: "text-emerald-700",
@@ -63,6 +63,18 @@ const formatNumber = (value) => numberFormatter.format(Number(value) || 0);
 const clampPercent = (value) => Math.max(0, Math.min(100, Number(value) || 0));
 
 const formatPercent = (value) => `${Math.round(clampPercent(value))}%`;
+
+const TREND_RANGE_OPTIONS = [
+    { value: "7D", label: "7 Hari" },
+    { value: "30D", label: "30 Hari" },
+    { value: "90D", label: "90 Hari" },
+];
+
+const getTrendRangeDays = (range) => {
+    if (range === "7D") return 7;
+    if (range === "90D") return 90;
+    return 30;
+};
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem("auth_token");
@@ -211,7 +223,7 @@ export default function DashboardAdmin() {
 
             if (Number.isNaN(eventDate.getTime())) return true;
 
-            const rangeDays = trendRange === "7D" ? 7 : 30;
+            const rangeDays = getTrendRangeDays(trendRange);
             const diffDays = (Date.now() - eventDate.getTime()) / 86400000;
 
             return diffDays <= rangeDays;
@@ -252,7 +264,7 @@ export default function DashboardAdmin() {
                                     to={item.to}
                                     className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
                                         isActive
-                                            ? "bg-slate-100 text-white"
+                                            ? "bg-white/15 text-white"
                                             : "text-white/65 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
@@ -261,19 +273,31 @@ export default function DashboardAdmin() {
                                 </Link>
                             );
                         })}
-
+                        {!isSuperAdmin && (
+                            <Link
+                                to="/dashboard/member"
+                                className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
+                                    pathname === "/dashboard/member"
+                                        ? "bg-white/15 text-white"
+                                        : "text-white/65 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
+                                Absen Saya
+                            </Link>
+                        )}
                         {isSuperAdmin && (
                             <button
                                 type="button"
                                 onClick={() => navigate("/dashboard")}
-                                className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-slate-100"
+                                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
                                     src={iconDashboard}
                                     alt="Super Admin Dashboard"
                                     className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
                                 />
-                                <span>Super Admin Dashboard</span>
+                                <span className="truncate">Super Admin Dashboard</span>
                             </button>
                         )}
                     </nav>
@@ -329,15 +353,12 @@ export default function DashboardAdmin() {
                     </header>
 
                     <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-32 md:pb-10">
-                        <p className="mb-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-slate-500">
-                            Dashboard Admin
-                        </p>
+
                         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                             <div>
                                 <h1 className="text-[1.85rem] font-extrabold text-slate-950 md:text-[2.1rem]">
                                     Welcome, {firstName}.
                                 </h1>
-                                <p className="mt-1 text-sm font-medium text-slate-500">Scan QR anggota atau set hadir manual dari satu halaman.</p>
                             </div>
                             <div className="flex flex-col gap-3 sm:flex-row">
                                 <button
@@ -386,12 +407,20 @@ export default function DashboardAdmin() {
                                             <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain " />
                                             <h3 className="text-[1.2rem] font-bold">Tren Partisipasi</h3>
                                         </div>
-                                        <button className="inline-flex items-center gap-3 rounded-[6px] bg-slate-100 px-4 py-3 text-[0.95rem] font-semibold text-slate-700">
-                                            <span>Last 30 Days</span>
-                                            <svg className="h-4 w-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <div className="relative">
+                                            <select
+                                                value={trendRange}
+                                                onChange={(event) => setTrendRange(event.target.value)}
+                                                className="h-11 appearance-none rounded-[6px] border border-slate-200 bg-slate-100 pl-4 pr-10 text-sm font-semibold text-slate-700 outline-none transition hover:bg-slate-50 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                                            >
+                                                {TREND_RANGE_OPTIONS.map((option) => (
+                                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                                ))}
+                                            </select>
+                                            <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
-                                        </button>
+                                        </div>
                                     </div>
 
                                     <div className="mt-6 rounded-[8px] bg-slate-50 p-4 ring-1 ring-slate-100">
@@ -410,8 +439,11 @@ export default function DashboardAdmin() {
                                                                         title={`${item.title}: ${formatNumber(item.total_present)} hadir`}
                                                                     />
                                                                 </div>
-                                                                <div className="w-full truncate text-center text-[0.68rem] font-semibold text-slate-500">
-                                                                    {formatShortDate(item.date_time)}
+                                                                <div className="w-full text-center">
+                                                                    <p className="text-[0.68rem] font-semibold text-slate-500">{formatShortDate(item.date_time)}</p>
+                                                                    <p className="mt-0.5 truncate text-[0.68rem] font-bold text-slate-700" title={item.title || "Tanpa Nama Acara"}>
+                                                                        {item.title || "Tanpa Nama Acara"}
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                         );
@@ -459,16 +491,16 @@ export default function DashboardAdmin() {
                                             <div className="flex items-center justify-between text-slate-700">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#1d4b28]" />
-                                                    <span className="text-slate-500">Present</span>
+                                                    <span className="text-slate-500">Hadir</span>
                                                 </div>
-                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_valid_radius || 0)}</span>
+                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_attendances || 0)}</span>
                                             </div>
                                             <div className="flex items-center justify-between text-slate-700">
                                                 <div className="flex items-center gap-2">
                                                     <span className="h-3.5 w-3.5 rounded-full bg-[#ff8d2a]" />
-                                                    <span className="text-slate-500">Absent</span>
+                                                    <span className="text-slate-500">Tidak Hadir</span>
                                                 </div>
-                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_invalid_radius || 0)}</span>
+                                                <span className="font-semibold text-slate-700">{formatNumber(summary.total_absences || 0)}</span>
                                             </div>
                                         </div>
                                     </section>

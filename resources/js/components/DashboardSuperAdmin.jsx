@@ -250,32 +250,32 @@ export default function DashboardSuperAdmin() {
     return (
         <div className="min-h-screen bg-[#f5f7f8] text-slate-900">
             <div className="flex min-h-screen w-full overflow-hidden bg-[#f4f7f4]">
-                <aside className="hidden bg-[#135723] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[190px] md:flex-col md:overflow-y-auto">
+                <aside className="hidden bg-[#185b21] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto">
                     <div className="flex flex-col items-center px-5 pt-7">
-                        <img src={logoHmif} alt="HMIF" className="h-20 w-20 object-contain" />
-                        <p className="mt-1 text-center text-base font-extrabold leading-none">HMIF</p>
-                        <p className="mt-1 text-center text-[10px] leading-tight text-white/70">
+                        <img src={logoHmif} alt="HMIF" className="h-20 w-20 rounded-full border-4 border-white/15 object-contain shadow-lg shadow-black/20" />
+                        <p className="mt-3 text-center text-xl font-bold leading-none tracking-wide">HMIF</p>
+                        <p className="mt-1 text-center text-[0.62rem] leading-snug text-white/65">
                             Himpunan Mahasiswa Informatika ITERA
                         </p>
                     </div>
 
-                    <nav className="mt-7 space-y-2 px-3">
+                    <nav className="mt-7 space-y-1 px-3">
                         {menus.map((menu) => (
                             <button
                                 key={menu.key}
                                 onClick={() => {
                                     setActiveMenu(menu.key);
                                 }}
-                                className={`relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-[12px] font-semibold transition ${
+                                className={`relative flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium transition ${
                                     activeMenu === menu.key
-                                        ? "bg-white/10 text-white"
-                                        : "text-white/90 hover:bg-white/10"
+                                        ? "bg-white/15 text-white"
+                                        : "text-white/65 hover:bg-white/10 hover:text-white"
                                 }`}
                             >
                                 <MenuIcon type={menu.icon} />
-                                <span>{menu.label}</span>
+                                <span className="truncate">{menu.label}</span>
                                 {activeMenu === menu.key && (
-                                    <span className="absolute right-0 top-0 h-full w-1 bg-[#65c631]" />
+                                    <span className="absolute right-2 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#9df76b]" />
                                 )}
                             </button>
                         ))}
@@ -283,10 +283,10 @@ export default function DashboardSuperAdmin() {
                         <button
                             type="button"
                             onClick={() => navigate("/dashboard/admin-overview")}
-                            className="mt-3 flex w-full items-center gap-3 rounded-[10px] border border-white/15 bg-white/10 px-4 py-3 text-left text-[12px] font-semibold text-white shadow-inner shadow-black/10 transition hover:bg-white/15"
+                            className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                         >
                             <MenuIcon type="admin" />
-                            <span>Admin Dashboard</span>
+                            <span className="truncate">Admin Dashboard</span>
                         </button>
                     </nav>
 
@@ -301,7 +301,7 @@ export default function DashboardSuperAdmin() {
                     </div>
                 </aside>
 
-                <div className="min-w-0 flex-1 bg-[#f5f7f8] md:ml-[190px]">
+                <div className="min-w-0 flex-1 bg-[#f5f7f8] md:ml-[220px]">
                     <header className="flex h-[64px] items-center justify-between border-b border-slate-200 bg-white px-5 md:px-7">
                         <h1 className="text-xl font-extrabold tracking-tight text-[#003f17]">{getTitle()}</h1>
 
@@ -595,7 +595,7 @@ function MenuIcon({ type }) {
         log: "log",
     };
 
-    return <Icon name={icons[type] || "layoutGrid"} className="h-4 w-4 shrink-0" />;
+    return <Icon name={icons[type] || "layoutGrid"} className="h-5 w-5 shrink-0" />;
 }
 
 function protectCsvValue(value) {
