@@ -60,7 +60,7 @@ const attendanceSummary = React.useMemo(() => calculateAttendanceSummary(history
 const recentActivities = attendanceSummary.normalized.slice(0, 3);
 const attendance = attendanceSummary.rate;
 const role = localStorage.getItem("role");
-const isAdminView = role === "admin";
+const isAdminView = role === "admin" || role === "super_admin";
 const attendanceLabel =
     attendanceSummary.total === 0
         ? "Belum ada data"
@@ -77,9 +77,13 @@ const attendanceLabel =
         navigate("/login");
     };
 
-    /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ NAV ITEMS Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+    /* ─── NAV ITEMS ─── */
     const navItems = [
-        { label: isAdminView ? "Admin" : "Dashboard", icon: iconDashboard, to: isAdminView ? "/dashboard/admin-overview" : "/dashboard" },
+        { 
+            label: role === "super_admin" ? "Super Admin" : (role === "admin" ? "Admin" : "Dashboard"), 
+            icon: iconDashboard, 
+            to: role === "super_admin" ? "/dashboard" : (role === "admin" ? "/dashboard/admin-overview" : "/dashboard") 
+        },
         { label: "History", icon: iconHistory, to: "/dashboard/history" },
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];

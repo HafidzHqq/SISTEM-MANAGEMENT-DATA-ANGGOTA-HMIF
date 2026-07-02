@@ -265,8 +265,13 @@ export default function Profile() {
         navigate("/login");
     };
 
+    const role = localStorage.getItem("role");
     const navItems = [
-        { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+        { 
+            label: role === "super_admin" ? "Super Admin" : (role === "admin" ? "Admin" : "Dashboard"), 
+            icon: iconDashboard, 
+            to: role === "super_admin" ? "/dashboard" : (role === "admin" ? "/dashboard/admin-overview" : "/dashboard") 
+        },
         { label: "History", icon: iconHistory, to: "/dashboard/history" },
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];
