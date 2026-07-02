@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 // Fitur: API Manajemen Profil Anggota
 // Deskripsi: Mengizinkan anggota untuk memperbarui data profil pribadi mereka sendiri
 class ProfileController extends Controller
