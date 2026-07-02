@@ -41,7 +41,17 @@ export default function Login() {
         : "";
 
     return (
-        <div className="relative min-h-screen bg-[#f4f5f7] flex items-center justify-center p-4 font-sans">
+        <div className="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden">
+            {/* Background Image with Blur and Green Overlay */}
+            <div className="absolute inset-0 -z-10 overflow-hidden">
+                <img
+                    src="/images/bg_itera.jpg"
+                    alt="Background ITERA"
+                    className="h-full w-full object-cover blur-[8px] scale-105"
+                />
+                <div className="absolute inset-0 bg-[#1c5e22]/60 mix-blend-multiply" />
+            </div>
+
             {isLoggedIn && (
                 <header className="absolute right-6 top-6 z-20">
                     <UserMenu />

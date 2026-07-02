@@ -154,37 +154,44 @@ export default function Home() {
             <main>
                 <section
                     id="guide"
-                    className="relative overflow-hidden bg-[#fbfcff] px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-32 lg:pb-28"
+                    className="relative overflow-hidden px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-32 lg:pb-28"
                 >
-                    <div className="absolute inset-x-0 top-0 -z-0 h-full bg-[radial-gradient(circle_at_50%_10%,rgba(34,197,94,0.11),transparent_24%),radial-gradient(circle_at_20%_0%,rgba(120,156,255,0.12),transparent_30%),linear-gradient(to_bottom,#fbfcff_0%,#f5f7ff_100%)]" />
-                    <div className="absolute left-1/2 top-36 h-48 w-48 -translate-x-1/2 rounded-full bg-emerald-200/35 blur-3xl" />
+                    {/* Background Image with Blur and Green Overlay */}
+                    <div className="absolute inset-0 -z-10 overflow-hidden">
+                        <img
+                            src="/images/bg_itera.jpg"
+                            alt="Background ITERA"
+                            className="h-full w-full object-cover blur-[8px] scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-[#1c5e22]/85 via-[#1c5e22]/90 to-[#123d16]" />
+                    </div>
 
                     <div className="relative mx-auto flex max-w-5xl flex-col items-center text-center">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-semibold tracking-[0.28em] text-emerald-700 ring-1 ring-emerald-100">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-[0.28em] text-emerald-300 ring-1 ring-white/15">
                             <IconInfo />
                             <span>SISTEM MANAGEMENT DATA</span>
                         </div>
-
-                        <h1 className="mt-8 max-w-5xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+ 
+                        <h1 className="mt-8 max-w-5xl text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
                             Panduan Login{" "}
                             <span className="text-[#22c55e]">Sistem Management Data Anggota HMIF</span>
                         </h1>
-
-                        <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-500 sm:text-xl">
+ 
+                        <p className="mt-6 max-w-2xl text-lg leading-8 text-emerald-100/75 sm:text-xl">
                             Ikuti langkah-langkah berikut untuk mengakses dashboard anggota HMIF dengan akun Google ITERA secara aman dan efisien.
                         </p>
-
+ 
                         <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row">
                             <a
                                 href="#steps"
-                                className="inline-flex items-center justify-center gap-3 rounded-xl bg-[#22c55e] px-8 py-4 text-base font-bold text-white shadow-[0_16px_24px_rgba(34,197,94,0.24)] transition hover:-translate-y-0.5 hover:bg-[#1fbd58]"
+                                className="inline-flex items-center justify-center gap-3 rounded-xl bg-[#22c55e] px-8 py-4 text-base font-bold text-emerald-950 shadow-[0_16px_24px_rgba(34,197,94,0.3)] transition hover:-translate-y-0.5 hover:bg-[#1fbd58]"
                             >
                                 <span>Mulai Panduan</span>
                                 <IconArrowDown />
                             </a>
                             <Link
                                 to="/login"
-                                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-8 py-4 text-base font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50"
+                                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15"
                             >
                                 Portal Utama
                             </Link>
