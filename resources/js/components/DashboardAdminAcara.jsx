@@ -203,76 +203,15 @@ function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
     );
 }
 
-function TimePickerField({ value, placeholder, onChange, isOpen, onOpenChange }) {
-    const [selectedHour = "", selectedMinute = ""] = isValidTimeInput(value) ? value.split(":") : [];
-
-    const selectHour = (hour) => {
-        onChange(`${hour}:${selectedMinute || "00"}`);
-    };
-
-    const selectMinute = (minute) => {
-        onChange(`${selectedHour || "00"}:${minute}`);
-        onOpenChange(false);
-    };
-
+function TimePickerField({ value, onChange }) {
     return (
-        <div className={`relative ${isOpen ? "z-50" : ""}`}>
-            <button
-                type="button"
-                onClick={() => onOpenChange(!isOpen)}
-                className="flex w-full items-center justify-between rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-left text-[0.95rem] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-            >
-                <span className={value ? "font-medium text-slate-800" : "text-slate-400"}>{value || placeholder}</span>
-                <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 7v5l3 2m7-2a10 10 0 11-20 0 10 10 0 0120 0z" />
-                </svg>
-            </button>
-
-            {isOpen && (
-                <div className="absolute left-0 top-[calc(100%+0.5rem)] z-50 w-full rounded-[14px] border border-emerald-100 bg-emerald-50 p-3 shadow-xl shadow-slate-900/10">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-400">Jam</p>
-                            <div className="grid max-h-40 grid-cols-3 gap-1 overflow-y-auto pr-1">
-                                {HOUR_OPTIONS.map(hour => (
-                                    <button
-                                        type="button"
-                                        key={hour}
-                                        onClick={() => selectHour(hour)}
-                                        className={`rounded-[8px] px-2 py-1.5 text-[0.78rem] font-bold transition ${
-                                            selectedHour === hour
-                                                ? "bg-emerald-600 text-white shadow-sm"
-                                                : "bg-white text-slate-700 hover:bg-emerald-100"
-                                        }`}
-                                    >
-                                        {hour}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <p className="mb-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-slate-400">Menit</p>
-                            <div className="grid max-h-40 grid-cols-3 gap-1 overflow-y-auto pr-1">
-                                {MINUTE_OPTIONS.map(minute => (
-                                    <button
-                                        type="button"
-                                        key={minute}
-                                        onClick={() => selectMinute(minute)}
-                                        className={`rounded-[8px] px-2 py-1.5 text-[0.78rem] font-bold transition ${
-                                            selectedMinute === minute
-                                                ? "bg-emerald-600 text-white shadow-sm"
-                                                : "bg-white text-slate-700 hover:bg-emerald-100"
-                                        }`}
-                                    >
-                                        {minute}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    <p className="mt-2 text-[0.72rem] text-slate-500">Pilih jam dulu, lalu menit.</p>
-                </div>
-            )}
+        <div className="relative w-full">
+            <input
+                type="time"
+                value={value || ""}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-[0.95rem] font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+            />
         </div>
     );
 }
@@ -896,10 +835,7 @@ export default function DashboardAdminAcara() {
                                     <label className="block text-[0.85rem] font-semibold text-slate-700 mb-1.5">Jam Acara <span className="text-red-500">*</span></label>
                                     <TimePickerField
                                         value={form.time}
-                                        placeholder="Pilih jam"
                                         onChange={(value) => handleFormValueChange("time", value)}
-                                        isOpen={openPicker === "time"}
-                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "time" : null)}
                                     />
                                 </div>
                             </div>
@@ -908,17 +844,11 @@ export default function DashboardAdminAcara() {
                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <TimePickerField
                                         value={form.window_start}
-                                        placeholder="Mulai"
                                         onChange={(value) => handleFormValueChange("window_start", value)}
-                                        isOpen={openPicker === "window_start"}
-                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "window_start" : null)}
                                     />
                                     <TimePickerField
                                         value={form.window_end}
-                                        placeholder="Selesai"
                                         onChange={(value) => handleFormValueChange("window_end", value)}
-                                        isOpen={openPicker === "window_end"}
-                                        onOpenChange={(isOpen) => setOpenPicker(isOpen ? "window_end" : null)}
                                     />
                                 </div>
                                 <p className="mt-1 text-[0.75rem] text-slate-400">Klik untuk memilih jam presensi hari yang sama</p>
