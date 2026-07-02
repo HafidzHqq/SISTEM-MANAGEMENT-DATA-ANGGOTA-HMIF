@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Schema;
 // Fitur: API Manajemen Profil Anggota
 // Deskripsi: Mengizinkan anggota untuk memperbarui data profil pribadi mereka sendiri
 class ProfileController extends Controller
@@ -48,16 +47,10 @@ class ProfileController extends Controller
         );
 
         $profile = $user->fresh()->memberProfile;
-        $profileData = $profile?->toArray();
-
-        if ($profileData) {
-            $profileData['departemen'] = $profileData['departemen'] ?? ($profileData['Departemen'] ?? null);
-            $profileData['Departemen'] = $profileData['Departemen'] ?? ($profileData['departemen'] ?? null);
-        }
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui',
-            'profile' => $profileData,
+            'profile' => $profile,
         ]);
     }
 

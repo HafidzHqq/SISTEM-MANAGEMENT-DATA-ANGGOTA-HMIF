@@ -102,6 +102,7 @@ function DetailIcon({ type = "calendar" }) {
 
 export default function DashboardHistory() {
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [filter, setFilter] = useState("semua");
     const [search, setSearch] = useState("");
     const [user, setUser] = useState(null);
@@ -399,45 +400,54 @@ export default function DashboardHistory() {
     };
 
     const renderSidebar = () => (
-        <aside className="hidden md:flex fixed bottom-0 left-0 top-0 z-50 min-h-screen w-[220px] flex-col bg-[#1c5e22] text-white">
-            <div className="flex flex-col items-center px-4 pb-5 pt-8">
-                <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full border-4 border-white/20 object-contain" />
-                <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
-                <p className="mt-0.5 text-center text-[0.62rem] leading-snug text-white/55">
-                    Himpunan Mahasiswa Informatika ITERA
-                </p>
-            </div>
-            <hr className="mx-4 border-white/10" />
-            <nav className="flex-1 space-y-1 px-3 pt-4">
-                {navItems.map((item) => {
-                    const isActive = item.to === "/dashboard/history";
-                    return (
-                        <Link
-                            key={item.label}
-                            to={item.to}
-                            className={`flex items-center gap-3 rounded-xl px-4 py-[10px] text-sm font-medium transition ${
-                                isActive ? "bg-white/15 text-white" : "text-white/65 hover:bg-white/10 hover:text-white"
-                            }`}
-                        >
-                            <img src={item.icon} alt="" className="h-[18px] w-[18px] object-contain opacity-90 brightness-[10]" />
-                            {item.label}
-                        </Link>
-                    );
-                })}
-            </nav>
-            <div className="p-4">
-                <div className="rounded-2xl bg-white/10 px-4 py-3">
-                    <p className="truncate text-sm font-semibold text-white">{name}</p>
-                    <p className="mt-0.5 text-[0.7rem] text-white/55">{nim}</p>
-                    <button
-                        onClick={handleLogout}
-                        className="mt-3 flex items-center gap-1 text-[0.78rem] text-red-300 transition hover:text-red-200"
-                    >
-                        Logout
-                    </button>
+        <>
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+            <aside className={`fixed inset-y-0 left-0 top-0 bottom-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
+                <div className="flex flex-col items-center px-4 pb-5 pt-8">
+                    <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full border-4 border-white/20 object-contain" />
+                    <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
+                    <p className="mt-0.5 text-center text-[0.62rem] leading-snug text-white/55">
+                        Himpunan Mahasiswa Informatika ITERA
+                    </p>
                 </div>
-            </div>
-        </aside>
+                <hr className="mx-4 border-white/10" />
+                <nav className="flex-1 space-y-1 px-3 pt-4">
+                    {navItems.map((item) => {
+                        const isActive = item.to === "/dashboard/history";
+                        return (
+                            <Link
+                                key={item.label}
+                                to={item.to}
+                                onClick={() => setIsSidebarOpen(false)}
+                                className={`flex items-center gap-3 rounded-xl px-4 py-[10px] text-sm font-medium transition ${
+                                    isActive ? "bg-white/15 text-white" : "text-white/65 hover:bg-white/10 hover:text-white"
+                                }`}
+                            >
+                                <img src={item.icon} alt="" className="h-[18px] w-[18px] object-contain opacity-90 brightness-[10]" />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
+                <div className="p-4">
+                    <div className="rounded-2xl bg-white/10 px-4 py-3">
+                        <p className="truncate text-sm font-semibold text-white">{name}</p>
+                        <p className="mt-0.5 text-[0.7rem] text-white/55">{nim}</p>
+                        <button
+                            onClick={handleLogout}
+                            className="mt-3 flex items-center gap-1 text-[0.78rem] text-red-300 transition hover:text-red-200"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </>
     );
 
     const renderTopbar = (title, showBack = false) => (
@@ -478,19 +488,30 @@ export default function DashboardHistory() {
             <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
                 {renderSidebar()}
                 <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
-                    <header className="flex items-center justify-between bg-white px-5 py-4 shadow-sm md:hidden">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedEvent(null)}
-                            className="flex items-center gap-2 text-sm font-bold text-gray-800"
-                        >
-                            <ChevronLeftIcon />
-                            Detail Acara
-                        </button>
+                    <header className="flex items-center justify-between bg-white px-4 py-3 shadow-sm md:hidden">
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-1 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none"
+                                aria-label="Open sidebar"
+                            >
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedEvent(null)}
+                                className="flex items-center gap-1.5 text-sm font-bold text-gray-800"
+                            >
+                                <ChevronLeftIcon />
+                                Detail Acara
+                            </button>
+                        </div>
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                            className="rounded-full border border-red-100 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-red-600 transition active:scale-95"
                         >
                             Logout
                         </button>
@@ -630,14 +651,25 @@ export default function DashboardHistory() {
             {renderSidebar()}
             <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
                 <header className="sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm md:hidden">
-                    <div className="flex items-center gap-2">
-                        <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
-                        <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none"
+                            aria-label="Open sidebar"
+                        >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
+                            <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                        </div>
                     </div>
                     <button
                         type="button"
                         onClick={handleLogout}
-                        className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        className="rounded-full border border-red-100 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-red-600 transition active:scale-95"
                     >
                         Logout
                     </button>

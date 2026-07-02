@@ -13,7 +13,6 @@ class MemberProfile extends Model
         'user_id',
         'angkatan',
         'departemen',
-        'Departemen',
         'jabatan',
         'status_keanggotaan',
         'no_telepon',

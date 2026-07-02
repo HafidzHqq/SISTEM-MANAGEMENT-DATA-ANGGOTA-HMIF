@@ -18,6 +18,7 @@ export default function DashboardSuperAdmin() {
     const [loadingAuditLogs, setLoadingAuditLogs] = useState(true);
     const [auditLogsError, setAuditLogsError] = useState("");
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -250,7 +251,15 @@ export default function DashboardSuperAdmin() {
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.12),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] text-slate-900">
             <div className="flex min-h-screen w-full overflow-hidden bg-transparent">
-                <aside className="hidden bg-[#1c5e22] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto">
+                {/* Mobile Sidebar Backdrop Overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
                     <div className="flex flex-col items-center px-5 pt-8">
                         <img src={logoHmif} alt="HMIF" className="h-20 w-20 rounded-full border-4 border-white/15 object-contain shadow-lg shadow-black/20" />
                         <p className="mt-3 text-center text-[1.05rem] font-extrabold leading-none tracking-[0.22em]">HMIF</p>
@@ -265,6 +274,7 @@ export default function DashboardSuperAdmin() {
                                 key={menu.key}
                                 onClick={() => {
                                     setActiveMenu(menu.key);
+                                    setIsSidebarOpen(false);
                                 }}
                                 className={`relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium transition ${
                                     activeMenu === menu.key
@@ -282,7 +292,10 @@ export default function DashboardSuperAdmin() {
 
                         <button
                             type="button"
-                            onClick={() => navigate("/dashboard/admin-overview")}
+                            onClick={() => {
+                                navigate("/dashboard/admin-overview");
+                                setIsSidebarOpen(false);
+                            }}
                             className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                         >
                             <MenuIcon type="admin" />
@@ -290,7 +303,10 @@ export default function DashboardSuperAdmin() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => navigate("/dashboard/member")}
+                            onClick={() => {
+                                navigate("/dashboard/member");
+                                setIsSidebarOpen(false);
+                            }}
                             className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                         >
                             <MenuIcon type="user" />
@@ -311,9 +327,20 @@ export default function DashboardSuperAdmin() {
 
                 <div className="min-w-0 flex-1 bg-transparent md:ml-[220px]">
                     <header className="flex h-[72px] items-center justify-between border-b border-white/70 bg-white/85 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-7">
-                        <div>
-                            <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Super Admin Console</p>
-                            <h1 className="mt-1 text-xl font-black tracking-tight text-slate-900">{getTitle()}</h1>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none md:hidden transition"
+                                aria-label="Open sidebar"
+                            >
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div>
+                                <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Super Admin Console</p>
+                                <h1 className="mt-0.5 text-xl font-black tracking-tight text-slate-900">{getTitle()}</h1>
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-4 text-[12px]">
