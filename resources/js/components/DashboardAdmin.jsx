@@ -138,11 +138,13 @@ export default function DashboardAdmin() {
     const [isDashboardLoading, setIsDashboardLoading] = React.useState(false);
     const [user, setUser] = useState(null);
     const [fotoUrl, setFotoUrl] = useState(null);
+    const [fotoLoadFailed, setFotoLoadFailed] = useState(false);
     const [userDivision, setUserDivision] = useState("Admin");
     const userName = localStorage.getItem("name") || "Admin User";
     const firstName = userName.split(" ")[0];
     const nim = user?.nim || localStorage.getItem("nim") || "-";
     const isSuperAdmin = localStorage.getItem("role") === "super_admin";
+    const displayFoto = fotoLoadFailed ? fotoProfile : (fotoUrl || fotoProfile);
 
     React.useEffect(() => {
         let isMounted = true;
@@ -158,6 +160,7 @@ export default function DashboardAdmin() {
             .then((data) => {
                 if (isMounted) {
                     setUser(data);
+                    setFotoLoadFailed(false);
                     setFotoUrl(data?.profile?.foto ? `/storage/${data.profile.foto}` : fotoProfile);
                     setUserDivision(data?.profile?.departemen || data?.profile?.Departemen || "Admin");
                 }
@@ -241,30 +244,30 @@ export default function DashboardAdmin() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f6f8f7] font-sans text-slate-950">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.14),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] font-sans text-slate-950">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
-                    <div className="flex flex-col items-center pt-7 pb-5 px-4">
+                <aside className="hidden md:flex flex-col w-[248px] min-h-screen bg-[linear-gradient(180deg,_#184f1e_0%,_#123817_100%)] text-white fixed left-0 top-0 bottom-0 z-50 shadow-[0_24px_80px_rgba(15,23,42,0.25)]">
+                    <div className="flex flex-col items-center pt-8 pb-6 px-4">
                         <img
                             src={hmifLogo}
                             alt="HMIF"
-                            className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20"
+                            className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/25"
                         />
-                        <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
-                        <p className="text-[0.62rem] leading-snug text-white/65 text-center">
+                        <p className="mt-3 text-[1.05rem] font-extrabold tracking-[0.22em]">HMIF</p>
+                        <p className="text-[0.68rem] leading-snug text-white/65 text-center">
                             Himpunan Mahasiswa Informatika<br />ITERA
                         </p>
                     </div>
-                    <nav className="flex-1 px-3 pt-4 space-y-1">
+                    <nav className="flex-1 px-3 pt-4 space-y-2">
                         {NAV_ITEMS.map((item) => {
                             const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
                             return (
                                 <Link
                                     key={item.label}
                                     to={item.to}
-                                    className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                         isActive
-                                            ? "bg-white/15 text-white"
+                                            ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                             : "text-white/65 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
@@ -276,9 +279,9 @@ export default function DashboardAdmin() {
                         {!isSuperAdmin && (
                             <Link
                                 to="/dashboard/member"
-                                className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                     pathname === "/dashboard/member"
-                                        ? "bg-white/15 text-white"
+                                        ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                         : "text-white/65 hover:bg-white/10 hover:text-white"
                                 }`}
                             >
@@ -290,7 +293,7 @@ export default function DashboardAdmin() {
                             <button
                                 type="button"
                                 onClick={() => navigate("/dashboard")}
-                                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                                className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
                                     src={iconDashboard}
@@ -302,9 +305,9 @@ export default function DashboardAdmin() {
                         )}
                     </nav>
                     <div className="p-4">
-                        <div className="bg-white/10 rounded-2xl px-4 py-3">
-                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
-                            <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
+                        <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
+                            <p className="truncate text-sm font-semibold text-white">{userName}</p>
+                            <p className="mt-0.5 text-[0.7rem] text-white/55">{nim}</p>
                             <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
                                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
@@ -316,8 +319,8 @@ export default function DashboardAdmin() {
                     </div>
                 </aside>
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
-                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
+                <div className="flex min-w-0 flex-1 flex-col md:ml-[248px]">
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white/90 px-4 py-4 backdrop-blur md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
                             <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
@@ -331,40 +334,49 @@ export default function DashboardAdmin() {
                         </button>
                     </header>
 
-                    <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
-                        <h2 className="text-[1.05rem] font-bold text-gray-800">Dashboard Admin</h2>
+                    <header className="hidden sticky top-0 z-40 items-center justify-between border-b border-white/70 bg-white/85 px-8 py-4 backdrop-blur md:flex">
+                        <div>
+                            <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Admin Overview</p>
+                            <h2 className="mt-1 text-[1.1rem] font-extrabold text-slate-900">Dashboard Admin</h2>
+                        </div>
                         <div className="flex items-center gap-4">
-                            <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-slate-500">
+                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[0.7rem] font-bold tracking-[0.16em] uppercase text-emerald-700">
                                 {userDivision}
                             </span>
                             <div className="h-5 w-px bg-gray-200" />
-                            <button className="text-slate-500 hover:text-gray-600 transition" aria-label="Notifikasi">
+                            <button className="text-slate-500 transition hover:text-emerald-700" aria-label="Notifikasi">
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                 </svg>
                             </button>
                             <img
-                                src={fotoUrl || fotoProfile}
+                                src={displayFoto}
                                 alt="Foto profil"
-                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                                className="h-10 w-10 rounded-full border-2 border-emerald-100 object-cover shadow-sm"
+                                onError={() => setFotoLoadFailed(true)}
                             />
                         </div>
                     </header>
 
-                    <main className="flex-1 px-4 py-5 md:px-8 md:py-8 pb-32 md:pb-10">
+                    <main className="flex-1 px-4 py-6 md:px-8 md:py-8 pb-32 md:pb-10">
 
-                        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="mb-6 flex flex-col gap-4 rounded-[28px] border border-white/70 bg-white/75 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur lg:flex-row lg:items-end lg:justify-between">
                             <div>
-                                <h1 className="text-[1.85rem] font-extrabold text-slate-950 md:text-[2.1rem]">
+                                <p className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Selamat datang kembali</p>
+                                <h1 className="mt-2 text-[1.95rem] font-black tracking-tight text-slate-950 md:text-[2.4rem]">
                                     Welcome, {firstName}.
                                 </h1>
+                                <div className="mt-4 flex flex-wrap gap-2 text-[0.78rem] font-semibold text-slate-600">
+                                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">{userDivision}</span>
+                                    <span className="rounded-full bg-slate-100 px-3 py-1">NIM: {nim}</span>
+                                </div>
                             </div>
                             <div className="flex flex-col gap-3 sm:flex-row">
                                 <button
                                     type="button"
                                     onClick={() => navigate("/scan")}
-                                    className="inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#1f7a2c] px-4 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#186322]"
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,_#1f7a2c_0%,_#2b8f3c_100%)] px-5 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(31,122,44,0.28)] transition hover:brightness-105"
                                 >
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M7 12h10" /></svg>
                                     Scan QR Anggota
@@ -372,7 +384,7 @@ export default function DashboardAdmin() {
                                 <button
                                     type="button"
                                     onClick={() => navigate("/scan")}
-                                    className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 shadow-sm transition hover:bg-slate-50"
                                 >
                                     Set Hadir Manual
                                 </button>
@@ -381,21 +393,22 @@ export default function DashboardAdmin() {
 
                         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                             {summaryCards.map((card) => (
-                                <div key={card.label} className="rounded-[10px] bg-white p-5 shadow-sm ring-1 ring-slate-200 md:p-6">
+                                <div key={card.label} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] md:p-6">
+                                    <div className={`h-1 w-16 rounded-full ${card.accent}`} />
                                     <div className="flex items-start justify-between">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 md:h-10 md:w-10">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 md:h-12 md:w-12">
                                             <img src={card.icon} alt={card.label} className="h-4 w-4 object-contain md:h-5 md:w-5" />
                                         </div>
-                                        <span className={`text-[0.68rem] font-semibold md:text-xs ${card.helperTone}`}>{card.help}</span>
+                                        <span className={`rounded-full bg-slate-50 px-3 py-1 text-[0.68rem] font-semibold md:text-xs ${card.helperTone}`}>{card.help}</span>
                                     </div>
-                                    <p className="mt-4 text-[0.65rem] font-medium uppercase tracking-[0.12em] text-slate-700 md:text-[0.8rem] md:tracking-[0.18em]">{card.label}</p>
-                                    <h2 className="mt-1 text-[1.8rem] font-extrabold leading-none text-slate-900 md:text-[2.3rem]">{card.value}</h2>
+                                    <p className="mt-4 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-500 md:text-[0.8rem]">{card.label}</p>
+                                    <h2 className="mt-2 text-[1.9rem] font-black leading-none tracking-tight text-slate-900 md:text-[2.5rem]">{card.value}</h2>
                                 </div>
                             ))}
                         </div>
 
                         {dashboardError && (
-                            <div className="mb-6 rounded-[10px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                            <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                                 {dashboardError}
                             </div>
                         )}

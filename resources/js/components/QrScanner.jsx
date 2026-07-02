@@ -80,8 +80,8 @@ function MemberQrView({ navigate }) {
                 const list = Array.isArray(eventData) ? eventData : Array.isArray(eventData.data) ? eventData.data : [];
                 const openEvents = list.filter(isEventOpen);
                 setUser(me);
-                setEvents(openEvents.length ? openEvents : list);
-                setEventId(String((openEvents[0] || list[0])?.event_id || ""));
+                setEvents(openEvents);
+                setEventId(String(openEvents[0]?.event_id || ""));
             })
             .catch(() => setError("Gagal memuat data QR."));
     }, []);
@@ -98,43 +98,54 @@ function MemberQrView({ navigate }) {
     const qrUrl = qrPayload
         ? `https://api.qrserver.com/v1/create-qr-code/?size=360x360&data=${encodeURIComponent(qrPayload)}`
         : "";
+    const hasActiveEvents = events.length > 0;
 
     return (
-        <div className="min-h-screen bg-[#e7f5e5] px-4 py-5 text-slate-900 sm:px-6">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(31,94,34,0.16),transparent_30%),linear-gradient(180deg,#f7fbf7_0%,#eaf3ea_100%)] px-4 py-5 text-slate-900 sm:px-6">
             <div className="mx-auto max-w-md">
                 <div className="mb-5 flex items-center justify-between">
-                    <button onClick={() => navigate(-1)} className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm">Kembali</button>
+                    <button onClick={() => navigate(-1)} className="rounded-full border border-white/70 bg-white/90 px-4 py-2 text-sm font-bold text-slate-700 shadow-sm backdrop-blur transition hover:bg-white">Kembali</button>
                     <div className="flex items-center gap-2">
                         <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain" />
                         <span className="text-sm font-extrabold">HMIF</span>
                     </div>
                 </div>
 
-                <div className="rounded-2xl bg-white p-5 text-center shadow-sm ring-1 ring-slate-200">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">QR Presensi Saya</p>
-                    <h1 className="mt-2 text-2xl font-extrabold text-slate-900">Tunjukkan ke Admin</h1>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-500">Pilih acara, lalu admin akan memindai QR ini untuk mencatat kehadiran.</p>
+                <div className="overflow-hidden rounded-[28px] border border-white/70 bg-white/92 p-5 text-center shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">QR Presensi Saya</p>
+                    <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900">Tunjukkan ke Admin</h1>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-500">Pilih acara, lalu admin memindai QR ini untuk mencatat kehadiran secara cepat.</p>
 
-                    <label className="mt-5 block text-left text-xs font-bold uppercase tracking-wide text-slate-500">Acara</label>
-                    <select
-                        value={eventId}
-                        onChange={(e) => setEventId(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                    >
-                        {events.map((event) => (
-                            <option key={event.event_id} value={event.event_id}>{eventLabel(event)}</option>
-                        ))}
-                    </select>
+                    {hasActiveEvents ? (
+                        <>
+                            <label className="mt-5 block text-left text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Acara</label>
+                            <select
+                                value={eventId}
+                                onChange={(e) => setEventId(e.target.value)}
+                                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                            >
+                                {events.map((event) => (
+                                    <option key={event.event_id} value={event.event_id}>{eventLabel(event)}</option>
+                                ))}
+                            </select>
+                        </>
+                    ) : (
+                        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm font-semibold text-amber-800">
+                            Tidak ada acara aktif saat ini.
+                        </div>
+                    )}
 
-                    <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                        {qrUrl ? (
-                            <img src={qrUrl} alt="QR presensi anggota" className="mx-auto h-64 w-64 rounded-xl bg-white p-3 shadow-sm" />
-                        ) : (
-                            <div className="flex h-64 items-center justify-center rounded-xl bg-white text-sm font-semibold text-slate-400">QR belum tersedia</div>
-                        )}
-                    </div>
+                    {hasActiveEvents && (
+                        <div className="mt-6 rounded-[28px] border border-slate-100 bg-slate-50 p-4">
+                            {qrUrl ? (
+                                <img src={qrUrl} alt="QR presensi anggota" className="mx-auto h-64 w-64 rounded-2xl bg-white p-3 shadow-[0_12px_30px_rgba(15,23,42,0.08)]" />
+                            ) : (
+                                <div className="flex h-64 items-center justify-center rounded-2xl bg-white text-sm font-semibold text-slate-400">QR belum tersedia</div>
+                            )}
+                        </div>
+                    )}
 
-                    <div className="mt-5 rounded-xl bg-emerald-50 p-4 text-left">
+                    <div className="mt-5 rounded-2xl bg-emerald-50 p-4 text-left ring-1 ring-emerald-100">
                         <p className="text-sm font-extrabold text-emerald-900">{user?.name || localStorage.getItem("name") || "Anggota"}</p>
                         <p className="mt-1 text-xs font-semibold text-emerald-700">NIM: {user?.nim || localStorage.getItem("nim") || "-"}</p>
                     </div>
@@ -328,82 +339,102 @@ function AdminScannerView({ navigate }) {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white md:grid md:grid-cols-[1fr_380px]">
-            <div className="relative flex min-h-[62vh] flex-col md:min-h-screen">
-                <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 py-3">
-                    <button onClick={() => navigate(-1)} className="rounded-full bg-black/45 px-4 py-2 text-sm font-bold">Kembali</button>
-                    <div className="flex items-center gap-3"><img src={hmifLogo} alt="HMIF" className="h-7 w-7" /><span className="font-bold">Scan Admin</span></div>
-                    <div className="w-20" />
+        <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#081108_0%,#101b12_100%)] text-white">
+            <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" playsInline autoPlay muted />
+            <canvas ref={canvasRef} className="hidden" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.3)_55%,rgba(0,0,0,0.7)_100%)]" />
+
+            <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-4 py-3 sm:px-6">
+                <button onClick={() => navigate(-1)} className="rounded-full border border-white/15 bg-black/30 px-4 py-2 text-sm font-bold backdrop-blur transition hover:bg-black/45">
+                    Kembali
+                </button>
+                <div className="flex items-center gap-3 rounded-full border border-white/10 bg-black/20 px-3 py-2 backdrop-blur">
+                    <img src={hmifLogo} alt="HMIF" className="h-6 w-6" />
+                    <span className="text-sm font-bold tracking-wide">Scan Admin</span>
                 </div>
+                <div className="w-20" />
+            </div>
 
-                <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" playsInline autoPlay muted />
-                <canvas ref={canvasRef} className="hidden" />
-                <div className="absolute inset-0 bg-black/55" />
-
-                {(cameraError || status) && (
-                    <div className={`absolute left-1/2 top-20 z-40 w-[90%] max-w-md -translate-x-1/2 rounded-2xl px-4 py-3 text-center text-sm font-bold shadow-lg ${
-                        status === "loading" ? "bg-yellow-600/90" : status === "success" ? "bg-green-600/90" : "bg-red-600/90"
-                    }`}>
-                        {statusMsg || cameraError}
-                    </div>
-                )}
-
-                <div className="relative z-20 flex flex-1 items-center justify-center pt-16">
-                    <div className="relative h-64 w-64 sm:h-80 sm:w-80">
-                        <div className="absolute inset-0 rounded-2xl border-2 border-white/90" />
-                        <div className="absolute -left-2 -top-2 h-8 w-8 rounded-tl-md border-l-4 border-t-4 border-white" />
-                        <div className="absolute -right-2 -top-2 h-8 w-8 rounded-tr-md border-r-4 border-t-4 border-white" />
-                        <div className="absolute -bottom-2 -left-2 h-8 w-8 rounded-bl-md border-b-4 border-l-4 border-white" />
-                        <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-br-md border-b-4 border-r-4 border-white" />
-                    </div>
+            {(cameraError || status) && (
+                <div className={`absolute left-1/2 top-20 z-40 w-[90%] max-w-md -translate-x-1/2 rounded-2xl px-4 py-3 text-center text-sm font-bold shadow-lg ${
+                    status === "loading" ? "bg-yellow-600/90" : status === "success" ? "bg-green-600/90" : "bg-red-600/90"
+                }`}>
+                    {statusMsg || cameraError}
                 </div>
+            )}
 
-                <div className="absolute bottom-7 left-1/2 z-30 flex -translate-x-1/2 items-center gap-8">
-                    <button type="button" onClick={torchSupported ? toggleTorch : undefined} className={`flex h-14 w-14 items-center justify-center rounded-full border border-white/25 bg-white/10 ${!torchSupported ? "opacity-40" : torchOn ? "bg-yellow-400/30" : ""}`}><FlashIcon /></button>
-                    <label className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full border border-white/25 bg-white/10">
-                        <UploadImageIcon />
-                        <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} />
-                    </label>
+            <div className="absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 justify-center px-4">
+                <div className="relative h-64 w-64 sm:h-80 sm:w-80">
+                    <div className="absolute inset-0 rounded-[34px] border border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.08)]" />
+                    <div className="absolute inset-4 rounded-[26px] border border-white/18 bg-white/4 backdrop-blur-[1px]" />
+                    <div className="absolute -left-2 -top-2 h-8 w-8 rounded-tl-md border-l-4 border-t-4 border-white" />
+                    <div className="absolute -right-2 -top-2 h-8 w-8 rounded-tr-md border-r-4 border-t-4 border-white" />
+                    <div className="absolute -bottom-2 -left-2 h-8 w-8 rounded-bl-md border-b-4 border-l-4 border-white" />
+                    <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-br-md border-b-4 border-r-4 border-white" />
+                    <div className="absolute inset-x-0 -bottom-14 flex justify-center">
+                        <div className="rounded-full border border-white/12 bg-black/25 px-4 py-2 text-[0.72rem] font-semibold tracking-[0.16em] text-white/80 backdrop-blur">
+                            Pusatkan QR di dalam bingkai
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <aside className="bg-[#e7f5e5] p-5 text-slate-900 md:min-h-screen md:overflow-y-auto">
-                <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">Presensi Manual</p>
-                    <h2 className="mt-2 text-xl font-extrabold">Set Hadir Tanpa QR</h2>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-500">Gunakan saat perangkat anggota tidak bisa menampilkan QR.</p>
-
-                    <form onSubmit={submitManual} className="mt-5 space-y-4">
-                        <div>
-                            <label className="mb-1 block text-xs font-bold text-slate-500">Acara</label>
-                            <select value={manualEventId} onChange={(e) => setManualEventId(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-emerald-500">
-                                {events.map((event) => <option key={event.event_id} value={event.event_id}>{eventLabel(event)}</option>)}
-                            </select>
+            <div className="absolute inset-x-0 bottom-0 z-30 p-4 sm:p-6">
+                <div className="mx-auto max-w-2xl rounded-[28px] border border-white/12 bg-white/10 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.25)] backdrop-blur-2xl sm:p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                            <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-emerald-300">QR Scanner</p>
+                            <h2 className="text-[1.9rem] font-black tracking-tight text-white sm:text-[2.2rem]">Scan cepat, fallback tetap siap</h2>
+                            <p className="max-w-xl text-sm leading-relaxed text-white/70">
+                                Arahkan QR ke kamera. Jika cahaya kurang atau kamera gagal membaca, aktifkan lampu atau unggah gambar QR.
+                            </p>
                         </div>
-                        <div>
-                            <label className="mb-1 block text-xs font-bold text-slate-500">Anggota</label>
-                            <select value={manualUserId} onChange={(e) => setManualUserId(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-emerald-500">
-                                {members.map((member) => <option key={member.user_id} value={member.user_id}>{member.name} - {member.nim || "Tanpa NIM"}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-xs font-bold text-slate-500">Keterangan</label>
-                            <input value={manualRemarks} onChange={(e) => setManualRemarks(e.target.value)} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold outline-none focus:border-emerald-500" />
-                        </div>
-                        <button type="submit" className="w-full rounded-xl bg-[#1f7a2c] px-4 py-3 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#186322]">Set Hadir</button>
-                    </form>
-                </div>
 
-                <div className="mt-4 rounded-2xl bg-white p-4 text-sm text-slate-600 shadow-sm ring-1 ring-slate-200">
-                    <p className="font-bold text-slate-900">Alur baru</p>
-                    <p className="mt-1">Anggota membuka halaman QR, memilih acara, lalu admin memindai QR tersebut.</p>
-                </div>
+                        <div className="flex items-center gap-3 self-start rounded-full border border-white/10 bg-black/15 p-2">
+                            <button type="button" onClick={torchSupported ? toggleTorch : undefined} className={`flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 shadow-lg transition ${!torchSupported ? "opacity-40" : torchOn ? "bg-yellow-400/30" : "hover:bg-white/20"}`}>
+                                <FlashIcon />
+                            </button>
+                            <label className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 shadow-lg transition hover:bg-white/20">
+                                <UploadImageIcon />
+                                <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} />
+                            </label>
+                        </div>
+                    </div>
 
-                <div className="mt-5 flex justify-around rounded-2xl bg-[#145c2a] p-3 text-white">
-                    <Link to="/dashboard" className="flex flex-col items-center text-xs font-bold"><img src={iconQr} alt="" className="mb-1 h-5 w-5 object-contain" />Dashboard</Link>
-                    <Link to="/dashboard/laporan" className="flex flex-col items-center text-xs font-bold">Laporan</Link>
+                    <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_320px]">
+                        <div className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-sm text-white/80">
+                            <p className="font-bold text-white">Panduan scan</p>
+                            <p className="mt-1 leading-relaxed">Pastikan QR penuh di layar, jangan terlalu dekat, dan posisikan di area bingkai. Hasil sukses akan muncul otomatis tanpa tombol tambahan.</p>
+                        </div>
+
+                        <details className="rounded-[22px] border border-white/10 bg-white/5 p-4 text-white/85">
+                            <summary className="cursor-pointer list-none text-sm font-bold tracking-[0.16em] text-white">Presensi Manual</summary>
+                            <p className="mt-2 text-sm text-white/65">Gunakan jika QR tidak terbaca atau anggota tidak bisa menampilkan QR.</p>
+                            <form onSubmit={submitManual} className="mt-4 space-y-3 text-slate-900">
+                                <select value={manualEventId} onChange={(e) => setManualEventId(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                    {events.map((event) => <option key={event.event_id} value={event.event_id}>{eventLabel(event)}</option>)}
+                                </select>
+                                <select value={manualUserId} onChange={(e) => setManualUserId(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100">
+                                    {members.map((member) => <option key={member.user_id} value={member.user_id}>{member.name} - {member.nim || "Tanpa NIM"}</option>)}
+                                </select>
+                                <input value={manualRemarks} onChange={(e) => setManualRemarks(e.target.value)} className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" />
+                                <button type="submit" className="w-full rounded-2xl bg-[linear-gradient(135deg,#1f7a2c_0%,#2b8f3c_100%)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(31,122,44,0.28)] transition hover:brightness-105">
+                                    Set Hadir
+                                </button>
+                            </form>
+                        </details>
+                    </div>
+
+                    <div className="mt-4 flex justify-between rounded-[22px] border border-white/10 bg-white/5 p-3 text-white/85">
+                        <Link to="/dashboard" className="flex flex-col items-center text-xs font-bold transition hover:text-white">
+                            <img src={iconQr} alt="" className="mb-1 h-5 w-5 object-contain" />Dashboard
+                        </Link>
+                        <Link to="/dashboard/laporan" className="flex flex-col items-center text-xs font-bold transition hover:text-white">
+                            Laporan
+                        </Link>
+                    </div>
                 </div>
-            </aside>
+            </div>
         </div>
     );
 }

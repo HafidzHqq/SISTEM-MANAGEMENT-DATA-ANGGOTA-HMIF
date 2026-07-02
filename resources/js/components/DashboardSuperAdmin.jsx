@@ -248,27 +248,27 @@ export default function DashboardSuperAdmin() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#f5f7f8] text-slate-900">
-            <div className="flex min-h-screen w-full overflow-hidden bg-[#f4f7f4]">
-                <aside className="hidden bg-[#185b21] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto">
-                    <div className="flex flex-col items-center px-5 pt-7">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.12),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] text-slate-900">
+            <div className="flex min-h-screen w-full overflow-hidden bg-transparent">
+                <aside className="hidden bg-[linear-gradient(180deg,_#184f1e_0%,_#123817_100%)] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[248px] md:flex-col md:overflow-y-auto md:shadow-[0_24px_80px_rgba(15,23,42,0.25)]">
+                    <div className="flex flex-col items-center px-5 pt-8">
                         <img src={logoHmif} alt="HMIF" className="h-20 w-20 rounded-full border-4 border-white/15 object-contain shadow-lg shadow-black/20" />
-                        <p className="mt-3 text-center text-xl font-bold leading-none tracking-wide">HMIF</p>
-                        <p className="mt-1 text-center text-[0.62rem] leading-snug text-white/65">
+                        <p className="mt-3 text-center text-[1.05rem] font-extrabold leading-none tracking-[0.22em]">HMIF</p>
+                        <p className="mt-1 text-center text-[0.68rem] leading-snug text-white/65">
                             Himpunan Mahasiswa Informatika ITERA
                         </p>
                     </div>
 
-                    <nav className="mt-7 space-y-1 px-3">
+                    <nav className="mt-7 space-y-2 px-3">
                         {menus.map((menu) => (
                             <button
                                 key={menu.key}
                                 onClick={() => {
                                     setActiveMenu(menu.key);
                                 }}
-                                className={`relative flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium transition ${
+                                className={`relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium transition ${
                                     activeMenu === menu.key
-                                        ? "bg-white/15 text-white"
+                                        ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                         : "text-white/65 hover:bg-white/10 hover:text-white"
                                 }`}
                             >
@@ -283,7 +283,7 @@ export default function DashboardSuperAdmin() {
                         <button
                             type="button"
                             onClick={() => navigate("/dashboard/admin-overview")}
-                            className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                            className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                         >
                             <MenuIcon type="admin" />
                             <span className="truncate">Admin Dashboard</span>
@@ -291,7 +291,7 @@ export default function DashboardSuperAdmin() {
                     </nav>
 
                     <div className="mt-auto p-4">
-                        <div className="flex items-center gap-3 rounded-md bg-white/10 p-3">
+                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-sm">
                             <img src={profilePhoto} alt="Super Admin" className="h-9 w-9 rounded-full object-cover" />
                             <div className="min-w-0">
                                 <p className="truncate text-[12px] font-bold">Super Admin</p>
@@ -301,22 +301,25 @@ export default function DashboardSuperAdmin() {
                     </div>
                 </aside>
 
-                <div className="min-w-0 flex-1 bg-[#f5f7f8] md:ml-[220px]">
-                    <header className="flex h-[64px] items-center justify-between border-b border-slate-200 bg-white px-5 md:px-7">
-                        <h1 className="text-xl font-extrabold tracking-tight text-[#003f17]">{getTitle()}</h1>
+                <div className="min-w-0 flex-1 bg-transparent md:ml-[248px]">
+                    <header className="flex h-[72px] items-center justify-between border-b border-white/70 bg-white/85 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-7">
+                        <div>
+                            <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Super Admin Console</p>
+                            <h1 className="mt-1 text-xl font-black tracking-tight text-slate-900">{getTitle()}</h1>
+                        </div>
 
                         <div className="flex items-center gap-4 text-[12px]">
                             <button
                                 type="button"
                                 aria-label="Notifications"
-                                className="text-slate-500 transition hover:text-[#003f17]"
+                                className="text-slate-500 transition hover:text-emerald-700"
                             >
                                 <Icon name="bell" className="h-4 w-4" />
                             </button>
                             <div className="h-5 w-px bg-slate-900/50" />
                             <button
                                 onClick={handleLogout}
-                                className="inline-flex items-center gap-1.5 font-semibold text-slate-800 transition hover:text-[#003f17]"
+                                className="inline-flex items-center gap-1.5 font-semibold text-slate-800 transition hover:text-emerald-700"
                             >
                                 <Icon name="logout" className="h-4 w-4" />
                                 Logout
@@ -1043,38 +1046,38 @@ function AdminManagementContent({
             )}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="min-h-[110px] rounded-[10px] bg-white p-5 shadow-sm">
+                <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-green-100 text-[#003f17]">
                         <Icon name="suitcase" className="h-5 w-5" />
                     </div>
-                    <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+                    <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
                         Total Admin
                     </p>
-                    <h3 className="mt-3 text-4xl font-extrabold text-slate-950">
+                    <h3 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
                         {totalAdmins}
                     </h3>
                 </div>
 
-                <div className="min-h-[110px] rounded-[10px] bg-white p-5 shadow-sm">
+                <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-[#9df76b] text-[#003f17]">
                         <Icon name="activity" className="h-5 w-5" />
                     </div>
-                    <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+                    <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
                         Admin Aktif Saat Ini
                     </p>
-                    <h3 className="mt-3 text-4xl font-extrabold text-slate-950">
+                    <h3 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
                         {activeAdmins}
                     </h3>
                 </div>
 
-                <div className="min-h-[110px] rounded-[10px] bg-white p-5 shadow-sm">
+                <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-slate-700">
                         <Icon name="timer" className="h-5 w-5" />
                     </div>
-                    <p className="text-[12px] font-extrabold uppercase tracking-wide text-slate-600">
+                    <p className="text-[12px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
                         Aktivitas Login
                     </p>
-                    <h3 className="mt-3 text-4xl font-extrabold text-slate-950">
+                    <h3 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
                         -
                     </h3>
                     <p className="mt-1 text-[11px] text-slate-500">
@@ -1083,21 +1086,21 @@ function AdminManagementContent({
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                 <div className="flex flex-col gap-4 border-b border-slate-100 p-5 md:flex-row md:items-center md:justify-between">
                     <input
                         type="text"
                         value={adminSearch}
                         onChange={(event) => setAdminSearch(event.target.value)}
                         placeholder="Filter hasil..."
-                        className="w-full rounded-[8px] bg-slate-100 px-4 py-3 text-sm outline-none md:max-w-sm"
+                        className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 md:max-w-sm"
                     />
 
                     <div className="flex gap-3">
                         <select
                             value={adminRoleFilter}
                             onChange={(event) => setAdminRoleFilter(event.target.value)}
-                            className="rounded-[8px] bg-slate-100 px-4 py-3 text-sm outline-none"
+                            className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none transition focus:bg-white focus:ring-2 focus:ring-emerald-100"
                         >
                             <option value="all">Semua Peran</option>
                             <option value="admin">Admin</option>
@@ -1106,7 +1109,7 @@ function AdminManagementContent({
                         <select
                             value={adminStatusFilter}
                             onChange={(event) => setAdminStatusFilter(event.target.value)}
-                            className="rounded-[8px] bg-slate-100 px-4 py-3 text-sm outline-none"
+                            className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none transition focus:bg-white focus:ring-2 focus:ring-emerald-100"
                         >
                             <option value="all">Status</option>
                             <option value="aktif">Aktif</option>
@@ -1117,7 +1120,7 @@ function AdminManagementContent({
 
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left text-[12px]">
-                        <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-600">
+                        <thead className="bg-slate-50 text-[11px] uppercase tracking-[0.16em] text-slate-500">
                             <tr>
                                 <th className="px-5 py-4">Admin</th>
                                 <th className="px-5 py-4">Departemen</th>
@@ -1129,7 +1132,7 @@ function AdminManagementContent({
 
                         <tbody>
                             {filteredAdmins.map((admin) => (
-                                <tr key={admin.user_id} className="border-t border-slate-100">
+                                <tr key={admin.user_id} className="border-t border-slate-100/80 transition hover:bg-slate-50/80">
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
                                             <img src={profilePhoto} alt={admin.name} className="h-9 w-9 rounded-full object-cover" />
@@ -1141,7 +1144,7 @@ function AdminManagementContent({
                                     </td>
 
                                     <td className="px-5 py-4 text-slate-700">
-                                        <span className="rounded-full bg-green-50 px-3 py-1 text-[11px] font-bold text-slate-700">
+                                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-slate-700">
                                             {admin.department || admin.departemen || admin.nim || "HMIF"}
                                         </span>
                                     </td>
@@ -1244,29 +1247,29 @@ function AuditLogsContent({ logs, loading, error }) {
 
 
 
-            <div className="overflow-hidden rounded-[10px] bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                 <div className="grid grid-cols-1 gap-3 border-b border-slate-100 p-4 md:grid-cols-3">
-                    <div className="flex items-center gap-2 rounded-[8px] bg-slate-100 px-4 py-3">
+                    <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3">
                         <Icon name="filter" className="h-4 w-4 text-slate-600" />
                         <select className="w-full bg-transparent text-sm outline-none">
                             <option>All Actions</option>
                         </select>
                     </div>
 
-                    <select className="rounded-[8px] bg-slate-100 px-4 py-3 text-sm outline-none">
+                    <select className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none">
                         <option>All Administrators</option>
                     </select>
 
                     <input
                         type="text"
                         placeholder="Cari log..."
-                        className="rounded-[8px] bg-slate-100 px-4 py-3 text-sm outline-none"
+                        className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none"
                     />
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left text-[12px]">
-                        <thead className="bg-slate-50 text-[10px] uppercase tracking-wide text-slate-600">
+                        <thead className="bg-slate-50 text-[10px] uppercase tracking-[0.16em] text-slate-500">
                             <tr>
                                 <th className="px-4 py-3">Action</th>
                                 <th className="px-4 py-3">Admin Responsible</th>
@@ -1280,7 +1283,7 @@ function AuditLogsContent({ logs, loading, error }) {
                             {logs.slice(0, 25).map((log, index) => (
                                 <tr
                                     key={log.audit_id || log.id || `${log.action}-${log.target_id}-${index}`}
-                                    className="border-t border-slate-100"
+                                    className="border-t border-slate-100/80 transition hover:bg-slate-50/80"
                                 >
                                     <td className="px-4 py-4">
                                         <p className="font-bold text-slate-950">
@@ -1308,7 +1311,7 @@ function AuditLogsContent({ logs, loading, error }) {
                                     </td>
 
                                     <td className="px-4 py-4">
-                                        <span className="rounded-full bg-[#9df76b] px-3 py-1 text-[10px] font-bold text-green-800">
+                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold text-green-800">
                                             Completed
                                         </span>
                                     </td>
