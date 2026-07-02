@@ -118,14 +118,14 @@ export default function Login() {
 
                 <div className="flex flex-col bg-white md:w-[58%] flex-1">
 
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ Main Content (centered) Ã¢â€â‚¬Ã¢â€â‚¬ */}
-                    <div className="flex flex-col items-center flex-1 px-8 sm:px-14 pt-16 pb-8">
+                    {/* ── Main Content (centered) ── */}
+                    <div className="flex flex-col items-center flex-1 px-8 sm:px-14 pt-10 md:pt-16 pb-8">
 
                         {/* Logo */}
                         <img
                             src={hmifLogo}
                             alt="Logo HMIF"
-                            className="h-40 w-40 object-contain rounded-full"
+                            className="h-28 w-28 md:h-40 md:w-40 object-contain rounded-full"
                         />
 
                         {/* Heading */}
