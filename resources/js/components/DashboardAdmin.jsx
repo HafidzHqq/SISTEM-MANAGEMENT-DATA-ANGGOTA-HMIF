@@ -443,9 +443,9 @@ export default function DashboardAdmin() {
 
                                                         return (
                                                             <div key={item.event_id} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
-                                                                <div className="flex w-full flex-1 items-end">
+                                                                <div className="flex w-full flex-1 items-end justify-center">
                                                                     <div
-                                                                        className="w-full rounded-t-[6px] bg-emerald-600 shadow-sm transition-all"
+                                                                        className="w-8 sm:w-10 rounded-t-[6px] bg-[#1c5e22] shadow-sm transition-all hover:bg-emerald-600"
                                                                         style={{ height: `${barHeight}%` }}
                                                                         title={`${item.title}: ${formatNumber(item.total_present)} hadir`}
                                                                     />
