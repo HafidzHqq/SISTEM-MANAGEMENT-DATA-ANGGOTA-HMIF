@@ -64,11 +64,15 @@ class ProfileController extends Controller
     public function uploadFoto(Request $request)
     {
         $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         $user = $request->user();
         $path = $request->file('foto')->store('profile-photos', 'public');
+        $absolutePath = storage_path('app/public/' . $path);
+
+        // Kompres foto sebelum disimpan
+        $this->compressImage($absolutePath);
 
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
@@ -79,5 +83,78 @@ class ProfileController extends Controller
             'message' => 'Foto berhasil diperbarui',
             'foto_url' => asset('storage/' . $path),
         ]);
+    }
+
+    private function compressImage($absolutePath)
+    {
+        // Mendapatkan informasi file gambar
+        $info = getimagesize($absolutePath);
+        if (!$info) return;
+
+        $mime = $info['mime'];
+        
+        // Memuat gambar berdasarkan MIME type
+        switch ($mime) {
+            case 'image/jpeg':
+                $image = @imagecreatefromjpeg($absolutePath);
+                break;
+            case 'image/png':
+                $image = @imagecreatefrompng($absolutePath);
+                if ($image) {
+                    imagealphablending($image, false);
+                    imagesavealpha($image, true);
+                }
+                break;
+            case 'image/webp':
+                $image = @imagecreatefromwebp($absolutePath);
+                break;
+            default:
+                return;
+        }
+
+        if (!$image) return;
+
+        // Resize gambar jika ukurannya melebihi 800px (lebar atau tinggi)
+        $maxWidth = 800;
+        $maxHeight = 800;
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        if ($width > $maxWidth || $height > $maxHeight) {
+            if ($width > $height) {
+                $newWidth = $maxWidth;
+                $newHeight = (int)($height * ($maxWidth / $width));
+            } else {
+                $newHeight = $maxHeight;
+                $newWidth = (int)($width * ($maxHeight / $height));
+            }
+
+            $newImage = imagecreatetruecolor($newWidth, $newHeight);
+            
+            // Pertahankan transparansi untuk PNG dan WEBP
+            if ($mime === 'image/png' || $mime === 'image/webp') {
+                imagealphablending($newImage, false);
+                imagesavealpha($newImage, true);
+            }
+
+            imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            imagedestroy($image);
+            $image = $newImage;
+        }
+
+        // Simpan kembali gambar dengan kompresi
+        switch ($mime) {
+            case 'image/jpeg':
+                imagejpeg($image, $absolutePath, 75); // Kualitas 75%
+                break;
+            case 'image/png':
+                imagepng($image, $absolutePath, 7); // Kompresi level 7
+                break;
+            case 'image/webp':
+                imagewebp($image, $absolutePath, 75); // Kualitas 75%
+                break;
+        }
+
+        imagedestroy($image);
     }
 }
