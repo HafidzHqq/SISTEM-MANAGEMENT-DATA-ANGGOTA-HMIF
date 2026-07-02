@@ -43,13 +43,12 @@ export default function Login() {
     return (
         <div className="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden">
             {/* Background Image with Blur and Green Overlay */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#0e2d11] via-[#1c5e22] to-[#081f0a] overflow-hidden">
                 <img
                     src="/images/bg_itera.jpg"
                     alt="Background ITERA"
-                    className="h-full w-full object-cover blur-[6px] scale-105"
+                    className="h-full w-full object-cover blur-[4px] opacity-[0.25] mix-blend-overlay scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-[#1c5e22]/20 to-black/75" />
             </div>
 
             {isLoggedIn && (

@@ -157,13 +157,12 @@ export default function Home() {
                     className="relative overflow-hidden px-4 min-h-[calc(100vh-73px)] flex items-center justify-center sm:px-6 lg:px-8"
                 >
                     {/* Background Image with Blur and Green Overlay */}
-                    <div className="absolute inset-0 z-0 overflow-hidden">
+                    <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#0e2d11] via-[#1c5e22] to-[#081f0a] overflow-hidden">
                         <img
                             src="/images/bg_itera.jpg"
                             alt="Background ITERA"
-                            className="h-full w-full object-cover blur-[6px] scale-105"
+                            className="h-full w-full object-cover blur-[4px] opacity-[0.25] mix-blend-overlay scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#1c5e22]/20 to-black/75" />
                     </div>
 
                     <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-20">
