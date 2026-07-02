@@ -320,7 +320,13 @@ export default function Profile() {
                     <div className="bg-white/10 rounded-2xl px-4 py-3">
                         <p className="text-sm font-semibold text-white truncate">{name}</p>
                         <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                        <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 flex items-center gap-1">Ã¢Â¤Â· Logout</button>
+                        <button onClick={handleLogout} className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition inline-flex items-center gap-1.5 font-semibold">
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                            </svg>
+                            <span>Logout</span>
+                        </button>
                     </div>
                 </div>
             </aside>

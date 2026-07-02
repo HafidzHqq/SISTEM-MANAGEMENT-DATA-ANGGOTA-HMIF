@@ -136,9 +136,13 @@ const attendanceLabel =
                         <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
                         <button
                             onClick={handleLogout}
-                            className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition flex items-center gap-1"
+                            className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition inline-flex items-center gap-1.5 font-semibold"
                         >
-                            Ã¢Â¤Â· Logout
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
+                            </svg>
+                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
