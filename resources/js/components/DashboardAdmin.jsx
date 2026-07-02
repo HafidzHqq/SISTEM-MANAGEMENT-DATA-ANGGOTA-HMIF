@@ -276,19 +276,17 @@ export default function DashboardAdmin() {
                                 </Link>
                             );
                         })}
-                        {!isSuperAdmin && (
-                            <Link
-                                to="/dashboard/member"
-                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
-                                    pathname === "/dashboard/member"
-                                        ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                        : "text-white/65 hover:bg-white/10 hover:text-white"
-                                }`}
-                            >
-                                <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                                Absen Saya
-                            </Link>
-                        )}
+                        <Link
+                            to="/dashboard/member"
+                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
+                                pathname === "/dashboard/member"
+                                    ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
+                                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                            }`}
+                        >
+                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
+                            Absen Saya
+                        </Link>
                         {isSuperAdmin && (
                             <button
                                 type="button"

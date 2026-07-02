@@ -25,6 +25,7 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (Throwable $exception) {
+            \Log::error('Google Login Error: ' . $exception->getMessage(), ['exception' => $exception]);
             return $this->redirectToFrontend('/login', [
                 'error' => 'google_session_expired',
             ]);

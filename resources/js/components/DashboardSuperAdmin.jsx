@@ -288,6 +288,14 @@ export default function DashboardSuperAdmin() {
                             <MenuIcon type="admin" />
                             <span className="truncate">Admin Dashboard</span>
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate("/dashboard/member")}
+                            className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                        >
+                            <MenuIcon type="user" />
+                            <span className="truncate">Absen Saya</span>
+                        </button>
                     </nav>
 
                     <div className="mt-auto p-4">
