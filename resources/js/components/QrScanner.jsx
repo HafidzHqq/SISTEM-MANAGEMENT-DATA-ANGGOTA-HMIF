@@ -476,7 +476,7 @@ export default function QrScanner() {
     const location = useLocation();
     const role = localStorage.getItem("role");
     const forceMemberQr = new URLSearchParams(location.search).get("mode") === "user";
-    const isAdminScanner = (role === "admin" || role === "super_admin") && !(role === "admin" && forceMemberQr);
+    const isAdminScanner = (role === "admin" || role === "super_admin") && !forceMemberQr;
 
     return isAdminScanner ? <AdminScannerView navigate={navigate} /> : <MemberQrView navigate={navigate} />;
 }
