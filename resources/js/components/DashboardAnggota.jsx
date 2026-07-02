@@ -13,6 +13,7 @@ import { calculateAttendanceSummary } from "../utils/attendanceHistory";
 
 export default function DashboardAnggota() {
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     const [user, setUser] = React.useState(null);
     const [historyData, setHistoryData] = React.useState([]);
@@ -97,7 +98,14 @@ const attendanceLabel =
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
             {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â DESKTOP SIDEBAR Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
-            <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
                 {/* Logo */}
                 <div className="flex flex-col items-center pt-8 pb-5 px-4">
                     <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full object-contain border-4 border-white/20" />
@@ -117,6 +125,7 @@ const attendanceLabel =
                             <Link
                                 key={item.label}
                                 to={item.to}
+                                onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${isActive
                                     ? "bg-white/15 text-white"
                                     : "text-white/65 hover:bg-white/10 hover:text-white"
@@ -153,14 +162,25 @@ const attendanceLabel =
 
                 {/* Mobile Header */}
                 <header className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
-                    <div className="flex items-center gap-2">
-                        <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
-                        <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none"
+                            aria-label="Open sidebar"
+                        >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 object-contain rounded-full" />
+                            <span className="text-sm font-bold text-gray-800">HMIF ITERA</span>
+                        </div>
                     </div>
                     <button
                         type="button"
                         onClick={handleLogout}
-                        className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                        className="rounded-full border border-red-100 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-red-600 transition active:scale-95"
                     >
                         Logout
                     </button>

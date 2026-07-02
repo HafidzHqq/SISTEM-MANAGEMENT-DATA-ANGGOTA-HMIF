@@ -275,6 +275,7 @@ function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
 
 export default function DashboardAdminLaporan() {
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const pathname = location.pathname;
 
@@ -481,8 +482,16 @@ export default function DashboardAdminLaporan() {
         <div className="min-h-screen overflow-x-hidden bg-[#e7f5e5] font-sans text-gray-900">
             <div className="min-h-screen flex">
 
+                {/* Mobile Sidebar Backdrop Overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
                 {/* SIDEBAR */}
-                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
+                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
                         <img src={hmifLogo} alt="HMIF" className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20" />
                         <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
@@ -493,6 +502,7 @@ export default function DashboardAdminLaporan() {
                             const isActive = pathname === item.to;
                             return (
                                 <Link key={item.label} to={item.to}
+                                    onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${isActive ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10" : "text-white/65 hover:bg-white/10 hover:text-white"}`}>
                                     <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
                                     {item.label}
@@ -501,6 +511,7 @@ export default function DashboardAdminLaporan() {
                         })}
                         <Link
                             to="/dashboard/member"
+                            onClick={() => setIsSidebarOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                 pathname === "/dashboard/member"
                                     ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
@@ -513,7 +524,10 @@ export default function DashboardAdminLaporan() {
                         {isSuperAdmin && (
                             <button
                                 type="button"
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() => {
+                                    navigate("/dashboard");
+                                    setIsSidebarOpen(false);
+                                }}
                                 className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
@@ -562,15 +576,26 @@ export default function DashboardAdminLaporan() {
                     </header>
 
                     {/* TOPBAR MOBILE */}
-                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-4 md:hidden">
-                        <div className="flex items-center gap-2">
-                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
-                            <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-3.5 md:hidden">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none"
+                                aria-label="Open sidebar"
+                            >
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
+                                <span className="text-sm font-bold text-slate-800">Admin HMIF</span>
+                            </div>
                         </div>
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                            className="rounded-full border border-red-100 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-red-600 transition active:scale-95"
                         >
                             Logout
                         </button>

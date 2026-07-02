@@ -130,6 +130,7 @@ const formatShortDate = (dateValue) => {
 
 export default function DashboardAdmin() {
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const location = useLocation();
     const pathname = location.pathname;
     const [trendRange, setTrendRange] = React.useState("30D");
@@ -246,7 +247,15 @@ export default function DashboardAdmin() {
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.14),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] font-sans text-slate-950">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
+                {/* Mobile Sidebar Backdrop Overlay */}
+                {isSidebarOpen && (
+                    <div 
+                        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
                     <div className="flex flex-col items-center pt-8 pb-6 px-4">
                         <img
                             src={hmifLogo}
@@ -265,6 +274,7 @@ export default function DashboardAdmin() {
                                 <Link
                                     key={item.label}
                                     to={item.to}
+                                    onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                         isActive
                                             ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
@@ -278,6 +288,7 @@ export default function DashboardAdmin() {
                         })}
                         <Link
                             to="/dashboard/member"
+                            onClick={() => setIsSidebarOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                 pathname === "/dashboard/member"
                                     ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
@@ -290,7 +301,10 @@ export default function DashboardAdmin() {
                         {isSuperAdmin && (
                             <button
                                 type="button"
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() => {
+                                    navigate("/dashboard");
+                                    setIsSidebarOpen(false);
+                                }}
                                 className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
@@ -318,15 +332,26 @@ export default function DashboardAdmin() {
                 </aside>
 
                 <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
-                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white/90 px-4 py-4 backdrop-blur md:hidden">
-                        <div className="flex items-center gap-2">
-                            <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
-                            <span className="text-sm font-bold text-slate-800">HMIF ITERA</span>
+                    <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white/90 px-4 py-3.5 backdrop-blur md:hidden">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none"
+                                aria-label="Open sidebar"
+                            >
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div className="flex items-center gap-2">
+                                <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
+                                <span className="text-sm font-bold text-slate-800">Admin HMIF</span>
+                            </div>
                         </div>
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="rounded-full border border-red-100 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 transition active:scale-95"
+                            className="rounded-full border border-red-100 bg-red-50 px-3.5 py-1.5 text-xs font-bold text-red-600 transition active:scale-95"
                         >
                             Logout
                         </button>
