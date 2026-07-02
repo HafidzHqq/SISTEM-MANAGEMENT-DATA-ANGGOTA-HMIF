@@ -476,12 +476,12 @@ export default function DashboardAdminLaporan() {
                         <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
                         <p className="text-[0.62rem] leading-snug text-white/65 text-center">Himpunan Mahasiswa Informatika<br />ITERA</p>
                     </div>
-                    <nav className="flex-1 px-3 pt-4 space-y-1">
+                    <nav className="flex-1 px-3 pt-4 space-y-2">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.to;
                             return (
                                 <Link key={item.label} to={item.to}
-                                    className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${isActive ? "bg-white/15 text-white" : "text-white/65 hover:bg-white/10 hover:text-white"}`}>
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${isActive ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10" : "text-white/65 hover:bg-white/10 hover:text-white"}`}>
                                     <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
                                     {item.label}
                                 </Link>
@@ -489,9 +489,9 @@ export default function DashboardAdminLaporan() {
                         })}
                         <Link
                             to="/dashboard/member"
-                            className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${
+                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
                                 pathname === "/dashboard/member"
-                                    ? "bg-white/15 text-white"
+                                    ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
                                     : "text-white/65 hover:bg-white/10 hover:text-white"
                             }`}
                         >
@@ -502,7 +502,7 @@ export default function DashboardAdminLaporan() {
                             <button
                                 type="button"
                                 onClick={() => navigate("/dashboard")}
-                                className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-[10px] text-left text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                                className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
                             >
                                 <img
                                     src={iconDashboard}
