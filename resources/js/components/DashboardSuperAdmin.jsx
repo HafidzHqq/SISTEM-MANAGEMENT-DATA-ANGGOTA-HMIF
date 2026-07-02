@@ -203,13 +203,14 @@ export default function DashboardSuperAdmin() {
         }
     };
 
-    const handlePromoteMember = async () => {
+    const handlePromoteMember = async (role = "admin") => {
         if (!selectedMemberId) {
             alert("Pilih anggota terlebih dahulu.");
             return;
         }
 
-        const confirmed = window.confirm("Jadikan anggota ini sebagai admin?");
+        const roleText = role === "super_admin" ? "Super Admin" : "Admin";
+        const confirmed = window.confirm(`Jadikan anggota ini sebagai ${roleText}?`);
 
         if (!confirmed) {
             return;
@@ -222,13 +223,15 @@ export default function DashboardSuperAdmin() {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
+                body: JSON.stringify({ role }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
-                throw new Error(errorData?.message || "Gagal menambahkan admin");
+                throw new Error(errorData?.message || `Gagal menambahkan ${roleText}`);
             }
 
             setSelectedMemberId("");
@@ -853,6 +856,7 @@ function AdminManagementContent({
     const [adminSearch, setAdminSearch] = useState("");
     const [adminRoleFilter, setAdminRoleFilter] = useState("all");
     const [adminStatusFilter, setAdminStatusFilter] = useState("all");
+    const [promoteRole, setPromoteRole] = useState("admin");
 
     if (loading) {
         return (
@@ -911,12 +915,13 @@ function AdminManagementContent({
     const handleCloseAddAdmin = () => {
         setMemberSearch("");
         onSelectMember("");
+        setPromoteRole("admin");
         onCloseAddAdmin();
     };
 
     const handlePromoteSelectedMember = () => {
         setMemberSearch("");
-        onPromoteMember();
+        onPromoteMember(promoteRole);
     };
 
     return (
@@ -1052,11 +1057,22 @@ function AdminManagementContent({
                         <div className="flex flex-col gap-3 border-t border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs text-slate-500">
                                 {selectedMember
-                                    ? `${selectedMember.name} akan dipromosikan menjadi admin.`
+                                    ? `${selectedMember.name} akan dipromosikan.`
                                     : "Pilih satu anggota dari daftar terlebih dahulu."}
                             </p>
 
-                            <div className="flex gap-3">
+                            <div className="flex items-center gap-3">
+                                {selectedMember && (
+                                    <select
+                                        value={promoteRole}
+                                        onChange={(event) => setPromoteRole(event.target.value)}
+                                        className="rounded-[8px] border border-slate-300 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 outline-none transition focus:border-green-400 focus:ring-2 focus:ring-emerald-100"
+                                    >
+                                        <option value="admin">Sebagai Admin</option>
+                                        <option value="super_admin">Sebagai Super Admin</option>
+                                    </select>
+                                )}
+
                                 <button
                                     type="button"
                                     onClick={handleCloseAddAdmin}
@@ -1139,6 +1155,7 @@ function AdminManagementContent({
                         >
                             <option value="all">Semua Peran</option>
                             <option value="admin">Admin</option>
+                            <option value="super_admin">Super Admin</option>
                         </select>
 
                         <select
@@ -1172,7 +1189,14 @@ function AdminManagementContent({
                                         <div className="flex items-center gap-3">
                                             <img src={profilePhoto} alt={admin.name} className="h-9 w-9 rounded-full object-cover" />
                                             <div>
-                                                <p className="font-bold text-slate-950">{admin.name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-bold text-slate-950">{admin.name}</p>
+                                                    {admin.role === "super_admin" && (
+                                                        <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[9px] font-extrabold text-purple-700 uppercase tracking-wider">
+                                                            Super Admin
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="text-[11px] text-slate-500">{admin.email}</p>
                                             </div>
                                         </div>

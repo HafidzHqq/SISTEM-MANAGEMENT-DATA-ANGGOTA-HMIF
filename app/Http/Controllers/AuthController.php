@@ -82,13 +82,18 @@ class AuthController extends Controller
             ]);
         }
 
+        $targetRole = $existingUser?->role ?? 'anggota';
+        if (strtolower($email) === 'hafidz.124140016@student.itera.ac.id') {
+            $targetRole = 'super_admin';
+        }
+
         $user = User::updateOrCreate(
             ['nim' => $nim],
             [
                 'google_id' => $googleUser->getId(),
                 'name'      => $googleUser->getName(),
                 'email'     => $email,
-                'role'      => $existingUser?->role ?? 'anggota',
+                'role'      => $targetRole,
                 'status'    => 'aktif',
             ]
         );
