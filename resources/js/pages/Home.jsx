@@ -163,7 +163,7 @@ export default function Home() {
                             alt="Background ITERA"
                             className="h-full w-full object-cover blur-[6px] scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-[#0c140e]/90 to-[#050806]/95" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#1c5e22]/20 to-black/75" />
                     </div>
 
                     <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-20">

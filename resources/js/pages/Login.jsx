@@ -49,7 +49,7 @@ export default function Login() {
                     alt="Background ITERA"
                     className="h-full w-full object-cover blur-[6px] scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-[#0c140e]/85 to-black/90" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-[#1c5e22]/20 to-black/75" />
             </div>
 
             {isLoggedIn && (
