@@ -90,7 +90,7 @@ class AttendanceController extends Controller
 
         $event = Event::find($payload['event_id'] ?? null);
         $user = User::where('user_id', $payload['user_id'] ?? null)
-            ->whereIn('role', ['anggota', 'admin'])
+            ->whereIn('role', ['anggota', 'admin', 'super_admin'])
             ->where('status', 'aktif')
             ->first();
 
@@ -107,7 +107,7 @@ class AttendanceController extends Controller
 
         $event = Event::find($validated['event_id']);
         $user = User::where('user_id', $validated['user_id'])
-            ->whereIn('role', ['anggota', 'admin'])
+            ->whereIn('role', ['anggota', 'admin', 'super_admin'])
             ->where('status', 'aktif')
             ->first();
 
@@ -323,7 +323,7 @@ class AttendanceController extends Controller
             ->keyBy('user_id');
 
         return User::with("memberProfile:profile_id,user_id,{$departmentColumn},jabatan,status_keanggotaan")
-            ->whereIn('role', ['anggota', 'admin'])
+            ->whereIn('role', ['anggota', 'admin', 'super_admin'])
             ->where('status', 'aktif')
             ->orderBy('name')
             ->get(['user_id', 'name', 'nim'])

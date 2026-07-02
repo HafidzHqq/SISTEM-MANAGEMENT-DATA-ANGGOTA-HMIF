@@ -12,12 +12,12 @@ class DashboardController extends Controller
 {
     public function attendanceStatistics()
     {
-        $eligibleUserIds = User::whereIn('role', ['anggota', 'admin'])
+        $eligibleUserIds = User::whereIn('role', ['anggota', 'admin', 'super_admin'])
             ->where('status', 'aktif')
             ->pluck('user_id');
 
-        $totalMembers = User::where('role', 'anggota')->where('status', 'aktif')->count();
-        $totalAdmins = User::where('role', 'admin')->where('status', 'aktif')->count();
+        $totalMembers = User::whereIn('role', ['anggota', 'admin', 'super_admin'])->where('status', 'aktif')->count();
+        $totalAdmins = User::whereIn('role', ['admin', 'super_admin'])->where('status', 'aktif')->count();
         $totalAttendanceParticipants = $eligibleUserIds->count();
         $totalEvents = Event::count();
         $activeEvents = Event::where('date_time', '>=', now())->count();
@@ -66,7 +66,7 @@ class DashboardController extends Controller
             ->leftJoin('member_profiles', 'users.user_id', '=', 'member_profiles.user_id')
             ->where('attendances.status', 'present')
             ->whereIn('attendances.user_id', $eligibleUserIds)
-            ->whereIn('users.role', ['anggota', 'admin'])
+            ->whereIn('users.role', ['anggota', 'admin', 'super_admin'])
             ->where('users.status', 'aktif')
             ->select(
                 "member_profiles.{$departmentColumn} as departemen",
