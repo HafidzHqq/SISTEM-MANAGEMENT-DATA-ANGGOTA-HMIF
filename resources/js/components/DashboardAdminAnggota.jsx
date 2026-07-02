@@ -19,21 +19,24 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
-const DEPARTMENT_OPTIONS = ["KEPROF", "PSDA", "INTERNAL", "EXTERNAL", "KOMINFO", "KESEKJENAN"];
+const DEPARTMENT_OPTIONS = ["Kesekjenan", "Senator", "DPA", "Eksternal", "PSDA", "Internal", "Keprofesian", "Kominfo"];
 const DEPARTMENT_FILTER_OPTIONS = ["Semua Departemen", ...DEPARTMENT_OPTIONS];
 const normalizeDepartment = (value) => {
     const normalized = String(value ?? "").trim();
     const lower = normalized.toLowerCase();
 
     if (!normalized || normalized === "-") return "-";
-    if (["keprof", "keprofesian", "technopreneur", "minat bakat"].includes(lower)) return "KEPROF";
+    if (["keprof", "keprofesian", "technopreneur", "minat bakat"].includes(lower)) return "Keprofesian";
     if (["psda"].includes(lower)) return "PSDA";
-    if (["internal"].includes(lower)) return "INTERNAL";
-    if (["external", "eksternal"].includes(lower)) return "EXTERNAL";
-    if (["kominfo"].includes(lower)) return "KOMINFO";
-    if (["kesekjenan"].includes(lower)) return "KESEKJENAN";
+    if (["internal"].includes(lower)) return "Internal";
+    if (["external", "eksternal"].includes(lower)) return "Eksternal";
+    if (["kominfo"].includes(lower)) return "Kominfo";
+    if (["kesekjenan"].includes(lower)) return "Kesekjenan";
+    if (["senator"].includes(lower)) return "Senator";
+    if (["dpa"].includes(lower)) return "DPA";
 
-    return normalized.toUpperCase();
+    const matched = DEPARTMENT_OPTIONS.find((opt) => opt.toLowerCase() === lower);
+    return matched || normalized;
 };
 const YEAR_FILTER_OPTIONS = ["Semua Angkatan", "2020", "2021", "2022", "2023", "2024"];
 const STATUS_FILTER_OPTIONS = ["Semua Status", "TETAP", "MUDA", "LUAR BIASA"];
@@ -115,11 +118,23 @@ const roleLabels = {
 
 const JABATAN_OPTIONS = [
     "-",
+    "Ketua Himpunan",
+    "Sekretaris Jenderal",
+    "Sekretaris Umum",
+    "Bendahara Umum",
+    "Senator",
+    "Koordinator DPA",
+    "Ketua Komisi",
+    "Staff Ahli",
+    "Staff",
+    "Kepala Departemen",
+    "Sekretaris Departemen",
+    "Kepala Divisi",
     "Ketua Departemen",
     "Ketua Divisi",
     "Sekertaris Departemen",
     "Staf Ahli",
-    "Staf",
+    "Staf"
 ];
 
 const STATUS_OPTIONS = [

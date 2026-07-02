@@ -15,8 +15,17 @@ use App\Models\AuditLog;
 class MemberController extends Controller
 {
     private const MEMBER_DIRECTORY_ROLES = ['anggota', 'admin', 'super_admin'];
-    private const DEPARTMENT_OPTIONS = ['KEPROF', 'PSDA', 'INTERNAL', 'EXTERNAL', 'KOMINFO', 'KESEKJENAN'];
-    private const POSITION_OPTIONS = ['-', 'Ketua Departemen', 'Ketua Divisi', 'Sekertaris Departemen', 'Staf Ahli', 'Staf'];
+    private const DEPARTMENT_OPTIONS = [
+        'Kesekjenan', 'Senator', 'DPA', 'Eksternal', 'PSDA', 'Internal', 'Keprofesian', 'Kominfo',
+        'KESEKJENAN', 'SENATOR', 'DPA', 'EXTERNAL', 'EKSTERNAL', 'PSDA', 'INTERNAL', 'KEPROF', 'KEPROFESIAN', 'KOMINFO'
+    ];
+    private const POSITION_OPTIONS = [
+        '-',
+        'Ketua Himpunan', 'Sekretaris Jenderal', 'Sekretaris Umum', 'Bendahara Umum',
+        'Senator', 'Koordinator DPA', 'Ketua Komisi', 'Staff Ahli', 'Staff',
+        'Kepala Departemen', 'Sekretaris Departemen', 'Kepala Divisi',
+        'Ketua Departemen', 'Ketua Divisi', 'Sekertaris Departemen', 'Staf Ahli', 'Staf'
+    ];
 
     // GET /api/members ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ambil semua anggota beserta profilnya
     public function index(Request $request)
