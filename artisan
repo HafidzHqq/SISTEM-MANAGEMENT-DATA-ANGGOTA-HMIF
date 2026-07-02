@@ -1,4 +1,4 @@
-#!/usr/bin/env php
+php artisan config:cache#!/usr/bin/env php
 <?php
 
 use Illuminate\Foundation\Application;
