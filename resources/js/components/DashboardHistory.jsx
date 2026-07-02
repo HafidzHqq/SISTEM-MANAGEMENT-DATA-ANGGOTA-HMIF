@@ -332,13 +332,19 @@ export default function DashboardHistory() {
     const role = localStorage.getItem("role");
     const navItems = [
         { 
-            label: role === "super_admin" ? "Super Admin" : (role === "admin" ? "Admin" : "Dashboard"), 
+            label: "Dashboard", 
             icon: iconDashboard, 
-            to: role === "super_admin" ? "/dashboard" : (role === "admin" ? "/dashboard/admin-overview" : "/dashboard") 
+            to: (role === "admin" || role === "super_admin") ? "/dashboard/member" : "/dashboard" 
         },
         { label: "History", icon: iconHistory, to: "/dashboard/history" },
         { label: "Profile", icon: iconProfile, to: "/dashboard/profile" },
     ];
+
+    if (role === "admin") {
+        navItems.push({ label: "Admin Panel", icon: iconDashboard, to: "/dashboard/admin-overview" });
+    } else if (role === "super_admin") {
+        navItems.push({ label: "Super Admin Panel", icon: iconDashboard, to: "/dashboard" });
+    }
 
     const normalizedHistory = React.useMemo(
         () => historyData.map((item, index) => normalizeHistoryItem(item, index)),
