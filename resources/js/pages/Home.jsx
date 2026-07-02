@@ -154,19 +154,19 @@ export default function Home() {
             <main>
                 <section
                     id="guide"
-                    className="relative overflow-hidden px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-32 lg:pb-28"
+                    className="relative overflow-hidden px-4 min-h-[calc(100vh-73px)] flex items-center justify-center sm:px-6 lg:px-8"
                 >
                     {/* Background Image with Blur and Green Overlay */}
                     <div className="absolute inset-0 z-0 overflow-hidden">
                         <img
                             src="/images/bg_itera.jpg"
                             alt="Background ITERA"
-                            className="h-full w-full object-cover blur-[8px] scale-105"
+                            className="h-full w-full object-cover blur-[6px] scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-b from-[#1c5e22]/85 via-[#1c5e22]/90 to-[#123d16]" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-[#0c140e]/90 to-[#050806]/95" />
                     </div>
 
-                    <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
+                    <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-20">
                         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-[0.28em] text-emerald-300 ring-1 ring-white/15">
                             <IconInfo />
                             <span>SISTEM MANAGEMENT DATA</span>

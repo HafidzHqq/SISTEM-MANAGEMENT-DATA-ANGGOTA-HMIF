@@ -47,9 +47,9 @@ export default function Login() {
                 <img
                     src="/images/bg_itera.jpg"
                     alt="Background ITERA"
-                    className="h-full w-full object-cover blur-[8px] scale-105"
+                    className="h-full w-full object-cover blur-[6px] scale-105"
                 />
-                <div className="absolute inset-0 bg-[#1c5e22]/60 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-[#0c140e]/85 to-black/90" />
             </div>
 
             {isLoggedIn && (
