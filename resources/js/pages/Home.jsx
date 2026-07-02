@@ -88,11 +88,16 @@ function IconLightbulb() {
     );
 }
 
-function SocialChip({ label }) {
+function SocialChip({ label, href }) {
     return (
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-white/10 text-xs font-semibold text-white ring-1 ring-white/15">
+        <a 
+            href={href || "#"} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-white/10 text-xs font-semibold text-white ring-1 ring-white/15 hover:bg-white/20 transition"
+        >
             {label}
-        </span>
+        </a>
     );
 }
 
@@ -305,8 +310,8 @@ export default function Home() {
                             </div>
 
                             <div className="mt-8 flex items-center gap-3">
-                                <SocialChip label="IG" />
-                                <SocialChip label="IN" />
+                                <SocialChip label="IG" href="https://www.instagram.com/hmif.itera?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" />
+                                <SocialChip label="IN" href="https://www.linkedin.com/company/hmif-itera" />
                             </div>
                         </div>
 
