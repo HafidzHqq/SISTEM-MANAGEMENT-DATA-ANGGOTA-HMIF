@@ -14,7 +14,8 @@ class SuperAdminController extends Controller
     // GET /api/admins — list semua admin dan super admin
     public function index()
     {
-        $admins = User::whereIn('role', ['admin', 'super_admin'])
+        $admins = User::with('memberProfile')
+            ->whereIn('role', ['admin', 'super_admin'])
             ->get(['user_id', 'name', 'email', 'nim', 'role', 'status', 'created_at']);
 
         return response()->json($admins);

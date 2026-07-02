@@ -1187,7 +1187,11 @@ function AdminManagementContent({
                                 <tr key={admin.user_id} className="border-t border-slate-100/80 transition hover:bg-slate-50/80">
                                     <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
-                                            <img src={profilePhoto} alt={admin.name} className="h-9 w-9 rounded-full object-cover" />
+                                            <img
+                                                src={(admin.member_profile?.foto || admin.memberProfile?.foto) ? `/storage/${admin.member_profile?.foto || admin.memberProfile?.foto}` : profilePhoto}
+                                                alt={admin.name}
+                                                className="h-9 w-9 rounded-full object-cover"
+                                            />
                                             <div>
                                                 <div className="flex items-center gap-2">
                                                     <p className="font-bold text-slate-950">{admin.name}</p>
