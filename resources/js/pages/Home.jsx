@@ -157,7 +157,7 @@ export default function Home() {
                     className="relative overflow-hidden px-4 pt-28 pb-24 sm:px-6 lg:px-8 lg:pt-32 lg:pb-28"
                 >
                     {/* Background Image with Blur and Green Overlay */}
-                    <div className="absolute inset-0 -z-10 overflow-hidden">
+                    <div className="absolute inset-0 z-0 overflow-hidden">
                         <img
                             src="/images/bg_itera.jpg"
                             alt="Background ITERA"
@@ -166,7 +166,7 @@ export default function Home() {
                         <div className="absolute inset-0 bg-gradient-to-b from-[#1c5e22]/85 via-[#1c5e22]/90 to-[#123d16]" />
                     </div>
 
-                    <div className="relative mx-auto flex max-w-5xl flex-col items-center text-center">
+                    <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
                         <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-[0.28em] text-emerald-300 ring-1 ring-white/15">
                             <IconInfo />
                             <span>SISTEM MANAGEMENT DATA</span>

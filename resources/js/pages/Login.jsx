@@ -43,7 +43,7 @@ export default function Login() {
     return (
         <div className="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden">
             {/* Background Image with Blur and Green Overlay */}
-            <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute inset-0 z-0 overflow-hidden">
                 <img
                     src="/images/bg_itera.jpg"
                     alt="Background ITERA"
@@ -58,8 +58,8 @@ export default function Login() {
                 </header>
             )}
 
-            {/* Ã¢â€â‚¬Ã¢â€â‚¬ CARD WRAPPER Ã¢â€â‚¬Ã¢â€â‚¬ */}
-            <div className="w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+            {/* ── CARD WRAPPER ── */}
+            <div className="relative z-10 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
 
                 <div
                     className="hidden md:flex relative flex-col justify-between p-10 md:w-[42%]"
