@@ -435,14 +435,14 @@ export default function DashboardAdmin() {
                                     </div>
 
                                     <div className="mt-6 rounded-[8px] bg-slate-50 p-4 ring-1 ring-slate-100">
-                                        <div className="h-[275px] rounded-[4px] bg-white px-4 pb-4 pt-6">
+                                        <div className="h-[350px] rounded-[4px] bg-white px-4 pb-4 pt-6">
                                             {trendItems.length > 0 ? (
-                                                <div className="flex h-full items-end gap-3">
+                                                <div className="flex h-full items-end justify-start gap-6 sm:gap-10 overflow-x-auto pb-1.5 scrollbar-thin">
                                                     {trendItems.map((item) => {
                                                         const barHeight = Math.max(16, Math.round((Number(item.total_present || 0) / trendMax) * 100));
 
                                                         return (
-                                                            <div key={item.event_id} className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+                                                            <div key={item.event_id} className="flex h-full w-20 sm:w-24 shrink-0 flex-col items-center justify-end gap-2">
                                                                 <div className="flex w-full flex-1 items-end justify-center">
                                                                     <div
                                                                         className="w-8 sm:w-10 rounded-t-[6px] bg-[#1c5e22] shadow-sm transition-all hover:bg-emerald-600"
