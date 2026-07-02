@@ -185,9 +185,9 @@ function AdminScannerView({ navigate }) {
                 const eventList = Array.isArray(eventData) ? eventData : Array.isArray(eventData.data) ? eventData.data : [];
                 const memberList = Array.isArray(memberData) ? memberData : Array.isArray(memberData.data) ? memberData.data : [];
                 const openEvents = eventList.filter(isEventOpen);
-                setEvents(openEvents.length ? openEvents : eventList);
+                setEvents(eventList);
                 setMembers(memberList.filter((member) => member.status !== "non-aktif" && member.role !== "super_admin"));
-                setManualEventId(String((openEvents[0] || eventList[0])?.event_id || ""));
+                setManualEventId(String(openEvents[0]?.event_id || ""));
                 setManualUserId(String(memberList[0]?.user_id || ""));
             })
             .catch(() => setStatusMsg("Gagal memuat data manual."));
@@ -433,9 +433,15 @@ function AdminScannerView({ navigate }) {
                         <form onSubmit={submitManual} className="space-y-4">
                             <div>
                                 <label className="block text-[0.68rem] font-bold uppercase tracking-wider text-white/55 mb-1.5">Pilih Acara</label>
-                                <select value={manualEventId} onChange={(e) => setManualEventId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white outline-none transition focus:border-emerald-500 focus:bg-black/50">
-                                    {events.map((event) => <option key={event.event_id} value={event.event_id} className="bg-slate-950 text-white">{eventLabel(event)}</option>)}
-                                </select>
+                                {events.filter(isEventOpen).length > 0 ? (
+                                    <select value={manualEventId} onChange={(e) => setManualEventId(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white outline-none transition focus:border-emerald-500 focus:bg-black/50">
+                                        {events.filter(isEventOpen).map((event) => <option key={event.event_id} value={event.event_id} className="bg-slate-950 text-white">{eventLabel(event)}</option>)}
+                                    </select>
+                                ) : (
+                                    <div className="rounded-xl border border-red-500/30 bg-red-950/20 px-3 py-2.5 text-xs font-semibold text-red-400">
+                                        Tidak ada acara aktif saat ini
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-[0.68rem] font-bold uppercase tracking-wider text-white/55 mb-1.5">Nama Anggota</label>
@@ -447,7 +453,7 @@ function AdminScannerView({ navigate }) {
                                 <label className="block text-[0.68rem] font-bold uppercase tracking-wider text-white/55 mb-1.5">Catatan Kehadiran</label>
                                 <input value={manualRemarks} onChange={(e) => setManualRemarks(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white outline-none transition focus:border-emerald-500 focus:bg-black/50" placeholder="Keterangan kehadiran..." />
                             </div>
-                            <button type="submit" className="w-full mt-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-lg transition hover:bg-emerald-500">
+                            <button type="submit" disabled={events.filter(isEventOpen).length === 0} className="w-full mt-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-lg transition hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed">
                                 Simpan Kehadiran
                             </button>
                         </form>
