@@ -77,7 +77,7 @@ const formatDateValue = (year, month, day) => `${year}-${padNumber(month + 1)}-$
 
 const formatDateDisplay = (value) => {
     const date = parseDateValue(value);
-    if (!date) return "Pilih tanggal";
+    if (!date) return "Semua Tanggal";
     return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 };
 
@@ -255,6 +255,18 @@ function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
                             );
                         })}
                     </div>
+                    <div className="mt-3 pt-2 border-t border-emerald-100 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onChange("");
+                                onOpenChange(false);
+                            }}
+                            className="text-xs font-bold text-red-600 hover:text-red-800 transition"
+                        >
+                            Hapus Filter Tanggal
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
@@ -283,8 +295,8 @@ export default function DashboardAdminLaporan() {
     // Filter state
     const [filterEventId, setFilterEventId] = useState("semua");
     const [filterDivisi, setFilterDivisi] = useState("Semua Departemen");
-    const [dateStart, setDateStart] = useState(monthStartStr());
-    const [dateEnd, setDateEnd] = useState(todayStr());
+    const [dateStart, setDateStart] = useState("");
+    const [dateEnd, setDateEnd] = useState("");
     const [page, setPage] = useState(1);
     const [openFilterPicker, setOpenFilterPicker] = useState(null);
 
@@ -432,8 +444,8 @@ export default function DashboardAdminLaporan() {
     const handleResetFilters = () => {
         setFilterEventId("semua");
         setFilterDivisi("Semua Departemen");
-        setDateStart(monthStartStr());
-        setDateEnd(todayStr());
+        setDateStart("");
+        setDateEnd("");
         setPage(1);
         setOpenFilterPicker(null);
     };
