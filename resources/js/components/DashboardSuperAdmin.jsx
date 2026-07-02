@@ -250,7 +250,7 @@ export default function DashboardSuperAdmin() {
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.12),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] text-slate-900">
             <div className="flex min-h-screen w-full overflow-hidden bg-transparent">
-                <aside className="hidden bg-[linear-gradient(180deg,_#184f1e_0%,_#123817_100%)] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[248px] md:flex-col md:overflow-y-auto md:shadow-[0_24px_80px_rgba(15,23,42,0.25)]">
+                <aside className="hidden bg-[#1c5e22] text-white md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto">
                     <div className="flex flex-col items-center px-5 pt-8">
                         <img src={logoHmif} alt="HMIF" className="h-20 w-20 rounded-full border-4 border-white/15 object-contain shadow-lg shadow-black/20" />
                         <p className="mt-3 text-center text-[1.05rem] font-extrabold leading-none tracking-[0.22em]">HMIF</p>
@@ -301,7 +301,7 @@ export default function DashboardSuperAdmin() {
                     </div>
                 </aside>
 
-                <div className="min-w-0 flex-1 bg-transparent md:ml-[248px]">
+                <div className="min-w-0 flex-1 bg-transparent md:ml-[220px]">
                     <header className="flex h-[72px] items-center justify-between border-b border-white/70 bg-white/85 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-7">
                         <div>
                             <p className="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-emerald-700">Super Admin Console</p>

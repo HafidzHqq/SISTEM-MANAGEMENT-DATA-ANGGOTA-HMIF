@@ -470,7 +470,7 @@ export default function DashboardAdminLaporan() {
             <div className="min-h-screen flex">
 
                 {/* SIDEBAR */}
-                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
+                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
                         <img src={hmifLogo} alt="HMIF" className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20" />
                         <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>

@@ -744,7 +744,7 @@ export default function DashboardAdminAnggota() {
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#e7f5e5] font-sans text-slate-900">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#185b21] text-white fixed left-0 top-0 bottom-0 z-50">
+                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-7 pb-5 px-4">
                         <img
                             src={hmifLogo}

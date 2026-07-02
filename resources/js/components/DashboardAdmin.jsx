@@ -246,7 +246,7 @@ export default function DashboardAdmin() {
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(31,94,34,0.14),_transparent_34%),linear-gradient(180deg,_#f9fbf9_0%,_#eef4ef_100%)] font-sans text-slate-950">
             <div className="min-h-screen flex">
-                <aside className="hidden md:flex flex-col w-[248px] min-h-screen bg-[linear-gradient(180deg,_#184f1e_0%,_#123817_100%)] text-white fixed left-0 top-0 bottom-0 z-50 shadow-[0_24px_80px_rgba(15,23,42,0.25)]">
+                <aside className="hidden md:flex flex-col w-[220px] min-h-screen bg-[#1c5e22] text-white fixed left-0 top-0 bottom-0 z-50">
                     <div className="flex flex-col items-center pt-8 pb-6 px-4">
                         <img
                             src={hmifLogo}
@@ -319,7 +319,7 @@ export default function DashboardAdmin() {
                     </div>
                 </aside>
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[248px]">
+                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
                     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white/90 px-4 py-4 backdrop-blur md:hidden">
                         <div className="flex items-center gap-2">
                             <img src={hmifLogo} alt="HMIF" className="h-8 w-8 rounded-full object-contain" />
