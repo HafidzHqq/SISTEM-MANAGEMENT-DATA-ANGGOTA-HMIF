@@ -363,15 +363,31 @@ export default function DashboardAdminAcara() {
             if (!res.ok) throw new Error();
             const data = await res.json();
             const list = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
-            setEvents(list);
-            if (list.length > 0) {
+            
+            // Urutkan acara: aktif terlebih dahulu, kemudian berdasarkan tanggal terbaru
+            const sortedList = [...list].sort((a, b) => {
+                const aActive = isEventActive(a);
+                const bActive = isEventActive(b);
+                if (aActive && !bActive) return -1;
+                if (!aActive && bActive) return 1;
+
+                const aTime = a.date_time ? new Date(a.date_time.replace(" ", "T")).getTime() : 0;
+                const bTime = b.date_time ? new Date(b.date_time.replace(" ", "T")).getTime() : 0;
+                if (aTime !== bTime) {
+                    return bTime - aTime;
+                }
+
+                return b.event_id - a.event_id;
+            });
+
+            setEvents(sortedList);
+            if (sortedList.length > 0) {
                 setFeaturedEvent(prev => {
-                    // Kalau featured masih ada di list, pertahankan. Kalau tidak, ambil index 0.
                     if (prev) {
-                        const stillExists = list.find(e => e.event_id === prev.event_id);
-                        return stillExists ?? list[0];
+                        const stillExists = sortedList.find(e => e.event_id === prev.event_id);
+                        return stillExists ?? sortedList[0];
                     }
-                    return list[0];
+                    return sortedList[0];
                 });
             } else {
                 setFeaturedEvent(null);
