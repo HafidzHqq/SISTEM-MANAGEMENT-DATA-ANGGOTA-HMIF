@@ -1043,6 +1043,13 @@ export default function DashboardAdminAnggota() {
                             </div>
                         )}
 
+                        <p className="text-[11px] text-slate-500 mb-2.5 md:hidden italic flex items-center gap-1 select-none">
+                            <svg className="h-3 w-3 animate-pulse text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                            Geser ke kanan untuk melihat kolom lainnya &rarr;
+                        </p>
+
                         <div className="overflow-hidden rounded-[10px] bg-white shadow-sm ring-1 ring-slate-200/70">
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[1120px] table-fixed text-sm">
@@ -1305,9 +1312,9 @@ export default function DashboardAdminAnggota() {
                                     </div>
 
                                     <div className="mt-6 border-t border-slate-200 pt-6">
-                                        <div className="grid gap-3 sm:grid-cols-[1fr_188px]">
+                                        <div className="grid gap-3 md:grid-cols-[1fr_188px]">
                                             <div className="rounded-[10px] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                                                Email tidak diubah dari panel ini: <span className="font-semibold text-slate-800">{detailMember.email}</span>
+                                                Email tidak diubah dari panel ini: <span className="font-semibold text-slate-800 break-all">{detailMember.email}</span>
                                             </div>
 
                                             <button
