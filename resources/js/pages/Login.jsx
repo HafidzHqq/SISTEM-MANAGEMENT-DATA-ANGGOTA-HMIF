@@ -41,15 +41,15 @@ export default function Login() {
         : "";
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden bg-[#07140a]">
+        <div className="relative min-h-screen flex items-center justify-center p-4 font-sans overflow-hidden bg-[#060c07]">
             {/* Background Image with Blur and Green Overlay */}
             <div className="absolute inset-0 z-0 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0e2d11] via-[#1c5e22] to-[#081f0a] opacity-80" />
                 <img
                     src="/images/bg_itera.jpg"
                     alt="Background ITERA"
-                    className="h-full w-full object-cover blur-[4px] opacity-[0.25] mix-blend-overlay scale-105"
+                    className="h-full w-full object-cover blur-[2px] opacity-[0.45] scale-105"
                 />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0e2d11]/85 via-[#081e0a]/92 to-[#040e05]/95" />
             </div>
 
             {isLoggedIn && (
