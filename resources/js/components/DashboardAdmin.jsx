@@ -150,10 +150,10 @@ export default function DashboardAdmin() {
     const [fotoUrl, setFotoUrl] = useState(null);
     const [fotoLoadFailed, setFotoLoadFailed] = useState(false);
     const [userDivision, setUserDivision] = useState("Admin");
-    const userName = localStorage.getItem("name") || "Admin User";
+    const userName = user?.name || localStorage.getItem("name") || "Admin User";
     const firstName = userName.split(" ")[0];
     const nim = user?.nim || localStorage.getItem("nim") || "-";
-    const isSuperAdmin = localStorage.getItem("role") === "super_admin";
+    const isSuperAdmin = user?.role === "super_admin";
     const displayFoto = fotoLoadFailed ? fotoProfile : (fotoUrl || fotoProfile);
 
     React.useEffect(() => {

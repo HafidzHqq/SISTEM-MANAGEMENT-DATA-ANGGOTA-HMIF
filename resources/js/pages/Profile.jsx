@@ -267,7 +267,7 @@ export default function Profile() {
         navigate("/login");
     };
 
-    const role = localStorage.getItem("role");
+    const role = profile?.role || localStorage.getItem("role");
     const navItems = [
         { 
             label: "Dashboard", 

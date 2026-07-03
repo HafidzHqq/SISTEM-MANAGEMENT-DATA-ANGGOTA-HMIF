@@ -374,7 +374,7 @@ export default function DashboardAdminAnggota() {
     const [user, setUser] = useState(null);
     const [fotoUrl, setFotoUrl] = useState(null);
     const [userDivision, setUserDivision] = useState("Admin");
-    const isSuperAdmin = localStorage.getItem("role") === "super_admin";
+    const isSuperAdmin = user?.role === "super_admin";
 
     const userName = user?.name || localStorage.getItem("name") || "Admin User";
     const nim = user?.nim || localStorage.getItem("nim") || "-";
