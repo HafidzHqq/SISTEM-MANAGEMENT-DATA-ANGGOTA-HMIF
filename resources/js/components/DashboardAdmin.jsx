@@ -507,7 +507,10 @@ export default function DashboardAdmin() {
                                             {trendItems.length > 0 ? (
                                                 <div className="flex h-full items-end justify-start gap-3 sm:gap-4 overflow-x-auto pb-1.5 scrollbar-thin">
                                                     {trendItems.map((item) => {
-                                                        const barHeight = Math.max(16, Math.round((Number(item.total_present || 0) / trendMax) * 100));
+                                                        const totalPresent = Number(item.total_present || 0);
+                                                        const barHeight = totalPresent > 0
+                                                            ? Math.max(6, Math.round((totalPresent / trendMax) * 100))
+                                                            : 0;
 
                                                         return (
                                                             <div key={item.event_id} className="flex h-full w-28 sm:w-32 shrink-0 flex-col items-center justify-end gap-2">
