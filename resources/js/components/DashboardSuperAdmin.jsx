@@ -19,6 +19,15 @@ export default function DashboardSuperAdmin() {
     const [auditLogsError, setAuditLogsError] = useState("");
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("auth_token");
@@ -262,16 +271,34 @@ export default function DashboardSuperAdmin() {
                     />
                 )}
 
-                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                    <div className="flex flex-col items-center px-5 pt-8">
-                        <img src={logoHmif} alt="HMIF" className="h-20 w-20 rounded-full border-4 border-white/15 object-contain shadow-lg shadow-black/20" />
-                        <p className="mt-3 text-center text-[1.05rem] font-extrabold leading-none tracking-[0.22em]">HMIF</p>
-                        <p className="mt-1 text-center text-[0.68rem] leading-snug text-white/65">
-                            Himpunan Mahasiswa Informatika ITERA
-                        </p>
+                <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col md:overflow-y-auto ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
+                    <div className="relative flex flex-col items-center pt-8 pb-6 px-4">
+                        <button
+                            type="button"
+                            onClick={toggleSidebarCollapse}
+                            className="hidden md:flex absolute top-5 -right-3.5 z-55 h-7 w-7 items-center justify-center rounded-full bg-[#1c5e22] border border-white/20 text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
+                            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                        >
+                            <svg className={`h-4 w-4 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <img
+                            src={logoHmif}
+                            alt="HMIF"
+                            className={`rounded-full object-contain border-4 border-white/10 shadow-lg shadow-black/10 transition-all duration-300 ${isSidebarCollapsed ? "h-11 w-11" : "h-20 w-20"}`}
+                        />
+                        {!isSidebarCollapsed && (
+                            <>
+                                <p className="mt-3 text-[1.1rem] font-extrabold tracking-[0.2em] text-white uppercase">HMIF</p>
+                                <p className="text-[0.68rem] font-medium leading-relaxed text-white/60 text-center mt-1 px-2">
+                                    Himpunan Mahasiswa Informatika ITERA
+                                </p>
+                            </>
+                        )}
                     </div>
-
-                    <nav className="mt-7 space-y-2 px-3">
+                    <hr className="border-white/10 mx-4" />
+                    <nav className="flex-1 px-3 pt-5 space-y-1.5">
                         {menus.map((menu) => (
                             <button
                                 key={menu.key}
@@ -279,15 +306,18 @@ export default function DashboardSuperAdmin() {
                                     setActiveMenu(menu.key);
                                     setIsSidebarOpen(false);
                                 }}
-                                className={`relative flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium transition ${
+                                title={isSidebarCollapsed ? menu.label : ""}
+                                className={`relative flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
+                                    isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
+                                } ${
                                     activeMenu === menu.key
-                                        ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                        : "text-white/65 hover:bg-white/10 hover:text-white"
+                                        ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
+                                        : "text-white/65 hover:bg-white/8 hover:text-white"
                                 }`}
                             >
                                 <MenuIcon type={menu.icon} />
-                                <span className="truncate">{menu.label}</span>
-                                {activeMenu === menu.key && (
+                                {!isSidebarCollapsed && <span className="truncate">{menu.label}</span>}
+                                {activeMenu === menu.key && !isSidebarCollapsed && (
                                     <span className="absolute right-2 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#9df76b]" />
                                 )}
                             </button>
@@ -299,10 +329,13 @@ export default function DashboardSuperAdmin() {
                                 navigate("/dashboard/admin-overview");
                                 setIsSidebarOpen(false);
                             }}
-                            className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                            title={isSidebarCollapsed ? "Admin Dashboard" : ""}
+                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
+                            }`}
                         >
                             <MenuIcon type="admin" />
-                            <span className="truncate">Admin Dashboard</span>
+                            {!isSidebarCollapsed && <span className="truncate">Admin Dashboard</span>}
                         </button>
                         <button
                             type="button"
@@ -310,25 +343,38 @@ export default function DashboardSuperAdmin() {
                                 navigate("/dashboard/member");
                                 setIsSidebarOpen(false);
                             }}
-                            className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                            title={isSidebarCollapsed ? "Absen Saya" : ""}
+                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
+                            }`}
                         >
                             <MenuIcon type="user" />
-                            <span className="truncate">Absen Saya</span>
+                            {!isSidebarCollapsed && <span className="truncate">Absen Saya</span>}
                         </button>
                     </nav>
 
-                    <div className="mt-auto p-4">
-                        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/10 p-3 backdrop-blur-sm">
-                            <img src={profilePhoto} alt="Super Admin" className="h-9 w-9 rounded-full object-cover" />
-                            <div className="min-w-0">
-                                <p className="truncate text-[12px] font-bold">Super Admin</p>
-                                <p className="truncate text-[10px] text-white/60">admin@hmif.com</p>
+                    <div className="p-4 mt-auto">
+                        {isSidebarCollapsed ? (
+                            <div className="flex flex-col items-center gap-3">
+                                <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                </button>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="rounded-2xl border border-white/8 bg-white/10 p-3.5 backdrop-blur-sm flex items-center gap-3 animate-fade-in">
+                                <img src={profilePhoto} alt="Super Admin" className="h-9 w-9 rounded-full object-cover border border-white/15" />
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-bold text-white">Super Admin</p>
+                                    <p className="truncate text-[0.72rem] text-white/55 font-medium">admin@hmif.com</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
-                <div className="min-w-0 flex-1 bg-transparent md:ml-[220px]">
+                <div className={`min-w-0 flex-1 bg-transparent transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                     <header className="flex h-[72px] items-center justify-between border-b border-white/70 bg-white/85 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-7">
                         <div className="flex items-center gap-3">
                             <button
@@ -743,25 +789,25 @@ function DashboardContent({ stats, logs, loading, error, onViewLogs }) {
         {
             label: "Total Members",
             value: summary.total_members ?? 0,
-            badge: "+5.2%",
+            badge: "",
             icon: "users",
         },
         {
             label: "Active Admins",
             value: summary.total_admins ?? 0,
-            badge: "Active",
+            badge: "",
             icon: "shield",
         },
         {
             label: "Total Events",
             value: summary.total_events ?? 0,
-            badge: "This Month",
+            badge: "",
             icon: "calendarCheck",
         },
         {
             label: "Attendance Rate",
             value: `${summary.attendance_rate ?? 0}%`,
-            badge: "High",
+            badge: "",
             icon: "barChart",
         },
     ];
@@ -775,9 +821,11 @@ function DashboardContent({ stats, logs, loading, error, onViewLogs }) {
                             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-green-100 text-[11px] font-black text-[#003f17]">
                                 <Icon name={card.icon} className="h-4 w-4" />
                             </div>
-                            <span className="rounded-full bg-[#9df76b] px-3 py-1 text-[10px] font-extrabold text-green-800">
-                                {card.badge}
-                            </span>
+                            {card.badge && (
+                                <span className="rounded-full bg-[#9df76b] px-3 py-1 text-[10px] font-extrabold text-green-800">
+                                    {card.badge}
+                                </span>
+                            )}
                         </div>
 
                         <p className="mt-3 text-[11px] font-extrabold tracking-wide text-slate-600">
@@ -1170,6 +1218,13 @@ function AdminManagementContent({
                     </div>
                 </div>
 
+                <p className="text-[11px] text-slate-500 mb-2 md:hidden italic flex items-center gap-1 select-none">
+                    <svg className="h-3 w-3 animate-pulse text-[#1f5e22]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                    Geser ke kanan untuk melihat kolom lainnya &rarr;
+                </p>
+
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left text-[12px]">
                         <thead className="bg-slate-50 text-[11px] uppercase tracking-[0.16em] text-slate-500">
@@ -1329,6 +1384,13 @@ function AuditLogsContent({ logs, loading, error }) {
                         className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none"
                     />
                 </div>
+
+                <p className="text-[11px] text-slate-500 mb-2 md:hidden italic flex items-center gap-1 select-none px-4 mt-2">
+                    <svg className="h-3 w-3 animate-pulse text-[#1f5e22]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                    Geser ke kanan untuk melihat kolom lainnya &rarr;
+                </p>
 
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] text-left text-[12px]">

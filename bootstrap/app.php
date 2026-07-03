@@ -21,6 +21,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })->create();
 
 // Bind public_html path for shared hosting compatibility
-$app->usePublicPath(realpath($app->basePath() . '/../public_html') ?: ($app->basePath() . '/../public_html'));
+if (file_exists($app->basePath() . '/../public_html')) {
+    $app->usePublicPath(realpath($app->basePath() . '/../public_html'));
+}
 
 return $app;

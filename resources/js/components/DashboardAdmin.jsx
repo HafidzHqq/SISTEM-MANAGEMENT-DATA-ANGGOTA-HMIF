@@ -131,6 +131,15 @@ const formatShortDate = (dateValue) => {
 export default function DashboardAdmin() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
     const location = useLocation();
     const pathname = location.pathname;
     const [trendRange, setTrendRange] = React.useState("30D");
@@ -255,19 +264,34 @@ export default function DashboardAdmin() {
                     />
                 )}
 
-                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                    <div className="flex flex-col items-center pt-8 pb-6 px-4">
+                <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col md:overflow-y-auto ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
+                    <div className="relative flex flex-col items-center pt-8 pb-6 px-4">
+                        <button
+                            type="button"
+                            onClick={toggleSidebarCollapse}
+                            className="hidden md:flex absolute top-5 -right-3.5 z-55 h-7 w-7 items-center justify-center rounded-full bg-[#1c5e22] border border-white/20 text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
+                            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                        >
+                            <svg className={`h-4 w-4 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
                         <img
                             src={hmifLogo}
                             alt="HMIF"
-                            className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/25"
+                            className={`rounded-full object-contain border-4 border-white/10 shadow-lg shadow-black/10 transition-all duration-300 ${isSidebarCollapsed ? "h-11 w-11" : "h-20 w-20"}`}
                         />
-                        <p className="mt-3 text-[1.05rem] font-extrabold tracking-[0.22em]">HMIF</p>
-                        <p className="text-[0.68rem] leading-snug text-white/65 text-center">
-                            Himpunan Mahasiswa Informatika<br />ITERA
-                        </p>
+                        {!isSidebarCollapsed && (
+                            <>
+                                <p className="mt-3 text-[1.1rem] font-extrabold tracking-[0.2em] text-white uppercase">HMIF</p>
+                                <p className="text-[0.68rem] font-medium leading-relaxed text-white/60 text-center mt-1 px-2">
+                                    Himpunan Mahasiswa Informatika ITERA
+                                </p>
+                            </>
+                        )}
                     </div>
-                    <nav className="flex-1 px-3 pt-4 space-y-2">
+                    <hr className="border-white/10 mx-4" />
+                    <nav className="flex-1 px-3 pt-5 space-y-1.5">
                         {NAV_ITEMS.map((item) => {
                             const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
                             return (
@@ -275,28 +299,34 @@ export default function DashboardAdmin() {
                                     key={item.label}
                                     to={item.to}
                                     onClick={() => setIsSidebarOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
+                                    title={isSidebarCollapsed ? item.label : ""}
+                                    className={`flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
+                                        isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
+                                    } ${
                                         isActive
-                                            ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                            : "text-white/65 hover:bg-white/10 hover:text-white"
+                                            ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
+                                            : "text-white/65 hover:bg-white/8 hover:text-white"
                                     }`}
                                 >
-                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                                    {item.label}
+                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90" />
+                                    {!isSidebarCollapsed && <span>{item.label}</span>}
                                 </Link>
                             );
                         })}
                         <Link
                             to="/dashboard/member"
                             onClick={() => setIsSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
+                            title={isSidebarCollapsed ? "Absen Saya" : ""}
+                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
+                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
+                            } ${
                                 pathname === "/dashboard/member"
-                                    ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                    : "text-white/65 hover:bg-white/10 hover:text-white"
+                                    ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
+                                    : "text-white/65 hover:bg-white/8 hover:text-white"
                             }`}
                         >
-                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                            Absen Saya
+                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90" />
+                            {!isSidebarCollapsed && <span>Absen Saya</span>}
                         </Link>
                         {isSuperAdmin && (
                             <button
@@ -305,33 +335,46 @@ export default function DashboardAdmin() {
                                     navigate("/dashboard");
                                     setIsSidebarOpen(false);
                                 }}
-                                className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
+                                title={isSidebarCollapsed ? "Super Admin Dashboard" : ""}
+                                className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                    isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
+                                }`}
                             >
                                 <img
                                     src={iconDashboard}
                                     alt="Super Admin Dashboard"
-                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
+                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90"
                                 />
-                                <span className="truncate">Super Admin Dashboard</span>
+                                {!isSidebarCollapsed && <span className="truncate">Super Admin Dashboard</span>}
                             </button>
                         )}
                     </nav>
-                    <div className="p-4">
-                        <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-sm">
-                            <p className="truncate text-sm font-semibold text-white">{userName}</p>
-                            <p className="mt-0.5 text-[0.7rem] text-white/55">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </div>
+                    <div className="p-4 mt-auto">
+                        {isSidebarCollapsed ? (
+                            <div className="flex flex-col items-center gap-3">
+                                <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
+                                <p className="truncate text-[0.9rem] font-bold text-white">{userName}</p>
+                                <p className="mt-0.5 truncate text-[0.72rem] text-white/55 font-medium">{nim}</p>
+                                <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
+                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
+                                    </svg>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </aside>
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
+                <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white/90 px-4 py-3.5 backdrop-blur md:hidden">
                         <div className="flex items-center gap-3">
                             <button
@@ -570,7 +613,7 @@ export default function DashboardAdmin() {
                     </div>
                 </div>
 
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#1c5e22] text-white">
                 <div className="grid grid-cols-4">
                     {NAV_ITEMS.map((item) => {
                         const isActive = item.activePaths ? item.activePaths.includes(pathname) : pathname === item.to;
@@ -578,9 +621,9 @@ export default function DashboardAdmin() {
                             <Link
                                 key={item.label}
                                 to={item.to}
-                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "text-white bg-white/10" : "text-slate-500 hover:text-white"}`}
+                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "text-white bg-white/10" : "text-white/60 hover:text-white"}`}
                             >
-                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain " />
+                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
                                 {item.label}
                             </Link>
                         );
