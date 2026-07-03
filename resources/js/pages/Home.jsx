@@ -101,6 +101,64 @@ function SocialChip({ label, href }) {
     );
 }
 
+function MobileHamburgerMenu() {
+    const [isOpen, setIsOpen] = useState(false);
+    const name = localStorage.getItem("name") || "User";
+
+    const handleLogout = () => {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("name");
+        localStorage.removeItem("role");
+        window.location.href = "/login";
+    };
+
+    return (
+        <div className="relative md:hidden">
+            <button
+                type="button"
+                onClick={() => setIsOpen((prev) => !prev)}
+                className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 focus:outline-none transition active:scale-95 border border-slate-200"
+                aria-label="Toggle menu"
+            >
+                {isOpen ? (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                ) : (
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                )}
+            </button>
+
+            {isOpen && (
+                <div className="absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/30 animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                        <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-700">Akun Aktif</p>
+                        <p className="text-sm font-extrabold text-slate-800 truncate mt-0.5">{name}</p>
+                    </div>
+                    <div className="p-2 space-y-1">
+                        <Link
+                            to="/dashboard"
+                            className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            <span>Dashboard</span>
+                        </Link>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="flex w-full items-center gap-2.5 rounded-xl bg-red-50 hover:bg-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function Home() {
     const [activeFaq, setActiveFaq] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -138,7 +196,7 @@ export default function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f7f9ff] text-slate-900 pb-16 md:pb-0">
+        <div className="min-h-screen bg-[#f7f9ff] text-slate-900 pb-0">
             <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
                     <Link to="/" className="flex items-center gap-3">
@@ -161,7 +219,12 @@ export default function Home() {
                     </nav>
 
                     {isLoggedIn ? (
-                        <UserMenu />
+                        <>
+                            <div className="hidden md:block">
+                                <UserMenu />
+                            </div>
+                            <MobileHamburgerMenu />
+                        </>
                     ) : (
                         <Link
                             to="/login"
@@ -374,69 +437,6 @@ export default function Home() {
                     </div>
                 </section>
             </main>
-
-            {/* MOBILE BOTTOM NAV */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe">
-                <button 
-                    onClick={() => scrollToSection("guide")} 
-                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
-                >
-                    {activeSection === "home" && (
-                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                    )}
-                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "home" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "home" ? "text-white font-extrabold" : "text-white/60"}`}>
-                        Home
-                    </span>
-                </button>
-
-                <button 
-                    onClick={() => scrollToSection("steps")} 
-                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
-                >
-                    {activeSection === "guide" && (
-                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                    )}
-                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "guide" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "guide" ? "text-white font-extrabold" : "text-white/60"}`}>
-                        Guide
-                    </span>
-                </button>
-
-                <button 
-                    onClick={() => scrollToSection("faq")} 
-                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
-                >
-                    {activeSection === "faq" && (
-                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                    )}
-                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "faq" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "faq" ? "text-white font-extrabold" : "text-white/60"}`}>
-                        FAQ
-                    </span>
-                </button>
-
-                <button 
-                    onClick={() => scrollToSection("dashboard")} 
-                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
-                >
-                    {activeSection === "contact" && (
-                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                    )}
-                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "contact" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "contact" ? "text-white font-extrabold" : "text-white/60"}`}>
-                        Contact
-                    </span>
-                </button>
-            </nav>
         </div>
     );
 }

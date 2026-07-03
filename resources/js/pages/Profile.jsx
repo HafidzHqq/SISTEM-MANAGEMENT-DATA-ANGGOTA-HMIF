@@ -272,10 +272,6 @@ export default function Profile() {
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
-            ctx.beginPath();
-            ctx.arc(150, 150, 150, 0, Math.PI * 2);
-            ctx.clip();
-
             const scale = 1.5; // ratio of output canvas (300) to crop frame (200)
             const canvasImageWidth = imageDimensions.width * zoom * scale;
             const canvasImageHeight = imageDimensions.height * zoom * scale;
@@ -760,7 +756,7 @@ export default function Profile() {
                                 }}
                             />
                             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                                <div className="absolute w-[200px] h-[200px] rounded-full border-2 border-emerald-500 shadow-[0_0_0_9999px_rgba(15,23,42,0.65)]" />
+                                <div className="absolute w-[200px] h-[200px] rounded-2xl border-2 border-emerald-500 shadow-[0_0_0_9999px_rgba(15,23,42,0.65)]" />
                             </div>
                         </div>
 
