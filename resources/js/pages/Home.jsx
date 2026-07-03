@@ -162,7 +162,8 @@ export default function Home() {
                     className="relative overflow-hidden px-4 min-h-[calc(100vh-73px)] flex items-center justify-center sm:px-6 lg:px-8"
                 >
                     {/* Background Image with Blur and Green Overlay */}
-                    <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#0e2d11] via-[#1c5e22] to-[#081f0a] overflow-hidden">
+                    <div className="absolute inset-0 z-0 bg-[#07140a] overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#0e2d11] via-[#1c5e22] to-[#081f0a] opacity-80" />
                         <img
                             src="/images/bg_itera.jpg"
                             alt="Background ITERA"
