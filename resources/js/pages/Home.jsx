@@ -265,9 +265,9 @@ export default function Home() {
                             <span>Sistem Management Data</span>
                         </div>
  
-                        <h1 className="mt-8 max-w-4xl text-3xl font-serif font-bold leading-[1.2] tracking-normal text-white sm:text-5xl lg:text-[3.5rem]">
-                            Sistem <span className="text-[#F4C44C]">Management Data Anggota</span>
-                            <span className="block mt-2">HMIF</span>
+                        <h1 className="mt-8 max-w-4xl text-3xl font-serif font-bold leading-[1.25] tracking-normal text-white sm:text-5xl lg:text-[3.8rem]">
+                            Sistem Management
+                            <span className="block mt-2.5 text-[#F4C44C]">Data Anggota HMIF</span>
                         </h1>
  
                         <p className="mt-6 max-w-2xl text-[1.05rem] sm:text-lg leading-relaxed text-emerald-100/75">
