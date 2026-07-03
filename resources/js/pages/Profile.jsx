@@ -1,10 +1,12 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
+import NotificationBell from "../components/NotificationBell";
 
 // HAPUS JABATAN_LIST lama
 
@@ -59,6 +61,33 @@ export default function Profile() {
     const [uploadingFoto, setUploadingFoto] = React.useState(false);
     const [fotoFile, setFotoFile] = React.useState(null);
     const [fotoPreview, setFotoPreview] = React.useState(null);
+
+    // Crop Image States
+    const [cropModalOpen, setCropModalOpen] = React.useState(false);
+    const [cropImageSrc, setCropImageSrc] = React.useState(null);
+    const [zoom, setZoom] = React.useState(1.0);
+    const [offset, setOffset] = React.useState({ x: 0, y: 0 });
+    const [imageDimensions, setImageDimensions] = React.useState({ width: 0, height: 0 });
+    const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!cropImageSrc) return;
+        const img = new Image();
+        img.onload = () => {
+            const aspect = img.naturalWidth / img.naturalHeight;
+            let width, height;
+            if (aspect > 1) {
+                height = 288;
+                width = 288 * aspect;
+            } else {
+                width = 288;
+                height = 288 / aspect;
+            }
+            setImageDimensions({ width, height });
+        };
+        img.src = cropImageSrc;
+    }, [cropImageSrc]);
 
     const showToast = () => {
         setToast(true);
@@ -190,8 +219,83 @@ export default function Profile() {
     const handleFotoChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        setFotoFile(file);
-        setFotoPreview(URL.createObjectURL(file));
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setCropImageSrc(reader.result);
+            setZoom(1.0);
+            setOffset({ x: 0, y: 0 });
+            setCropModalOpen(true);
+        };
+        reader.readAsDataURL(file);
+        e.target.value = "";
+    };
+
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+        const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+        setDragStart({
+            x: clientX - offset.x,
+            y: clientY - offset.y
+        });
+    };
+
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+        const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+        setOffset({
+            x: clientX - dragStart.x,
+            y: clientY - dragStart.y
+        });
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleCropCancel = () => {
+        setCropModalOpen(false);
+        setCropImageSrc(null);
+    };
+
+    const handleCropSave = () => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext("2d");
+
+            ctx.clearRect(0, 0, 300, 300);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
+            ctx.beginPath();
+            ctx.arc(150, 150, 150, 0, Math.PI * 2);
+            ctx.clip();
+
+            const scale = 1.5; // ratio of output canvas (300) to crop frame (200)
+            const canvasImageWidth = imageDimensions.width * zoom * scale;
+            const canvasImageHeight = imageDimensions.height * zoom * scale;
+            const canvasImageCenterX = 150 + offset.x * scale;
+            const canvasImageCenterY = 150 + offset.y * scale;
+
+            const drawX = canvasImageCenterX - canvasImageWidth / 2;
+            const drawY = canvasImageCenterY - canvasImageHeight / 2;
+
+            ctx.drawImage(img, drawX, drawY, canvasImageWidth, canvasImageHeight);
+
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const file = new File([blob], "profile_cropped.png", { type: "image/png" });
+                setFotoFile(file);
+                setFotoPreview(URL.createObjectURL(file));
+                setCropModalOpen(false);
+            }, "image/png");
+        };
+        img.src = cropImageSrc;
     };
 
     const handleSave = async () => {
@@ -306,76 +410,15 @@ export default function Profile() {
                 />
             )}
 
-            <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col md:overflow-y-auto ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
-                <div className="relative flex flex-col items-center pt-8 pb-6 px-4">
-                    <button
-                        type="button"
-                        onClick={toggleSidebarCollapse}
-                        className="hidden md:flex absolute top-5 -right-3.5 z-55 h-7 w-7 items-center justify-center rounded-full bg-[#1c5e22] border border-white/20 text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
-                        title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-                    >
-                        <svg className={`h-4 w-4 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <img
-                        src={hmifLogo}
-                        alt="HMIF"
-                        className={`rounded-full object-contain border-4 border-white/10 shadow-lg shadow-black/10 transition-all duration-300 ${isSidebarCollapsed ? "h-11 w-11" : "h-20 w-20"}`}
-                    />
-                    {!isSidebarCollapsed && (
-                        <>
-                            <p className="mt-3 text-[1.1rem] font-extrabold tracking-[0.2em] text-white uppercase">HMIF</p>
-                            <p className="text-[0.68rem] font-medium leading-relaxed text-white/60 text-center mt-1 px-2">
-                                Himpunan Mahasiswa Informatika ITERA
-                            </p>
-                        </>
-                    )}
-                </div>
-                <hr className="border-white/10 mx-4" />
-                <nav className="flex-1 px-3 pt-5 space-y-1.5">
-                    {navItems.map((item) => {
-                        const isActive = item.to === "/dashboard/profile";
-                        return (
-                            <Link 
-                                key={item.label} 
-                                to={item.to}
-                                onClick={() => setIsSidebarOpen(false)}
-                                title={isSidebarCollapsed ? item.label : ""}
-                                className={`flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
-                                    isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                                } ${isActive ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8" : "text-white/65 hover:bg-white/8 hover:text-white"}`}
-                            >
-                                <img src={item.icon} alt="" className="h-5 w-5 object-contain brightness-0 invert opacity-90" />
-                                {!isSidebarCollapsed && <span>{item.label}</span>}
-                            </Link>
-                        );
-                    })}
-                </nav>
-                <div className="p-4 mt-auto">
-                    {isSidebarCollapsed ? (
-                        <div className="flex flex-col items-center gap-3">
-                            <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
-                            <p className="truncate text-[0.9rem] font-bold text-white">{name}</p>
-                            <p className="mt-0.5 truncate text-[0.72rem] text-white/55 font-medium">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </aside>
+            <Sidebar
+                role={role}
+                userName={name}
+                nim={nim}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                isSidebarCollapsed={isSidebarCollapsed}
+                toggleSidebarCollapse={toggleSidebarCollapse}
+            />
 
             {/* ─── MAIN AREA ─── */}
             <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
@@ -409,9 +452,7 @@ export default function Profile() {
                     <div className="flex items-center gap-4">
                         <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{form.departemen || "-"}</span>
                         <div className="h-5 w-px bg-gray-200" />
-                        <button className="text-gray-400 hover:text-gray-600 transition">
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                        </button>
+                        <NotificationBell />
                         <img src={displayFoto} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" onError={() => setFotoLoadFailed(true)} />
                     </div>
                 </header>
@@ -665,17 +706,99 @@ export default function Profile() {
             </div>
 
             {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MOBILE BOTTOM NAV Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1c5e22] flex z-50">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe">
                 {navItems.map((item) => {
                     const isActive = item.to === "/dashboard/profile";
                     return (
-                        <Link key={item.label} to={item.to} className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 ${isActive ? "bg-white/15" : ""}`}>
-                            <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-[10]" />
-                            <span className="text-[0.58rem] font-bold tracking-[0.12em] text-white/80 uppercase">{item.label}</span>
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
+                                {item.label}
+                            </span>
                         </Link>
                     );
                 })}
             </nav>
+
+            {cropModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="relative w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-6 shadow-2xl flex flex-col items-center">
+                        <h3 className="text-lg font-bold text-white mb-4">Sesuaikan Foto Profil</h3>
+                        
+                        {/* Cropping Window */}
+                        <div 
+                            className="relative w-72 h-72 overflow-hidden bg-slate-950 rounded-2xl cursor-move touch-none border border-slate-800"
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            onTouchStart={handleMouseDown}
+                            onTouchMove={handleMouseMove}
+                            onTouchEnd={handleMouseUp}
+                        >
+                            <img 
+                                src={cropImageSrc} 
+                                alt="Crop source"
+                                className="absolute max-w-none origin-center pointer-events-none select-none"
+                                style={{
+                                    width: `${imageDimensions.width}px`,
+                                    height: `${imageDimensions.height}px`,
+                                    transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px)) scale(${zoom})`,
+                                    top: '50%',
+                                    left: '50%',
+                                }}
+                            />
+                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                <div className="absolute w-[200px] h-[200px] rounded-full border-2 border-emerald-500 shadow-[0_0_0_9999px_rgba(15,23,42,0.65)]" />
+                            </div>
+                        </div>
+
+                        {/* Zoom Slider */}
+                        <div className="w-full mt-6 space-y-2">
+                            <div className="flex justify-between text-xs text-slate-400 font-semibold">
+                                <span>Perkecil</span>
+                                <span>Perbesar ({zoom.toFixed(1)}x)</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="1" 
+                                max="3" 
+                                step="0.05"
+                                value={zoom} 
+                                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                                className="w-full accent-emerald-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="w-full mt-6 flex gap-3">
+                            <button 
+                                onClick={handleCropCancel}
+                                className="flex-1 rounded-xl bg-slate-800 text-slate-300 font-bold text-sm py-3 transition hover:bg-slate-700/80 active:scale-95"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                onClick={handleCropSave}
+                                className="flex-1 rounded-xl bg-emerald-500 text-emerald-950 font-bold text-sm py-3 shadow-[0_8px_20px_rgba(16,185,129,0.3)] transition hover:bg-emerald-400 active:scale-95"
+                            >
+                                Gunakan Foto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

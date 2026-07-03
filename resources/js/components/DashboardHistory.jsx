@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
@@ -14,7 +15,7 @@ import iconTidakHadir from "../assets/icon-tidakhadir.png";
 import iconArchive from "../assets/icon-archive.png";
 import iconPrint from "../assets/icon-print.png";
 import iconRingkasan from "../assets/icon-ringkasan.png";
-
+import NotificationBell from "./NotificationBell";
 const ITEMS_PER_PAGE = 3;
 const DEFAULT_LOCATION = "Lokasi belum diatur";
 
@@ -103,6 +104,15 @@ function DetailIcon({ type = "calendar" }) {
 export default function DashboardHistory() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
     const [filter, setFilter] = useState("semua");
     const [search, setSearch] = useState("");
     const [user, setUser] = useState(null);
@@ -400,54 +410,15 @@ export default function DashboardHistory() {
     };
 
     const renderSidebar = () => (
-        <>
-            {isSidebarOpen && (
-                <div 
-                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
-                    onClick={() => setIsSidebarOpen(false)}
-                />
-            )}
-            <aside className={`fixed inset-y-0 left-0 top-0 bottom-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                <div className="flex flex-col items-center px-4 pb-5 pt-8">
-                    <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full border-4 border-white/20 object-contain" />
-                    <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
-                    <p className="mt-0.5 text-center text-[0.62rem] leading-snug text-white/55">
-                        Himpunan Mahasiswa Informatika ITERA
-                    </p>
-                </div>
-                <hr className="mx-4 border-white/10" />
-                <nav className="flex-1 space-y-1 px-3 pt-4">
-                    {navItems.map((item) => {
-                        const isActive = item.to === "/dashboard/history";
-                        return (
-                            <Link
-                                key={item.label}
-                                to={item.to}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center gap-3 rounded-xl px-4 py-[10px] text-sm font-medium transition ${
-                                    isActive ? "bg-white/15 text-white" : "text-white/65 hover:bg-white/10 hover:text-white"
-                                }`}
-                            >
-                                <img src={item.icon} alt="" className="h-[18px] w-[18px] object-contain opacity-90 brightness-[10]" />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-                <div className="p-4">
-                    <div className="rounded-2xl bg-white/10 px-4 py-3">
-                        <p className="truncate text-sm font-semibold text-white">{name}</p>
-                        <p className="mt-0.5 text-[0.7rem] text-white/55">{nim}</p>
-                        <button
-                            onClick={handleLogout}
-                            className="mt-3 flex items-center gap-1 text-[0.78rem] text-red-300 transition hover:text-red-200"
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </aside>
-        </>
+        <Sidebar
+            role="anggota"
+            userName={name}
+            nim={nim}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            isSidebarCollapsed={isSidebarCollapsed}
+            toggleSidebarCollapse={toggleSidebarCollapse}
+        />
     );
 
     const renderTopbar = (title, showBack = false) => (
@@ -468,16 +439,7 @@ export default function DashboardHistory() {
             <div className="flex items-center gap-4">
                 <span className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-gray-500">{division}</span>
                 <div className="h-5 w-px bg-gray-200" />
-                <button className="text-gray-400 transition hover:text-gray-600">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2c0 .5-.2 1-.6 1.4L4 17h11Zm0 0v1a3 3 0 1 1-6 0v-1"
-                        />
-                    </svg>
-                </button>
+                <NotificationBell />
                 <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover" />
             </div>
         </header>
@@ -487,7 +449,7 @@ export default function DashboardHistory() {
         return (
             <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
                 {renderSidebar()}
-                <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
+                <div className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                     <header className="flex items-center justify-between bg-white px-4 py-3 shadow-sm md:hidden">
                         <div className="flex items-center gap-2">
                             <button
@@ -649,7 +611,7 @@ export default function DashboardHistory() {
     return (
         <div className="flex min-h-screen bg-[#f0f2ee] font-sans">
             {renderSidebar()}
-            <div className="flex min-h-screen flex-1 flex-col md:ml-[220px]">
+            <div className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                 <header className="sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm md:hidden">
                     <div className="flex items-center gap-3">
                         <button
@@ -913,13 +875,26 @@ export default function DashboardHistory() {
                 </main>
             </div>
 
-            <nav className="fixed bottom-0 left-0 right-0 z-50 flex bg-[#1c5e22] md:hidden">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
                 {navItems.map((item) => {
                     const isActive = item.to === "/dashboard/history";
                     return (
-                        <Link key={item.label} to={item.to} className={`flex flex-1 flex-col items-center justify-center gap-1 py-3 ${isActive ? "bg-white/15" : ""}`}>
-                            <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-[10]" />
-                            <span className="text-[0.58rem] font-bold uppercase tracking-[0.12em] text-white/80">{item.label}</span>
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
+                                {item.label}
+                            </span>
                         </Link>
                     );
                 })}

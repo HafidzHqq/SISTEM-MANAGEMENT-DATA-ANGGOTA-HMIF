@@ -158,6 +158,11 @@ class AttendanceController extends Controller
                 'status' => 'present',
                 'remarks' => $remarks,
             ]);
+            $actorId = request()->user()?->user_id;
+            if ($actorId) {
+                $details = "Melakukan check-in manual untuk {$user->name} pada acara {$event->title}";
+                \App\Models\AuditLog::catat($actorId, 'manual_checkin', 'attendance', $attendance->attendance_id, $details);
+            }
         } catch (\Illuminate\Database\QueryException $e) {
             return response()->json([
                 'message' => $user->name . ' sudah tercatat hadir pada acara ini'

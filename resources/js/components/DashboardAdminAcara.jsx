@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
+
+import NotificationBell from "./NotificationBell";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
@@ -29,8 +32,25 @@ const generateQrToken = (event) => {
 
 // Helper: cek apakah event masih aktif
 const isEventActive = (event) => {
-    const end = event.attendance_window_end ? new Date(event.attendance_window_end) : null;
+    const end = event.attendance_window_end ? new Date(event.attendance_window_end.replace(" ", "T")) : null;
     return end && end >= new Date();
+};
+
+const getEventStatus = (event) => {
+    if (!event) return "berakhir";
+    const now = new Date();
+    const startStr = event.attendance_window_start ? event.attendance_window_start.replace(" ", "T") : null;
+    const endStr = event.attendance_window_end ? event.attendance_window_end.replace(" ", "T") : null;
+    const start = startStr ? new Date(startStr) : null;
+    const end = endStr ? new Date(endStr) : null;
+
+    if (start && now < start) {
+        return "segera_hadir";
+    } else if (end && now > end) {
+        return "berakhir";
+    } else {
+        return "aktif";
+    }
 };
 
 const normalizeDateInput = (value) => {
@@ -249,32 +269,244 @@ function StatBox({ label, value }) {
     );
 }
 
-// Badge status: Aktif (hijau) atau Berakhir (merah)
+// Badge status: Segera Hadir (kuning), Aktif (hijau), atau Berakhir (merah)
 function StatusBadge({ event }) {
-    const active = isEventActive(event);
+    const status = getEventStatus(event);
+    if (status === "segera_hadir") {
+        return (
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] bg-amber-100 text-amber-700">
+                Segera Hadir
+            </span>
+        );
+    }
+    if (status === "aktif") {
+        return (
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] bg-[#def6d7] text-[#5baa19]">
+                Aktif
+            </span>
+        );
+    }
     return (
-        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] ${
-            active
-                ? "bg-[#def6d7] text-[#5baa19]"
-                : "bg-red-100 text-red-600"
-        }`}>
-            {active ? "Aktif" : "Berakhir"}
+        <span className="inline-flex items-center rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] bg-red-100 text-red-600">
+            Berakhir
         </span>
     );
 }
 
 // Modal Detail
-function DetailModal({ event, onClose, onDelete, deletingId }) {
+function DetailModal({ event, onClose, onDelete, deletingId, onUpdateSuccess }) {
     if (!event) return null;
-    const formatDate = (dt) => dt ? new Date(dt).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "-";
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({
+        title: "",
+        location: "",
+        description: "",
+        date: "",
+        time: "",
+        window_start: "",
+        window_end: "",
+    });
+    const [openPicker, setOpenPicker] = useState(null);
+    const [editError, setEditError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (event) {
+            const dtStr = event.date_time ? event.date_time.replace(" ", "T") : "";
+            const startStr = event.attendance_window_start ? event.attendance_window_start.replace(" ", "T") : "";
+            const endStr = event.attendance_window_end ? event.attendance_window_end.replace(" ", "T") : "";
+
+            const datePart = dtStr.substring(0, 10);
+            const timePart = dtStr.substring(11, 16);
+            const startPart = startStr.substring(11, 16);
+            const endPart = endStr.substring(11, 16);
+
+            setEditForm({
+                title: event.title || "",
+                location: event.location || "",
+                description: event.description || "",
+                date: datePart || "",
+                time: timePart || "",
+                window_start: startPart || "",
+                window_end: endPart || "",
+            });
+            setEditError("");
+            setIsEditing(false);
+        }
+    }, [event]);
+
+    const handleUpdate = async () => {
+        if (!editForm.title.trim()) { setEditError("Judul acara tidak boleh kosong"); return; }
+        if (!editForm.date) { setEditError("Tanggal wajib diisi"); return; }
+        if (!editForm.time) { setEditError("Jam acara wajib diisi"); return; }
+        if (!editForm.window_start || !editForm.window_end) { setEditError("Jam presensi wajib diisi"); return; }
+
+        const eventDate = normalizeDateInput(editForm.date);
+        const eventTime = normalizeTimeInput(editForm.time);
+        const windowStart = normalizeTimeInput(editForm.window_start);
+        const windowEnd = normalizeTimeInput(editForm.window_end);
+
+        if (!isValidDateInput(eventDate)) {
+            setEditError("Pilih tanggal dari kalender");
+            return;
+        }
+
+        if (!isValidTimeInput(eventTime) || !isValidTimeInput(windowStart) || !isValidTimeInput(windowEnd)) {
+            setEditError("Pilih jam acara dan window presensi");
+            return;
+        }
+
+        setIsSubmitting(true);
+        setEditError("");
+
+        const date_time = `${eventDate}T${eventTime}:00`;
+        const attendance_window_start = `${eventDate}T${windowStart}:00`;
+        const attendance_window_end = `${eventDate}T${windowEnd}:00`;
+
+        try {
+            const res = await fetch(`/api/events/${event.event_id}`, {
+                method: "PUT",
+                headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: editForm.title.trim(),
+                    description: editForm.description.trim(),
+                    location: editForm.location.trim(),
+                    date_time,
+                    attendance_window_start,
+                    attendance_window_end,
+                }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Gagal mengubah acara");
+
+            setIsEditing(false);
+            if (onUpdateSuccess) {
+                await onUpdateSuccess();
+            }
+            onClose();
+        } catch (err) {
+            setEditError(err.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const formatDate = (dt) => dt ? new Date(dt.toLocaleString().replace(" ", "T")).toLocaleString("id-ID", { dateStyle: "long", timeStyle: "short" }) : "-";
     const windowStart = event.attendance_window_start
-        ? new Date(event.attendance_window_start).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(event.attendance_window_start.replace(" ", "T")).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
         : "-";
     const windowEnd = event.attendance_window_end
-        ? new Date(event.attendance_window_end).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(event.attendance_window_end.replace(" ", "T")).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
         : "-";
 
     const isDeleting = deletingId === event.event_id;
+
+    if (isEditing) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+                <div className="w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[18px] bg-white p-6 shadow-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-[1.25rem] font-extrabold text-slate-900">Ubah Acara</h2>
+                        <button onClick={() => setIsEditing(false)} className="text-slate-450 hover:text-slate-700">
+                            <svg className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Judul Acara <span className="text-red-500">*</span></label>
+                            <input 
+                                type="text" 
+                                value={editForm.title} 
+                                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                                placeholder="Contoh: Rapat Koordinasi Anggota"
+                                className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Lokasi</label>
+                            <input 
+                                type="text" 
+                                value={editForm.location} 
+                                onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                                placeholder="Contoh: Auditorium Utama Lt. 3"
+                                className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100" 
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Deskripsi</label>
+                            <textarea 
+                                value={editForm.description} 
+                                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                rows={2} 
+                                placeholder="Deskripsi singkat..."
+                                className="w-full rounded-[10px] border border-slate-300 px-4 py-2.5 text-[0.95rem] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 resize-none" 
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                                <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Tanggal <span className="text-red-500">*</span></label>
+                                <DatePickerField
+                                    value={editForm.date}
+                                    onChange={(value) => setEditForm(prev => ({ ...prev, date: value }))}
+                                    isOpen={openPicker === "date"}
+                                    onOpenChange={(isOpen) => setOpenPicker(isOpen ? "date" : null)}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Jam Acara <span className="text-red-500">*</span></label>
+                                <TimePickerField
+                                    value={editForm.time}
+                                    onChange={(value) => setEditForm(prev => ({ ...prev, time: value }))}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-[0.82rem] font-semibold text-slate-700 mb-1.5">Window Presensi <span className="text-red-500">*</span></label>
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <TimePickerField
+                                    value={editForm.window_start}
+                                    onChange={(value) => setEditForm(prev => ({ ...prev, window_start: value }))}
+                                />
+                                <TimePickerField
+                                    value={editForm.window_end}
+                                    onChange={(value) => setEditForm(prev => ({ ...prev, window_end: value }))}
+                                />
+                            </div>
+                        </div>
+
+                        {editError && (
+                            <div className="rounded-[10px] bg-red-50 border border-red-200 px-4 py-3">
+                                <p className="text-[0.9rem] text-red-700">{editError}</p>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsEditing(false)}
+                                disabled={isSubmitting}
+                                className="flex-1 rounded-[10px] border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            >
+                                Batal
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={handleUpdate} 
+                                disabled={isSubmitting}
+                                className="flex-1 rounded-[10px] bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            >
+                                {isSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
@@ -312,7 +544,15 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
                     Tutup
                 </button>
 
-                {/* Tombol Hapus ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â di bawah Tutup */}
+                {/* Tombol Ubah Acara */}
+                <button
+                    onClick={() => setIsEditing(true)}
+                    className="mt-2 w-full rounded-[10px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-600 hover:bg-emerald-100 transition"
+                >
+                    Ubah Acara
+                </button>
+
+                {/* Tombol Hapus */}
                 <button
                     onClick={() => onDelete(event.event_id, event.title)}
                     disabled={isDeleting}
@@ -328,6 +568,15 @@ function DetailModal({ event, onClose, onDelete, deletingId }) {
 export default function DashboardAdminAcara() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
     const location = useLocation();
     const pathname = location.pathname;
 
@@ -438,10 +687,10 @@ export default function DashboardAdminAcara() {
 
     // Stats panel sekarang spesifik ke featuredEvent
     const featuredStats = useMemo(() => {
-        if (!featuredEvent) return { checkin: 0, active: false };
+        if (!featuredEvent) return { checkin: 0, status: "berakhir" };
         return {
             checkin: Number(featuredEvent.attendances_count ?? 0),
-            active: isEventActive(featuredEvent),
+            status: getEventStatus(featuredEvent),
         };
     }, [featuredEvent]);
 
@@ -524,70 +773,17 @@ export default function DashboardAdminAcara() {
                 )}
 
                 {/* SIDEBAR */}
-                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                    <div className="flex flex-col items-center pt-7 pb-5 px-4">
-                        <img src={hmifLogo} alt="HMIF" className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20" />
-                        <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
-                        <p className="text-[0.62rem] leading-snug text-white/65 text-center">Himpunan Mahasiswa Informatika<br />ITERA</p>
-                    </div>
-                    <nav className="flex-1 px-3 pt-4 space-y-2">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.to;
-                            return (
-                                <Link key={item.label} to={item.to}
-                                    onClick={() => setIsSidebarOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${isActive ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10" : "text-white/65 hover:bg-white/10 hover:text-white"}`}>
-                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                        <Link
-                            to="/dashboard/member"
-                            onClick={() => setIsSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
-                                pathname === "/dashboard/member"
-                                    ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                    : "text-white/65 hover:bg-white/10 hover:text-white"
-                            }`}
-                        >
-                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                            Absen Saya
-                        </Link>
-                        {isSuperAdmin && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    navigate("/dashboard");
-                                    setIsSidebarOpen(false);
-                                }}
-                                className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <img
-                                    src={iconDashboard}
-                                    alt="Super Admin Dashboard"
-                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
-                                />
-                                <span className="truncate">Super Admin Dashboard</span>
-                            </button>
-                        )}
-                    </nav>
-                    <div className="p-4">
-                        <div className="bg-white/10 rounded-2xl px-4 py-3">
-                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
-                            <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    </div>
-                </aside>
+                <Sidebar
+                    role="admin"
+                    userName={userName}
+                    nim={nim}
+                    isSidebarOpen={isSidebarOpen}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    toggleSidebarCollapse={toggleSidebarCollapse}
+                />
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
+                <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
 
                     {/* TOPBAR DESKTOP */}
                     <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
@@ -595,11 +791,7 @@ export default function DashboardAdminAcara() {
                         <div className="flex items-center gap-4">
                             <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{userDivision}</span>
                             <div className="h-5 w-px bg-gray-200" />
-                            <button className="text-gray-400 hover:text-gray-600 transition">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                            </button>
+                            <NotificationBell />
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Foto profil"
@@ -744,7 +936,10 @@ export default function DashboardAdminAcara() {
                                         <StatBox label="Check-in Acara Ini" value={featuredStats.checkin} />
                                         <StatBox
                                             label="Status"
-                                            value={featuredStats.active ? "Aktif" : "Berakhir"}
+                                            value={
+                                                featuredStats.status === "segera_hadir" ? "Segera Hadir" :
+                                                featuredStats.status === "aktif" ? "Aktif" : "Berakhir"
+                                            }
                                         />
                                     </div>
                                 </aside>
@@ -772,14 +967,8 @@ export default function DashboardAdminAcara() {
                                         >
                                             <div className="p-5">
                                                 <div className="flex items-center justify-between mb-3">
-                                                    {/* Badge: Aktif (hijau) atau Berakhir (merah) */}
-                                                    <span className={`rounded-full px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] ${
-                                                        active
-                                                            ? "bg-[#def6d7] text-[#5baa19]"
-                                                            : "bg-red-100 text-red-600"
-                                                    }`}>
-                                                        {active ? "Aktif" : "Berakhir"}
-                                                    </span>
+                                                    {/* Badge: Segera Hadir, Aktif, atau Berakhir */}
+                                                    <StatusBadge event={event} />
                                                     {/* Indikator event yang sedang ditampilkan */}
                                                     {isSelected && (
                                                         <span className="text-[0.72rem] font-semibold text-[#5baa19] flex items-center gap-1">
@@ -920,28 +1109,39 @@ export default function DashboardAdminAcara() {
                 </div>
             )}
 
-            {/* MODAL Detail
+            {/* MODAL Detail */}
             <DetailModal
                 event={detailEvent}
                 onClose={() => setDetailEvent(null)}
                 onDelete={handleDeleteEvent}
                 deletingId={deletingId}
+                onUpdateSuccess={fetchEvents}
             />
 
             {/* MOBILE NAV */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#185b21] md:hidden">
-                <div className="grid grid-cols-4">
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.to;
-                        return (
-                            <Link key={item.label} to={item.to}
-                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "bg-white/10 text-white" : "text-white/80 hover:text-white"}`}>
-                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
+                {NAV_ITEMS.map((item) => {
+                    const isActive = pathname === item.to;
+                    return (
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
                                 {item.label}
-                            </Link>
-                        );
-                    })}
-                </div>
+                            </span>
+                        </Link>
+                    );
+                })}
             </nav>
         </div>
     );

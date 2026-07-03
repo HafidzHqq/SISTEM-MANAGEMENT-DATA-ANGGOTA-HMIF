@@ -38,6 +38,8 @@ class EventController extends Controller
         $validated['created_by'] = $request->user()->user_id;
 
         $event = Event::create($validated);
+        $details = "Membuat acara baru: {$event->title} di " . ($event->location ?: 'Lokasi belum ditentukan');
+        \App\Models\AuditLog::catat($request->user()->user_id, 'store', 'event', $event->event_id, $details);
         return response()->json($event, 201);
     }
 
@@ -69,6 +71,7 @@ class EventController extends Controller
         $validated = $request->validate([
             'title'                    => 'sometimes|required|string',
             'description'              => 'nullable|string',
+            'location'                 => 'nullable|string',
             'date_time'                => 'sometimes|required|date',
             'attendance_window_start'  => 'sometimes|required|date',
             'attendance_window_end'    => 'sometimes|required|date',
@@ -77,7 +80,34 @@ class EventController extends Controller
             'radius_meter'             => 'nullable|integer',
         ]);
 
+        $dirty = [];
+        foreach ($validated as $key => $value) {
+            if ($event->$key != $value) {
+                $dirty[$key] = [
+                    'old' => $event->$key ?? 'Belum Diatur',
+                    'new' => $value ?? 'Belum Diatur',
+                ];
+            }
+        }
+
         $event->update($validated);
+
+        $detailsList = [];
+        foreach ($dirty as $field => $change) {
+            $fieldName = match($field) {
+                'title' => 'Judul',
+                'description' => 'Deskripsi',
+                'location' => 'Lokasi',
+                'date_time' => 'Jam Acara',
+                'attendance_window_start' => 'Mulai Presensi',
+                'attendance_window_end' => 'Tutup Presensi',
+                default => $field,
+            };
+            $detailsList[] = "$fieldName: \"{$change['old']}\" -> \"{$change['new']}\"";
+        }
+        $details = implode(', ', $detailsList);
+
+        \App\Models\AuditLog::catat($request->user()->user_id, 'update', 'event', $event->event_id, $details ?: 'Tidak ada perubahan data');
 
         return response()->json($event);
     }
@@ -95,7 +125,9 @@ class EventController extends Controller
             return response()->json(['message' => 'Event tidak ditemukan'], 404);
         }
 
+        $details = "Menghapus acara: {$event->title}";
         $event->delete();
+        \App\Models\AuditLog::catat($request->user()->user_id, 'delete', 'event', $id, $details);
         return response()->json(['message' => 'Event berhasil dihapus']);
     }
 

@@ -1,11 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconDashboard from "../assets/icon-dashboard.png";
 import iconProfile from "../assets/icon-profile.png";
 import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
+
+import NotificationBell from "./NotificationBell";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
@@ -276,6 +279,15 @@ function DatePickerField({ value, onChange, isOpen, onOpenChange }) {
 export default function DashboardAdminLaporan() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
     const location = useLocation();
     const pathname = location.pathname;
 
@@ -491,70 +503,17 @@ export default function DashboardAdminLaporan() {
                 )}
 
                 {/* SIDEBAR */}
-                <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                    <div className="flex flex-col items-center pt-7 pb-5 px-4">
-                        <img src={hmifLogo} alt="HMIF" className="h-20 w-20 rounded-full object-contain border-4 border-white/15 shadow-lg shadow-black/20" />
-                        <p className="mt-3 text-xl font-bold tracking-wide">HMIF</p>
-                        <p className="text-[0.62rem] leading-snug text-white/65 text-center">Himpunan Mahasiswa Informatika<br />ITERA</p>
-                    </div>
-                    <nav className="flex-1 px-3 pt-4 space-y-2">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.to;
-                            return (
-                                <Link key={item.label} to={item.to}
-                                    onClick={() => setIsSidebarOpen(false)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${isActive ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10" : "text-white/65 hover:bg-white/10 hover:text-white"}`}>
-                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                        <Link
-                            to="/dashboard/member"
-                            onClick={() => setIsSidebarOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[0.95rem] font-medium transition ${
-                                pathname === "/dashboard/member"
-                                    ? "bg-white/15 text-white shadow-sm ring-1 ring-white/10"
-                                    : "text-white/65 hover:bg-white/10 hover:text-white"
-                            }`}
-                        >
-                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95" />
-                            Absen Saya
-                        </Link>
-                        {isSuperAdmin && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    navigate("/dashboard");
-                                    setIsSidebarOpen(false);
-                                }}
-                                className="mt-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <img
-                                    src={iconDashboard}
-                                    alt="Super Admin Dashboard"
-                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-95"
-                                />
-                                <span className="truncate">Super Admin Dashboard</span>
-                            </button>
-                        )}
-                    </nav>
-                    <div className="p-4">
-                        <div className="bg-white/10 rounded-2xl px-4 py-3">
-                            <p className="text-sm font-semibold text-white truncate">{userName}</p>
-                            <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3 inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-red-300 transition hover:text-red-200">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    </div>
-                </aside>
+                <Sidebar
+                    role="admin"
+                    userName={userName}
+                    nim={nim}
+                    isSidebarOpen={isSidebarOpen}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    toggleSidebarCollapse={toggleSidebarCollapse}
+                />
 
-                <div className="flex min-w-0 flex-1 flex-col md:ml-[220px]">
+                <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
 
                     {/* TOPBAR DESKTOP */}
                     <header className="hidden md:flex items-center justify-between bg-white px-8 py-[14px] border-b border-gray-100 sticky top-0 z-40">
@@ -562,11 +521,7 @@ export default function DashboardAdminLaporan() {
                         <div className="flex items-center gap-4">
                             <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{userDivision}</span>
                             <div className="h-5 w-px bg-gray-200" />
-                            <button className="text-gray-400 hover:text-gray-600 transition">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                            </button>
+                            <NotificationBell />
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Foto profil"
@@ -781,19 +736,29 @@ export default function DashboardAdminLaporan() {
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#185b21] md:hidden">
-                <div className="grid grid-cols-4">
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.to;
-                        return (
-                            <Link key={item.label} to={item.to}
-                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${isActive ? "bg-white/10 text-white" : "text-white/80 hover:text-white"}`}>
-                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
+                {NAV_ITEMS.map((item) => {
+                    const isActive = pathname === item.to;
+                    return (
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
                                 {item.label}
-                            </Link>
-                        );
-                    })}
-                </div>
+                            </span>
+                        </Link>
+                    );
+                })}
             </nav>
         </div>
     );

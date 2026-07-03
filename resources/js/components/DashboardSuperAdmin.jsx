@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import logoHmif from "../assets/logo-hmif.png";
 import profilePhoto from "../assets/fotoprofile.png";
 
@@ -271,108 +272,15 @@ export default function DashboardSuperAdmin() {
                     />
                 )}
 
-                <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col md:overflow-y-auto ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
-                    <div className="relative flex flex-col items-center pt-8 pb-6 px-4">
-                        <button
-                            type="button"
-                            onClick={toggleSidebarCollapse}
-                            className="hidden md:flex absolute top-5 -right-3.5 z-55 h-7 w-7 items-center justify-center rounded-full bg-[#1c5e22] border border-white/20 text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
-                            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-                        >
-                            <svg className={`h-4 w-4 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <img
-                            src={logoHmif}
-                            alt="HMIF"
-                            className={`rounded-full object-contain border-4 border-white/10 shadow-lg shadow-black/10 transition-all duration-300 ${isSidebarCollapsed ? "h-11 w-11" : "h-20 w-20"}`}
-                        />
-                        {!isSidebarCollapsed && (
-                            <>
-                                <p className="mt-3 text-[1.1rem] font-extrabold tracking-[0.2em] text-white uppercase">HMIF</p>
-                                <p className="text-[0.68rem] font-medium leading-relaxed text-white/60 text-center mt-1 px-2">
-                                    Himpunan Mahasiswa Informatika ITERA
-                                </p>
-                            </>
-                        )}
-                    </div>
-                    <hr className="border-white/10 mx-4" />
-                    <nav className="flex-1 px-3 pt-5 space-y-1.5">
-                        {menus.map((menu) => (
-                            <button
-                                key={menu.key}
-                                onClick={() => {
-                                    setActiveMenu(menu.key);
-                                    setIsSidebarOpen(false);
-                                }}
-                                title={isSidebarCollapsed ? menu.label : ""}
-                                className={`relative flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
-                                    isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
-                                } ${
-                                    activeMenu === menu.key
-                                        ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
-                                        : "text-white/65 hover:bg-white/8 hover:text-white"
-                                }`}
-                            >
-                                <MenuIcon type={menu.icon} />
-                                {!isSidebarCollapsed && <span className="truncate">{menu.label}</span>}
-                                {activeMenu === menu.key && !isSidebarCollapsed && (
-                                    <span className="absolute right-2 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-[#9df76b]" />
-                                )}
-                            </button>
-                        ))}
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                navigate("/dashboard/admin-overview");
-                                setIsSidebarOpen(false);
-                            }}
-                            title={isSidebarCollapsed ? "Admin Dashboard" : ""}
-                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
-                            }`}
-                        >
-                            <MenuIcon type="admin" />
-                            {!isSidebarCollapsed && <span className="truncate">Admin Dashboard</span>}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                navigate("/dashboard/member");
-                                setIsSidebarOpen(false);
-                            }}
-                            title={isSidebarCollapsed ? "Absen Saya" : ""}
-                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
-                            }`}
-                        >
-                            <MenuIcon type="user" />
-                            {!isSidebarCollapsed && <span className="truncate">Absen Saya</span>}
-                        </button>
-                    </nav>
-
-                    <div className="p-4 mt-auto">
-                        {isSidebarCollapsed ? (
-                            <div className="flex flex-col items-center gap-3">
-                                <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="rounded-2xl border border-white/8 bg-white/10 p-3.5 backdrop-blur-sm flex items-center gap-3 animate-fade-in">
-                                <img src={profilePhoto} alt="Super Admin" className="h-9 w-9 rounded-full object-cover border border-white/15" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-bold text-white">Super Admin</p>
-                                    <p className="truncate text-[0.72rem] text-white/55 font-medium">admin@hmif.com</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </aside>
+                <Sidebar
+                    role="super_admin"
+                    activeMenu={activeMenu}
+                    setActiveMenu={setActiveMenu}
+                    isSidebarOpen={isSidebarOpen}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    toggleSidebarCollapse={toggleSidebarCollapse}
+                />
 
                 <div className={`min-w-0 flex-1 bg-transparent transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                     <header className="flex h-[72px] items-center justify-between border-b border-white/70 bg-white/85 px-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] backdrop-blur md:px-7">
@@ -707,11 +615,24 @@ function downloadCsv(filename, rows) {
     URL.revokeObjectURL(url);
 }
 
+const ACTION_FRIENDLY_NAMES = {
+    promote: "Promosi Admin",
+    demote: "Demosi Admin",
+    toggle_status: "Status Akun",
+    delete: "Hapus Data",
+    update: "Ubah Data",
+    import: "Import Excel",
+    store: "Tambah Acara",
+    manual_checkin: "Hadir Manual",
+};
+
 function buildDashboardLogs(logs) {
     if (logs?.length > 0) {
         return logs.slice(0, 3).map((log, index) => ({
-            key: log.audit_id || log.id || `${log.action}-${index}`,
-            action: log.action || "System activity",
+            key: log.log_id || log.id || `${log.action}-${index}`,
+            action: ACTION_FRIENDLY_NAMES[log.action] || log.action || "System activity",
+            details: log.details || "",
+            target_name: log.target_name || "",
             entity: log.target_type || "System",
             timestamp: log.created_at ? new Date(log.created_at).toLocaleString("id-ID") : "-",
             status: "Completed",
@@ -864,13 +785,29 @@ function DashboardContent({ stats, logs, loading, error, onViewLogs }) {
                             <tr key={log.key} className="border-b border-slate-100">
                                 <td className="px-5 py-4">
                                     <div className="flex items-center gap-3">
-                                        <span className={`flex h-7 w-7 items-center justify-center rounded-full ${log.iconClass}`}>
+                                        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${log.iconClass}`}>
                                             <Icon name={log.icon} className="h-3.5 w-3.5" />
                                         </span>
-                                        <span className="font-semibold text-slate-800">{log.action}</span>
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-slate-800">{log.action}</span>
+                                            {log.details && (
+                                                <span className="text-[10px] text-slate-500 max-w-xs truncate" title={log.details}>
+                                                    {log.details}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </td>
-                                <td className="px-5 py-4 text-slate-600">{log.entity}</td>
+                                <td className="px-5 py-4 text-slate-600">
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-slate-800 capitalize">{log.entity}</span>
+                                        {log.target_name && (
+                                            <span className="text-[10px] text-slate-500 max-w-xs truncate" title={log.target_name}>
+                                                {log.target_name}
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
                                 <td className="px-5 py-4 text-slate-600">{log.timestamp}</td>
                                 <td className="px-5 py-4">
                                     <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold ${log.statusClass}`}>
@@ -1330,7 +1267,11 @@ function AdminManagementContent({
     );
 }
 
-function AuditLogsContent({ logs, loading, error }) {
+function AuditLogsContent({ logs = [], loading, error }) {
+    const [actionFilter, setActionFilter] = React.useState("all");
+    const [adminFilter, setAdminFilter] = React.useState("all");
+    const [searchQuery, setSearchQuery] = React.useState("");
+
     if (loading) {
         return (
             <div className="rounded-[10px] bg-white p-5">
@@ -1347,9 +1288,63 @@ function AuditLogsContent({ logs, loading, error }) {
         );
     }
 
+    // Dynamic Lists
+    const uniqueAdmins = React.useMemo(() => {
+        const admins = [];
+        const seen = new Set();
+        logs.forEach(log => {
+            if (log.actor && !seen.has(log.actor.user_id)) {
+                seen.add(log.actor.user_id);
+                admins.push(log.actor);
+            }
+        });
+        return admins;
+    }, [logs]);
 
+    const uniqueActions = [
+        { value: "all", label: "Semua Aksi" },
+        { value: "promote", label: "Promosi Admin" },
+        { value: "demote", label: "Demosi Admin" },
+        { value: "toggle_status", label: "Status Akun" },
+        { value: "delete", label: "Hapus Data" },
+        { value: "update", label: "Ubah Data" },
+        { value: "import", label: "Import Excel" },
+        { value: "store", label: "Tambah Acara" },
+        { value: "manual_checkin", label: "Set Hadir Manual" }
+    ];
 
+    const filteredLogs = React.useMemo(() => {
+        return logs.filter(log => {
+            if (actionFilter !== "all" && log.action !== actionFilter) return false;
+            if (adminFilter !== "all" && String(log.actor?.user_id) !== adminFilter) return false;
+            if (searchQuery.trim() !== "") {
+                const query = searchQuery.toLowerCase();
+                const actionMatch = (log.action || "").toLowerCase().includes(query);
+                const actorNameMatch = (log.actor?.name || "").toLowerCase().includes(query);
+                const actorEmailMatch = (log.actor?.email || "").toLowerCase().includes(query);
+                const targetTypeMatch = (log.target_type || "").toLowerCase().includes(query);
+                const targetNameMatch = (log.target_name || "").toLowerCase().includes(query);
+                const targetIdMatch = String(log.target_id || "").includes(query);
+                const detailsMatch = (log.details || "").toLowerCase().includes(query);
+                return actionMatch || actorNameMatch || actorEmailMatch || targetTypeMatch || targetNameMatch || targetIdMatch || detailsMatch;
+            }
+            return true;
+        });
+    }, [logs, actionFilter, adminFilter, searchQuery]);
 
+    const formatAction = (action) => {
+        const config = {
+            promote: { label: "Promosi Admin", badge: "bg-emerald-50 text-emerald-700 border border-emerald-200" },
+            demote: { label: "Demosi Admin", badge: "bg-rose-50 text-rose-700 border border-rose-200" },
+            toggle_status: { label: "Status Akun", badge: "bg-amber-50 text-amber-700 border border-amber-200" },
+            delete: { label: "Hapus Data", badge: "bg-red-50 text-red-700 border border-red-200" },
+            update: { label: "Ubah Data", badge: "bg-blue-50 text-blue-700 border border-blue-200" },
+            import: { label: "Import Excel", badge: "bg-violet-50 text-violet-700 border border-violet-200" },
+            store: { label: "Tambah Acara", badge: "bg-teal-50 text-teal-700 border border-teal-200" },
+            manual_checkin: { label: "Hadir Manual", badge: "bg-sky-50 text-sky-700 border border-sky-200" }
+        };
+        return config[action] || { label: action, badge: "bg-slate-50 text-slate-700 border border-slate-200" };
+    };
 
     return (
         <div className="space-y-4">
@@ -1363,24 +1358,36 @@ function AuditLogsContent({ logs, loading, error }) {
                 </div>
             </div>
 
-
-
             <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                 <div className="grid grid-cols-1 gap-3 border-b border-slate-100 p-4 md:grid-cols-3">
                     <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-4 py-3">
-                        <Icon name="filter" className="h-4 w-4 text-slate-600" />
-                        <select className="w-full bg-transparent text-sm outline-none">
-                            <option>All Actions</option>
+                        <select 
+                            value={actionFilter}
+                            onChange={(e) => setActionFilter(e.target.value)}
+                            className="w-full bg-transparent text-sm outline-none"
+                        >
+                            {uniqueActions.map((act) => (
+                                <option key={act.value} value={act.value}>{act.label}</option>
+                            ))}
                         </select>
                     </div>
 
-                    <select className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none">
-                        <option>All Administrators</option>
+                    <select 
+                        value={adminFilter}
+                        onChange={(e) => setAdminFilter(e.target.value)}
+                        className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none"
+                    >
+                        <option value="all">Semua Administrator</option>
+                        {uniqueAdmins.map((admin) => (
+                            <option key={admin.user_id} value={String(admin.user_id)}>{admin.name}</option>
+                        ))}
                     </select>
 
                     <input
                         type="text"
                         placeholder="Cari log..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="rounded-2xl bg-slate-100 px-4 py-3 text-sm outline-none"
                     />
                 </div>
@@ -1405,48 +1412,63 @@ function AuditLogsContent({ logs, loading, error }) {
                         </thead>
 
                         <tbody>
-                            {logs.slice(0, 25).map((log, index) => (
-                                <tr
-                                    key={log.audit_id || log.id || `${log.action}-${log.target_id}-${index}`}
-                                    className="border-t border-slate-100/80 transition hover:bg-slate-50/80"
-                                >
-                                    <td className="px-4 py-4">
-                                        <p className="font-bold text-slate-950">
-                                            {log.action || "-"}
-                                        </p>
-                                    </td>
+                            {filteredLogs.slice(0, 25).map((log, index) => {
+                                const actionInfo = formatAction(log.action);
+                                return (
+                                    <tr
+                                        key={log.log_id || log.id || `${log.action}-${log.target_id}-${index}`}
+                                        className="border-t border-slate-100/80 transition hover:bg-slate-50/80"
+                                    >
+                                        <td className="px-4 py-4">
+                                            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${actionInfo.badge}`}>
+                                                {actionInfo.label}
+                                            </span>
+                                        </td>
 
-                                    <td className="px-4 py-4">
-                                        <p className="font-semibold text-slate-800">
-                                            {log.actor?.name || "System"}
-                                        </p>
-                                        <p className="text-[11px] text-slate-500">
-                                            {log.actor?.email || "-"}
-                                        </p>
-                                    </td>
+                                        <td className="px-4 py-4">
+                                            <p className="font-semibold text-slate-800">
+                                                {log.actor?.name || "System"}
+                                            </p>
+                                            <p className="text-[11px] text-slate-500">
+                                                {log.actor?.email || "-"}
+                                            </p>
+                                        </td>
 
-                                    <td className="px-4 py-4 text-slate-700">
-                                        {log.target_type || "-"} #{log.target_id || "-"}
-                                    </td>
+                                        <td className="px-4 py-4 text-slate-700">
+                                            <div className="flex flex-col gap-1.5">
+                                                <span className="font-semibold text-slate-900">
+                                                    {log.target_name || "N/A (Sudah dihapus)"}
+                                                </span>
+                                                {log.details && (
+                                                    <span className="text-[11px] font-semibold text-slate-600 bg-slate-100/70 border border-slate-200/50 rounded-lg px-2 py-0.5 max-w-md break-words inline-block leading-relaxed">
+                                                        {log.details}
+                                                    </span>
+                                                )}
+                                                <span className="text-[10px] text-slate-500 capitalize">
+                                                    Tipe: {log.target_type || "-"} (ID: #{log.target_id || "-"})
+                                                </span>
+                                            </div>
+                                        </td>
 
-                                    <td className="px-4 py-4 text-slate-700">
-                                        {log.created_at
-                                            ? new Date(log.created_at).toLocaleString("id-ID")
-                                            : "-"}
-                                    </td>
+                                        <td className="px-4 py-4 text-slate-700">
+                                            {log.created_at
+                                                ? new Date(log.created_at).toLocaleString("id-ID")
+                                                : "-"}
+                                        </td>
 
-                                    <td className="px-4 py-4">
-                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold text-green-800">
-                                            Completed
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
+                                        <td className="px-4 py-4">
+                                            <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                                                Completed
+                                            </span>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
 
-                            {logs.length === 0 && (
+                            {filteredLogs.length === 0 && (
                                 <tr>
                                     <td colSpan="5" className="px-4 py-8 text-center text-slate-500">
-                                        Belum ada audit log.
+                                        Tidak ada audit log yang cocok dengan filter.
                                     </td>
                                 </tr>
                             )}
@@ -1455,7 +1477,7 @@ function AuditLogsContent({ logs, loading, error }) {
                 </div>
 
                 <div className="border-t border-slate-100 px-4 py-4 text-[12px] text-slate-600">
-                    Showing {Math.min(logs.length, 25)} of {logs.length} entries
+                    Showing {Math.min(filteredLogs.length, 25)} of {filteredLogs.length} entries
                 </div>
             </div>
         </div>

@@ -104,35 +104,58 @@ function SocialChip({ label, href }) {
 export default function Home() {
     const [activeFaq, setActiveFaq] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [activeSection, setActiveSection] = useState("home");
 
     useEffect(() => {
         setIsLoggedIn(!!localStorage.getItem("auth_token"));
+
+        const handleScroll = () => {
+            const scrollPos = window.scrollY + 200;
+            const stepsEl = document.getElementById("steps");
+            const faqEl = document.getElementById("faq");
+            const dashboardEl = document.getElementById("dashboard");
+
+            if (dashboardEl && scrollPos >= dashboardEl.offsetTop) {
+                setActiveSection("contact");
+            } else if (faqEl && scrollPos >= faqEl.offsetTop) {
+                setActiveSection("faq");
+            } else if (stepsEl && scrollPos >= stepsEl.offsetTop) {
+                setActiveSection("guide");
+            } else {
+                setActiveSection("home");
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    const scrollToSection = (id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-[#f7f9ff] text-slate-900">
+        <div className="min-h-screen bg-[#f7f9ff] text-slate-900 pb-16 md:pb-0">
             <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
                     <Link to="/" className="flex items-center gap-3">
                         <img src={logoHmif} alt="HMIF" className="h-11 w-11 rounded-full object-cover" />
-                        <div className="leading-tight">
-                            <div className="text-lg font-extrabold tracking-tight text-emerald-700">
-                                HMIF Management
-                            </div>
-                            <div className="text-xs font-semibold tracking-[0.34em] text-slate-500">
-                                SISTEM HMIF
-                            </div>
-                        </div>
+                        <span className="text-xl font-black tracking-wider text-emerald-800 font-sans">
+                            HMIF
+                        </span>
                     </Link>
 
-                    <nav className="hidden items-center gap-9 text-[15px] font-medium text-slate-600 md:flex">
-                        <a className="transition hover:text-emerald-600" href="#guide">
+                    <nav className="hidden items-center gap-9 text-[15px] font-semibold text-slate-600 md:flex">
+                        <a className="transition hover:text-emerald-700" href="#guide">
                             Guide
                         </a>
-                        <a className="transition hover:text-emerald-600" href="#faq">
+                        <a className="transition hover:text-emerald-700" href="#faq">
                             FAQ
                         </a>
-                        <Link className="transition hover:text-emerald-600" to="/dashboard">
+                        <Link className="transition hover:text-emerald-700" to="/dashboard">
                             Dashboard
                         </Link>
                     </nav>
@@ -142,15 +165,9 @@ export default function Home() {
                     ) : (
                         <Link
                             to="/login"
-                            className="inline-flex items-center gap-2 rounded-xl bg-[#22c55e] px-6 py-3 text-[15px] font-bold text-emerald-950 shadow-[0_14px_24px_rgba(34,197,94,0.24)] transition hover:-translate-y-0.5 hover:bg-[#1fbd58]"
+                            className="inline-flex items-center gap-2 rounded-full bg-[#F4C44C] px-6 py-2.5 text-[15px] font-extrabold text-slate-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-md"
                         >
-                            <span>Login Now</span>
-                            <span className="-mr-1">
-                                <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" aria-hidden="true">
-                                    <path d="M5 12h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    <path d="M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </span>
+                            <span>Login</span>
                         </Link>
                     )}
                 </div>
@@ -159,44 +176,53 @@ export default function Home() {
             <main>
                 <section
                     id="guide"
-                    className="relative overflow-hidden px-4 min-h-[calc(100vh-73px)] flex items-center justify-center sm:px-6 lg:px-8"
+                    className="relative overflow-hidden px-4 min-h-[calc(100vh-73px)] flex items-center justify-center sm:px-6 lg:px-8 bg-[#0a220c]"
                 >
-                    {/* Background Image with Blur and Green Overlay */}
-                    <div className="absolute inset-0 z-0 bg-[#060c07] overflow-hidden">
+                    {/* Background Image with Dark Green Overlay */}
+                    <div className="absolute inset-0 z-0 overflow-hidden">
                         <img
                             src="/images/bg_itera.jpg"
                             alt="Background ITERA"
-                            className="h-full w-full object-cover blur-[2px] opacity-[0.45] scale-105"
+                            className="h-full w-full object-cover opacity-35 mix-blend-luminosity scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#0e2d11]/85 via-[#081e0a]/92 to-[#040e05]/95" />
+                        <div className="absolute inset-0 bg-[#0a220c]/82" />
+                        {/* Dot Grid Pattern */}
+                        <div 
+                            className="absolute inset-0 opacity-[0.14]"
+                            style={{
+                                backgroundImage: "radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px)",
+                                backgroundSize: "24px 24px"
+                            }}
+                        />
                     </div>
 
-                    <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-20">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold tracking-[0.28em] text-emerald-300 ring-1 ring-white/15">
-                            <IconInfo />
-                            <span>SISTEM MANAGEMENT DATA</span>
+                    <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-24">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[#0a220c] border border-white/5 px-4.5 py-1.5 text-xs font-bold tracking-[0.24em] text-white uppercase">
+                            <span className="h-2 w-2 rounded-full bg-[#F4C44C] animate-pulse" />
+                            <span>Sistem Management Data</span>
                         </div>
  
-                        <h1 className="mt-8 max-w-5xl text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-                            Panduan Login{" "}
-                            <span className="text-[#22c55e]">Sistem Management Data Anggota HMIF</span>
+                        <h1 className="mt-8 max-w-4xl text-4.5xl font-serif font-bold leading-[1.2] tracking-normal text-white sm:text-5xl lg:text-[3.5rem]">
+                            Panduan Login <span className="text-[#F4C44C]">Sistem</span>
+                            <span className="text-[#F4C44C] block mt-1">Management Data Anggota</span>
+                            <span className="block mt-2">HMIF</span>
                         </h1>
  
-                        <p className="mt-6 max-w-2xl text-lg leading-8 text-emerald-100/75 sm:text-xl">
-                            Ikuti langkah-langkah berikut untuk mengakses dashboard anggota HMIF dengan akun Google ITERA secara aman dan efisien.
+                        <p className="mt-6 max-w-2xl text-[1.05rem] sm:text-lg leading-relaxed text-emerald-100/75">
+                            Ikuti langkah-langkah mudah di bawah ini untuk mengakses dashboard anggota HMIF dengan akun Google ITERA secara aman, cepat, dan efisien.
                         </p>
  
-                        <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row">
+                        <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row justify-center w-full max-w-md sm:max-w-none">
                             <a
                                 href="#steps"
-                                className="inline-flex items-center justify-center gap-3 rounded-xl bg-[#22c55e] px-8 py-4 text-base font-bold text-emerald-950 shadow-[0_16px_24px_rgba(34,197,94,0.3)] transition hover:-translate-y-0.5 hover:bg-[#1fbd58]"
+                                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#F4C44C] px-8 py-4 text-base font-extrabold text-slate-900 shadow-[0_16px_28px_rgba(244,196,76,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-[0_20px_35px_rgba(244,196,76,0.28)] active:translate-y-0"
                             >
                                 <span>Mulai Panduan</span>
                                 <IconArrowDown />
                             </a>
                             <Link
                                 to="/login"
-                                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-base font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15"
+                                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/20 active:translate-y-0"
                             >
                                 Portal Utama
                             </Link>
@@ -348,6 +374,69 @@ export default function Home() {
                     </div>
                 </section>
             </main>
+
+            {/* MOBILE BOTTOM NAV */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe">
+                <button 
+                    onClick={() => scrollToSection("guide")} 
+                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
+                >
+                    {activeSection === "home" && (
+                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                    )}
+                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "home" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "home" ? "text-white font-extrabold" : "text-white/60"}`}>
+                        Home
+                    </span>
+                </button>
+
+                <button 
+                    onClick={() => scrollToSection("steps")} 
+                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
+                >
+                    {activeSection === "guide" && (
+                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                    )}
+                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "guide" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "guide" ? "text-white font-extrabold" : "text-white/60"}`}>
+                        Guide
+                    </span>
+                </button>
+
+                <button 
+                    onClick={() => scrollToSection("faq")} 
+                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
+                >
+                    {activeSection === "faq" && (
+                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                    )}
+                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "faq" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "faq" ? "text-white font-extrabold" : "text-white/60"}`}>
+                        FAQ
+                    </span>
+                </button>
+
+                <button 
+                    onClick={() => scrollToSection("dashboard")} 
+                    className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
+                >
+                    {activeSection === "contact" && (
+                        <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                    )}
+                    <svg className={`h-4.5 w-4.5 transition-transform duration-300 ${activeSection === "contact" ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${activeSection === "contact" ? "text-white font-extrabold" : "text-white/60"}`}>
+                        Contact
+                    </span>
+                </button>
+            </nav>
         </div>
     );
 }

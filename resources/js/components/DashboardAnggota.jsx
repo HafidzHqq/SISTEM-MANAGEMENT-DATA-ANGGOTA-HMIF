@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import lockIcon from "../assets/lock.png";
@@ -8,12 +9,22 @@ import iconDashboard from "../assets/icon-dashboard.png";
 import iconHistory from "../assets/icon-history.png";
 import iconProfile from "../assets/icon-profile.png";
 import { calculateAttendanceSummary } from "../utils/attendanceHistory";
+import NotificationBell from "./NotificationBell";
 
 
 
 export default function DashboardAnggota() {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(
+        localStorage.getItem("sidebar-collapsed") === "true"
+    );
+
+    const toggleSidebarCollapse = () => {
+        const newValue = !isSidebarCollapsed;
+        setIsSidebarCollapsed(newValue);
+        localStorage.setItem("sidebar-collapsed", String(newValue));
+    };
 
     const [user, setUser] = React.useState(null);
     const [historyData, setHistoryData] = React.useState([]);
@@ -97,68 +108,18 @@ const attendanceLabel =
 
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
-            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â DESKTOP SIDEBAR Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
-            {isSidebarOpen && (
-                <div 
-                    className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden"
-                    onClick={() => setIsSidebarOpen(false)}
-                />
-            )}
+            <Sidebar
+                role="anggota"
+                userName={name}
+                nim={nim}
+                isSidebarOpen={isSidebarOpen}
+                setIsSidebarOpen={setIsSidebarOpen}
+                isSidebarCollapsed={isSidebarCollapsed}
+                toggleSidebarCollapse={toggleSidebarCollapse}
+            />
 
-            <aside className={`fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col bg-[#1c5e22] text-white transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-[220px] md:flex-col md:overflow-y-auto`}>
-                {/* Logo */}
-                <div className="flex flex-col items-center pt-8 pb-5 px-4">
-                    <img src={hmifLogo} alt="HMIF" className="h-[72px] w-[72px] rounded-full object-contain border-4 border-white/20" />
-                    <p className="mt-3 text-base font-bold tracking-wide">HMIF</p>
-                    <p className="text-[0.62rem] text-white/55 text-center leading-snug mt-0.5">
-                        Himpunan Mahasiswa Informatika ITERA
-                    </p>
-                </div>
-
-                <hr className="border-white/10 mx-4" />
-
-                {/* Navigation */}
-                <nav className="flex-1 px-3 pt-4 space-y-1">
-                    {navItems.map((item) => {
-                        const isActive = window.location.pathname === item.to;
-                        return (
-                            <Link
-                                key={item.label}
-                                to={item.to}
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-[10px] rounded-xl text-sm font-medium transition ${isActive
-                                    ? "bg-white/15 text-white"
-                                    : "text-white/65 hover:bg-white/10 hover:text-white"
-                                    }`}
-                            >
-                                <img src={item.icon} alt="" className="h-[18px] w-[18px] object-contain brightness-[10] opacity-90" />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                {/* User + Logout */}
-                <div className="p-4">
-                    <div className="bg-white/10 rounded-2xl px-4 py-3">
-                        <p className="text-sm font-semibold text-white truncate">{name}</p>
-                        <p className="text-[0.7rem] text-white/55 mt-0.5">{nim}</p>
-                        <button
-                            onClick={handleLogout}
-                            className="mt-3 text-[0.78rem] text-red-300 hover:text-red-200 transition inline-flex items-center gap-1.5 font-semibold"
-                        >
-                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 17l5-5-5-5M15 12H3" />
-                            </svg>
-                            <span>Logout</span>
-                        </button>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MAIN AREA Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
-            <div className="flex-1 md:ml-[220px] flex flex-col min-h-screen">
+            {/* ─── MAIN AREA ─── */}
+            <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
 
                 {/* Mobile Header */}
                 <header className="md:hidden sticky top-0 z-40 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
@@ -194,12 +155,7 @@ const attendanceLabel =
                             {division}
                         </span>
                         <div className="h-5 w-px bg-gray-200" />
-                        <button className="text-gray-400 hover:text-gray-600 transition">
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                        </button>
+                        <NotificationBell />
                         <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
                     </div>
                 </header>
@@ -335,20 +291,30 @@ const attendanceLabel =
                 </main>
             </div>
 
-            {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â MOBILE BOTTOM NAV Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#1c5e22] flex z-50">
-                {navItems.map((item) => (
-                    <Link
-                        key={item.label}
-                        to={item.to}
-                        className="flex-1 flex flex-col items-center justify-center py-3 gap-1"
-                    >
-                        <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-[10]" />
-                        <span className="text-[0.58rem] font-bold tracking-[0.12em] text-white/80 uppercase">
-                            {item.label}
-                        </span>
-                    </Link>
-                ))}
+            {/* MOBILE BOTTOM NAV */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe">
+                {navItems.map((item) => {
+                    const isActive = item.to === "/dashboard/member";
+                    return (
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
+                                {item.label}
+                            </span>
+                        </Link>
+                    );
+                })}
             </nav>
         </div>
     );

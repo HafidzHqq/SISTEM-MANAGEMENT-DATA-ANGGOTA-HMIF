@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import Sidebar from "./Sidebar";
 import hmifLogo from "../assets/logo-hmif.png";
 import fotoProfile from "../assets/fotoprofile.png";
 import iconSearch from "../assets/icon-search.png";
@@ -11,6 +12,8 @@ import iconArchive from "../assets/icon-archive.png";
 import iconAcaraAktif from "../assets/assets dash admin/Icon-acaraaktif.png";
 import iconHadirHariIni from "../assets/assets dash admin/Icon-hadirhariini.png";
 import iconPersentaseKeaktifan from "../assets/assets dash admin/Icon-persentasekeaktifan.png";
+
+import NotificationBell from "./NotificationBell";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
@@ -790,115 +793,15 @@ export default function DashboardAdminAnggota() {
                     />
                 )}
 
-                <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col md:overflow-y-auto ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
-                    <div className="relative flex flex-col items-center pt-8 pb-6 px-4">
-                        <button
-                            type="button"
-                            onClick={toggleSidebarCollapse}
-                            className="hidden md:flex absolute top-5 -right-3.5 z-55 h-7 w-7 items-center justify-center rounded-full bg-[#1c5e22] border border-white/20 text-white shadow-md hover:bg-emerald-700 transition active:scale-95"
-                            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-                        >
-                            <svg className={`h-4 w-4 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <img
-                            src={hmifLogo}
-                            alt="HMIF"
-                            className={`rounded-full object-contain border-4 border-white/10 shadow-lg shadow-black/10 transition-all duration-300 ${isSidebarCollapsed ? "h-11 w-11" : "h-20 w-20"}`}
-                        />
-                        {!isSidebarCollapsed && (
-                            <>
-                                <p className="mt-3 text-[1.1rem] font-extrabold tracking-[0.2em] text-white uppercase">HMIF</p>
-                                <p className="text-[0.68rem] font-medium leading-relaxed text-white/60 text-center mt-1 px-2">
-                                    Himpunan Mahasiswa Informatika ITERA
-                                </p>
-                            </>
-                        )}
-                    </div>
-                    <hr className="border-white/10 mx-4" />
-                    <nav className="flex-1 px-3 pt-5 space-y-1.5">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.to;
-                            return (
-                                <Link
-                                    key={item.label}
-                                    to={item.to}
-                                    onClick={() => setIsSidebarOpen(false)}
-                                    title={isSidebarCollapsed ? item.label : ""}
-                                    className={`flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
-                                        isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                                    } ${
-                                        isActive
-                                            ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
-                                            : "text-white/65 hover:bg-white/8 hover:text-white"
-                                    }`}
-                                >
-                                    <img src={item.icon} alt={item.label} className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90" />
-                                    {!isSidebarCollapsed && <span>{item.label}</span>}
-                                </Link>
-                            );
-                        })}
-                        <Link
-                            to="/dashboard/member"
-                            onClick={() => setIsSidebarOpen(false)}
-                            title={isSidebarCollapsed ? "Absen Saya" : ""}
-                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold transition-all duration-150 ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                            } ${
-                                pathname === "/dashboard/member"
-                                    ? "bg-white/12 text-white shadow-sm ring-1 ring-white/8"
-                                    : "text-white/65 hover:bg-white/8 hover:text-white"
-                            }`}
-                        >
-                            <img src={iconProfile} alt="Absen Saya" className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90" />
-                            {!isSidebarCollapsed && <span>Absen Saya</span>}
-                        </Link>
-                        {isSuperAdmin && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    navigate("/dashboard");
-                                    setIsSidebarOpen(false);
-                                }}
-                                title={isSidebarCollapsed ? "Super Admin Dashboard" : ""}
-                                className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                    isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                                }`}
-                            >
-                                <img
-                                    src={iconDashboard}
-                                    alt="Super Admin Dashboard"
-                                    className="h-5 w-5 shrink-0 object-contain brightness-0 invert opacity-90"
-                                />
-                                {!isSidebarCollapsed && <span className="truncate">Super Admin Dashboard</span>}
-                            </button>
-                        )}
-                    </nav>
-                    <div className="p-4 mt-auto">
-                        {isSidebarCollapsed ? (
-                            <div className="flex flex-col items-center gap-3">
-                                <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
-                                <p className="truncate text-[0.9rem] font-bold text-white">{userName}</p>
-                                <p className="mt-0.5 truncate text-[0.72rem] text-white/55 font-medium">{nim}</p>
-                                <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
-                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
-                                    </svg>
-                                    <span>Logout</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </aside>
+                <Sidebar
+                    role="admin"
+                    userName={userName}
+                    nim={nim}
+                    isSidebarOpen={isSidebarOpen}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    toggleSidebarCollapse={toggleSidebarCollapse}
+                />
 
                 <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${isSidebarCollapsed ? "md:ml-[76px]" : "md:ml-[240px]"}`}>
                     <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200/70 bg-white px-4 py-3.5 md:hidden">
@@ -933,12 +836,7 @@ export default function DashboardAdminAnggota() {
                                 {userDivision}
                             </span>
                             <div className="h-5 w-px bg-gray-200" />
-                            <button className="text-gray-400 hover:text-gray-600 transition" aria-label="Notifikasi">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                            </button>
+                            <NotificationBell />
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Foto profil"
@@ -1404,24 +1302,29 @@ export default function DashboardAdminAnggota() {
                 </div>
             </div>
 
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#185b21] md:hidden">
-                <div className="grid grid-cols-4">
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname === item.to;
-                        return (
-                            <Link
-                                key={item.label}
-                                to={item.to}
-                                className={`flex flex-col items-center justify-center gap-1 py-3 text-[0.67rem] font-semibold uppercase tracking-[0.12em] transition ${
-                                    isActive ? "bg-white/10 text-white" : "text-white/80 hover:text-white"
-                                }`}
-                            >
-                                <img src={item.icon} alt={item.label} className="h-5 w-5 object-contain brightness-0 invert" />
+            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
+                {NAV_ITEMS.map((item) => {
+                    const isActive = pathname === item.to;
+                    return (
+                        <Link 
+                            key={item.label} 
+                            to={item.to} 
+                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
+                        >
+                            {isActive && (
+                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
+                            )}
+                            <img 
+                                src={item.icon} 
+                                alt={item.label} 
+                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
+                            />
+                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
                                 {item.label}
-                            </Link>
-                        );
-                    })}
-                </div>
+                            </span>
+                        </Link>
+                    );
+                })}
             </nav>
         </div>
     );

@@ -111,12 +111,36 @@ class MemberController extends Controller
             : 'Departemen';
         $profileData[$departemenColumn] = $request->input('departemen') ?: null;
 
+        $profile = $user->memberProfile ?: new \App\Models\MemberProfile();
+        $dirty = [];
+        foreach ($profileData as $key => $value) {
+            if ($profile->$key != $value) {
+                $dirty[$key] = [
+                    'old' => $profile->$key ?? 'Belum Diatur',
+                    'new' => $value ?? 'Belum Diatur',
+                ];
+            }
+        }
+
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],
             $profileData
         );
 
-        AuditLog::catat($request->user()->user_id, 'update', 'member', $id);
+        $detailsList = [];
+        foreach ($dirty as $field => $change) {
+            $fieldName = match(strtolower($field)) {
+                'departemen' => 'Departemen',
+                'jabatan' => 'Jabatan',
+                'status_keanggotaan' => 'Status Keanggotaan',
+                'no_telepon' => 'No Telepon',
+                default => $field,
+            };
+            $detailsList[] = "$fieldName: \"{$change['old']}\" -> \"{$change['new']}\"";
+        }
+        $details = implode(', ', $detailsList);
+
+        AuditLog::catat($request->user()->user_id, 'update', 'member', $id, $details ?: 'Tidak ada perubahan data');
 
         return response()->json([
             'message' => 'Data anggota berhasil diperbarui',
@@ -142,7 +166,8 @@ class MemberController extends Controller
             ], 403);
         }
 
-        AuditLog::catat($request->user()->user_id, 'delete', 'member', $id);
+        $details = "Menghapus anggota: {$user->name} ({$user->nim})";
+        AuditLog::catat($request->user()->user_id, 'delete', 'member', $id, $details);
 
         $user->delete();
 
@@ -208,7 +233,8 @@ class MemberController extends Controller
                 $berhasil++;
             }
 
-            AuditLog::catat($request->user()->user_id, 'import', 'member', 0);
+            $details = "Berhasil mengimpor $berhasil anggota";
+            AuditLog::catat($request->user()->user_id, 'import', 'member', 0, $details);
 
             return response()->json([
                 'message'  => "$berhasil anggota berhasil diimport",

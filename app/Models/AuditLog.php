@@ -14,6 +14,7 @@ class AuditLog extends Model
         'action',
         'target_type',
         'target_id',
+        'details',
         'created_at',
     ];
 
@@ -21,12 +22,13 @@ class AuditLog extends Model
         return $this->belongsTo(User::class, 'actor_id', 'user_id');
     }
 
-    public static function catat($actorId, $action, $targetType, $targetId) {
+    public static function catat($actorId, $action, $targetType, $targetId, $details = null) {
         self::create([
         'actor_id'    => $actorId,
         'action'      => $action,
         'target_type' => $targetType,
         'target_id'   => $targetId,
+        'details'     => $details,
         'created_at'  => now(),
         ]);
     }

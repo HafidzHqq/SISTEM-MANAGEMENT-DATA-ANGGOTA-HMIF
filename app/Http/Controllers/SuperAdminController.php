@@ -36,8 +36,8 @@ class SuperAdminController extends Controller
         }
 
         $user->update(['role' => $targetRole]);
-
-        AuditLog::catat($request->user()->user_id, 'promote', 'user', $id);
+        $details = "Jabatan diubah menjadi: " . ($targetRole === 'super_admin' ? 'Super Admin' : 'Admin');
+        AuditLog::catat($request->user()->user_id, 'promote', 'user', $id, $details);
 
         return response()->json([
             'message' => 'Anggota berhasil dijadikan ' . ($targetRole === 'super_admin' ? 'Super Admin' : 'Admin'),
@@ -59,8 +59,8 @@ class SuperAdminController extends Controller
         }
 
         $user->update(['role' => 'anggota']);
-
-        AuditLog::catat($request->user()->user_id, 'demote', 'user', $id);
+        $details = "Jabatan diturunkan menjadi Anggota";
+        AuditLog::catat($request->user()->user_id, 'demote', 'user', $id, $details);
 
         return response()->json([
             'message' => 'Jabatan berhasil diturunkan menjadi anggota',
@@ -83,8 +83,8 @@ class SuperAdminController extends Controller
 
         $newStatus = $user->status === 'aktif' ? 'non-aktif' : 'aktif';
         $user->update(['status' => $newStatus]);
-
-        AuditLog::catat($request->user()->user_id, 'toggle_status', 'user', $id);
+        $details = "Status diubah menjadi: " . ($newStatus === 'aktif' ? 'Aktif' : 'Non-Aktif');
+        AuditLog::catat($request->user()->user_id, 'toggle_status', 'user', $id, $details);
 
         return response()->json([
             'message' => 'Status berhasil diubah menjadi ' . $newStatus,
@@ -107,7 +107,8 @@ class SuperAdminController extends Controller
             return response()->json(['message' => 'User tidak ditemukan'], 404);
         }
 
-        AuditLog::catat($request->user()->user_id, 'delete', 'user', $id);
+        $details = "Menghapus akun: {$user->name} ({$user->email})";
+        AuditLog::catat($request->user()->user_id, 'delete', 'user', $id, $details);
 
         $user->delete();
 
