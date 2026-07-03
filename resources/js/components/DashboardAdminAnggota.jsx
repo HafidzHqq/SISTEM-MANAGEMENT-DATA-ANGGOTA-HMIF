@@ -234,7 +234,19 @@ const mapMemberRow = (member, index) => {
         canDelete: role === "anggota",
         email: member.email ?? "-",
         foto: profile.foto ?? member.foto ?? null,
+        lastUpdate: profile.updated_at ?? member.updated_at ?? null,
     };
+};
+
+const formatLastUpdateDate = (dateValue) => {
+    if (!dateValue) return "-";
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    }).toUpperCase();
 };
 
 const formatNumber = (value) => new Intl.NumberFormat("id-ID").format(value);
@@ -1340,9 +1352,9 @@ export default function DashboardAdminAnggota() {
                                         )}
                                     </div>
 
-                                    <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 pt-4 text-[0.68rem] font-bold uppercase tracking-[0.22em] text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="mt-6 flex flex-col items-center justify-between gap-2 border-t border-slate-200 pt-4 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-slate-500 sm:flex-row sm:text-left">
                                         <span>HMIF ITERA</span>
-                                        <span className="text-slate-500">LAST UPDATED: OCT 24, 2023</span>
+                                        <span className="text-slate-500">LAST UPDATED: {formatLastUpdateDate(detailMember.lastUpdate)}</span>
                                     </div>
                                 </div>
                             </div>
