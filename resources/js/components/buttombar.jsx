@@ -6,9 +6,9 @@ const BottomBar = ({
   items = [],
   activeHref,
   ease = 'power3.easeOut',
-  baseColor = '#ffffff',
+  baseColor = '#9df76b',
   pillColor = 'rgba(255, 255, 255, 0.08)',
-  hoveredPillTextColor = '#1c5e22',
+  hoveredPillTextColor = '#003f17',
   pillTextColor = '#ffffff',
   className = '',
   initialLoadAnimation = false
