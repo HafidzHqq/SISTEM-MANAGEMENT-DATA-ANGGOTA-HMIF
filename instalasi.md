@@ -19,7 +19,7 @@ Pastikan perangkat/server Anda memenuhi prasyarat berikut:
 ### 1. Clone Repositori
 Jelajahi ke direktori web server Anda (misal Laragon `www/` atau XAMPP `htdocs/`) dan clone repositori ini:
 ```bash
-git clone https://github.com/HafidzHqq/SISTEM-MANAGEMENT-DATA-ANGGOTA-HMIF.git
+git clone https://github.com/leeclza/SISTEM-MANAGEMENT-DATA-ANGGOTA-HMIF.git
 cd SISTEM-MANAGEMENT-DATA-ANGGOTA-HMIF
 ```
 
