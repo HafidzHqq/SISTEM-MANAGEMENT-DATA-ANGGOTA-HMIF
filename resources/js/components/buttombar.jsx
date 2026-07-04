@@ -2,141 +2,227 @@ import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 
-// Import icons
-import iconDashboard from '../assets/icon-dashboard.png';
-import iconHistory from '../assets/icon-history.png';
-import iconProfile from '../assets/icon-profile.png';
-import iconKegiatan from '../assets/icon-kegiatan.png';
-import iconArchive from '../assets/icon-archive.png';
-
 const BottomBar = ({
   items = [],
   activeHref,
-  baseColor = '#1c5e22',
-  pillColor = '#ffffff',
-  pillTextColor = '#1c5e22',
-  activeTextColor = '#1c5e22',
-  inactiveTextColor = 'rgba(255, 255, 255, 0.6)'
+  ease = 'power3.easeOut',
+  baseColor = '#ffffff',
+  pillColor = 'rgba(255, 255, 255, 0.08)',
+  hoveredPillTextColor = '#1c5e22',
+  pillTextColor = '#ffffff',
+  className = '',
+  initialLoadAnimation = false
 }) => {
-  const containerRef = useRef(null);
-  const activePillRef = useRef(null);
-  const itemRefs = useRef([]);
+  const resolvedPillTextColor = pillTextColor ?? '#ffffff';
+  const circleRefs = useRef([]);
+  const tlRefs = useRef([]);
   const location = useLocation();
   const currentPath = activeHref || location.pathname;
 
   useEffect(() => {
-    // Find the active item index (either matching href or explicitly marked isActive)
-    const activeIndex = items.findIndex(item => item.href === currentPath || item.isActive);
-    if (activeIndex === -1 || !activePillRef.current || !itemRefs.current[activeIndex]) {
-      // If no match, hide the pill indicator
-      gsap.to(activePillRef.current, { scale: 0, duration: 0.2 });
-      return;
-    }
+    const layout = () => {
+      circleRefs.current.forEach((circle, i) => {
+        if (!circle?.parentElement) return;
 
-    const activeEl = itemRefs.current[activeIndex];
-    const containerEl = containerRef.current;
-    
-    if (!activeEl || !containerEl) return;
+        const pill = circle.parentElement;
+        const rect = pill.getBoundingClientRect();
+        const { width: w, height: h } = rect;
+        if (w === 0 || h === 0) return;
 
-    // Get position of active item relative to the container
-    const activeRect = activeEl.getBoundingClientRect();
-    const containerRect = containerEl.getBoundingClientRect();
+        const R = ((w * w) / 4 + h * h) / (2 * h);
+        const D = Math.ceil(2 * R) + 2;
+        const delta = Math.ceil(R - Math.sqrt(Math.max(0, R * R - (w * w) / 4))) + 1;
+        const originY = D - delta;
 
-    const left = activeRect.left - containerRect.left;
-    const width = activeRect.width;
-    const height = activeRect.height;
+        circle.style.width = `${D}px`;
+        circle.style.height = `${D}px`;
+        circle.style.bottom = `-${delta}px`;
 
-    // Animate the active pill background to the new position
-    gsap.to(activePillRef.current, {
-      x: left,
-      width: width,
-      height: height,
-      scale: 1,
-      duration: 0.3,
-      ease: 'power3.out',
-      overwrite: 'auto'
+        gsap.set(circle, {
+          xPercent: -50,
+          scale: 0,
+          transformOrigin: `50% ${originY}px`
+        });
+
+        const label = pill.querySelector('.pill-label');
+        const white = pill.querySelector('.pill-label-hover');
+
+        if (label) gsap.set(label, { y: 0 });
+        if (white) gsap.set(white, { y: h + 12, opacity: 0 });
+
+        tlRefs.current[i]?.kill();
+        const tl = gsap.timeline({ paused: true });
+
+        tl.to(circle, { scale: 1.2, xPercent: -50, duration: 0.4, ease, overwrite: 'auto' }, 0);
+
+        if (label) {
+          tl.to(label, { y: -(h + 8), duration: 0.4, ease, overwrite: 'auto' }, 0);
+        }
+
+        if (white) {
+          gsap.set(white, { y: h + 12, opacity: 0 });
+          tl.to(white, { y: 0, opacity: 1, duration: 0.4, ease, overwrite: 'auto' }, 0);
+        }
+
+        tlRefs.current[i] = tl;
+
+        // Check if currently active and seek to end
+        const isActive = items[i]?.href === currentPath || items[i]?.isActive;
+        if (isActive) {
+          tl.progress(1);
+        } else {
+          tl.progress(0);
+        }
+      });
+    };
+
+    // Run layout after short timeout to ensure rects are calculated
+    const timer = setTimeout(layout, 50);
+
+    const onResize = () => layout();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [items, currentPath, ease]);
+
+  // Handle click animations or active state changes
+  useEffect(() => {
+    items.forEach((item, i) => {
+      const isActive = item.href === currentPath || item.isActive;
+      const tl = tlRefs.current[i];
+      if (!tl) return;
+
+      if (isActive) {
+        gsap.to(tl, { progress: 1, duration: 0.35, ease: 'power2.out' });
+      } else {
+        gsap.to(tl, { progress: 0, duration: 0.25, ease: 'power2.out' });
+      }
     });
   }, [currentPath, items]);
 
-  // Helper to resolve icon based on label/path
-  const getIcon = (label) => {
-    const l = label.toLowerCase();
-    if (l.includes('dashboard') || l.includes('overview') || l.includes('log')) return iconDashboard;
-    if (l.includes('anggota') || l.includes('admin') || l.includes('profile') || l.includes('profil')) {
-      if (l.includes('anggota') && !l.includes('dashboard')) return iconProfile;
-      return iconProfile;
-    }
-    if (l.includes('history') || l.includes('riwayat')) return iconHistory;
-    if (l.includes('acara') || l.includes('kegiatan')) return iconKegiatan;
-    if (l.includes('laporan') || l.includes('report')) return iconArchive;
-    if (l.includes('audit') || l.includes('logs')) return iconArchive;
-    return iconDashboard;
+  const cssVars = {
+    ['--base']: baseColor,
+    ['--pill-bg']: pillColor,
+    ['--hover-text']: hoveredPillTextColor,
+    ['--pill-text']: resolvedPillTextColor,
+    ['--nav-h']: '42px',
+    ['--pill-pad-x']: '18px',
+    ['--pill-gap']: '6px'
   };
 
   return (
     <div 
-      ref={containerRef}
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22] border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] px-2"
-      style={{ margin: 0, paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22] border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex items-center justify-center py-2 px-3"
+      style={{ margin: 0, paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
     >
-      <div className="relative flex justify-around items-center w-full h-[52px] py-1">
-        {/* Sliding active indicator */}
-        <div 
-          ref={activePillRef}
-          className="absolute left-0 rounded-xl bg-white ring-1 ring-white/5 pointer-events-none"
-          style={{ 
-            height: '44px',
-            scale: 0,
-            transformOrigin: 'center',
-            willChange: 'transform, width'
+      <nav
+        className={`w-full flex items-center justify-center ${className}`}
+        aria-label="Primary"
+        style={cssVars}
+      >
+        <div
+          className="relative flex items-center rounded-full w-full justify-around"
+          style={{
+            height: 'var(--nav-h)',
           }}
-        />
+        >
+          <ul
+            role="menubar"
+            className="list-none flex items-stretch m-0 p-[3px] h-full w-full justify-around"
+            style={{ gap: 'var(--pill-gap)' }}
+          >
+            {items.map((item, i) => {
+              const isActive = item.href === currentPath || item.isActive;
 
-        {items.map((item, index) => {
-          const isActive = item.href === currentPath || item.isActive;
-          
-          const handleClick = (e) => {
-            if (item.onClick) {
-              e.preventDefault();
-              item.onClick();
-            }
-          };
+              const pillStyle = {
+                background: 'var(--pill-bg)',
+                color: 'var(--pill-text)',
+                paddingLeft: 'var(--pill-pad-x)',
+                paddingRight: 'var(--pill-pad-x)',
+                height: '100%',
+                flex: 1,
+                maxWidth: '120px'
+              };
 
-          const Component = item.onClick ? 'button' : Link;
-          const componentProps = item.onClick 
-            ? { onClick: handleClick, type: 'button' } 
-            : { to: item.href || '#' };
-          
-          return (
-            <Component
-              key={item.href || item.label}
-              ref={el => { itemRefs.current[index] = el; }}
-              className="relative flex-1 flex flex-col items-center justify-center py-1 z-10 select-none outline-none h-full"
-              {...componentProps}
-            >
-              <img 
-                src={getIcon(item.label)} 
-                alt={item.label} 
-                className={`h-4.5 w-4.5 object-contain transition-all duration-300 ${
-                  isActive 
-                    ? 'scale-110' 
-                    : 'brightness-[10] opacity-60'
-                }`}
-                style={isActive ? { filter: 'invert(24%) sepia(85%) saturate(547%) hue-rotate(82deg) brightness(91%) contrast(92%)' } : {}}
-              />
-              <span 
-                className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 mt-0.5 ${
-                  isActive 
-                    ? 'text-[#1c5e22] font-extrabold' 
-                    : 'text-white/60'
-                }`}
-              >
-                {item.label}
-              </span>
-            </Component>
-          );
-        })}
-      </div>
+              const PillContent = (
+                <>
+                  <span
+                    className="hover-circle absolute left-1/2 bottom-0 rounded-full z-[1] block pointer-events-none"
+                    style={{
+                      background: 'var(--base, #fff)',
+                      willChange: 'transform'
+                    }}
+                    aria-hidden="true"
+                    ref={el => {
+                      circleRefs.current[i] = el;
+                    }}
+                  />
+                  <span className="label-stack relative inline-block leading-[1] z-[2]">
+                    <span
+                      className="pill-label relative z-[2] inline-block leading-[1] text-[12px] font-bold uppercase tracking-[0.05em]"
+                      style={{ willChange: 'transform' }}
+                    >
+                      {item.label}
+                    </span>
+                    <span
+                      className="pill-label-hover absolute left-0 top-0 z-[3] inline-block text-[12px] font-extrabold uppercase tracking-[0.05em]"
+                      style={{
+                        color: 'var(--hover-text)',
+                        willChange: 'transform, opacity'
+                      }}
+                      aria-hidden="true"
+                    >
+                      {item.label}
+                    </span>
+                  </span>
+                  {isActive && (
+                    <span
+                      className="absolute left-1/2 -bottom-[6px] -translate-x-1/2 w-1.5 h-1.5 rounded-full z-[4]"
+                      style={{ background: 'var(--base, #fff)' }}
+                      aria-hidden="true"
+                    />
+                  )}
+                </>
+              );
+
+              const basePillClasses =
+                'relative overflow-hidden inline-flex items-center justify-center no-underline rounded-full box-border font-semibold whitespace-nowrap cursor-pointer px-0 select-none';
+
+              return (
+                <li key={item.href || item.label} role="none" className="flex h-full flex-1 justify-center">
+                  {item.onClick ? (
+                    <button
+                      role="menuitem"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        item.onClick();
+                      }}
+                      className={basePillClasses}
+                      style={pillStyle}
+                      aria-label={item.label}
+                    >
+                      {PillContent}
+                    </button>
+                  ) : (
+                    <Link
+                      role="menuitem"
+                      to={item.href}
+                      className={basePillClasses}
+                      style={pillStyle}
+                      aria-label={item.label}
+                    >
+                      {PillContent}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </nav>
     </div>
   );
 };
