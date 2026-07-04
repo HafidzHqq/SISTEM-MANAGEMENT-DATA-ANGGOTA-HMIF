@@ -9,6 +9,7 @@ import iconKegiatan from "../assets/icon-kegiatan.png";
 import iconArchive from "../assets/icon-archive.png";
 
 import NotificationBell from "./NotificationBell";
+import BottomBar from "./buttombar";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
@@ -736,30 +737,7 @@ export default function DashboardAdminLaporan() {
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
-                {NAV_ITEMS.map((item) => {
-                    const isActive = pathname === item.to;
-                    return (
-                        <Link 
-                            key={item.label} 
-                            to={item.to} 
-                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95"
-                        >
-                            {isActive && (
-                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                            )}
-                            <img 
-                                src={item.icon} 
-                                alt={item.label} 
-                                className={`h-4.5 w-4.5 object-contain transition-transform duration-300 ${isActive ? "scale-110 brightness-[10] filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "brightness-[10] opacity-60"}`} 
-                            />
-                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
-                                {item.label}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </nav>
+            <BottomBar items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname} />
         </div>
     );
 }

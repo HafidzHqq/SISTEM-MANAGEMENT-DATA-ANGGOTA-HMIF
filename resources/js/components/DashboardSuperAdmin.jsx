@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import BottomBar from "./buttombar";
 import logoHmif from "../assets/logo-hmif.png";
 import profilePhoto from "../assets/fotoprofile.png";
 
@@ -359,36 +360,7 @@ export default function DashboardSuperAdmin() {
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22]/95 backdrop-blur-md border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex justify-around items-center px-2 pb-safe md:hidden">
-                {menus.map((item) => {
-                    const isActive = activeMenu === item.key;
-                    const getMenuIconName = (key) => {
-                        if (key === "dashboard") return "layoutGrid";
-                        if (key === "admins") return "userCog";
-                        return "log";
-                    };
-                    return (
-                        <button 
-                            key={item.key} 
-                            onClick={() => setActiveMenu(item.key)} 
-                            className="relative flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 transition-all duration-300 active:scale-95 text-white"
-                        >
-                            {isActive && (
-                                <span className="absolute inset-x-4 inset-y-1 rounded-xl bg-white/12 ring-1 ring-white/5" />
-                            )}
-                            <div className={`transition-transform duration-300 ${isActive ? "scale-110 text-white filter drop-shadow-[0_2px_8px_rgba(255,255,255,0.4)]" : "text-white/60"}`}>
-                                <Icon 
-                                    name={getMenuIconName(item.key)} 
-                                    className="h-4.5 w-4.5" 
-                                />
-                            </div>
-                            <span className={`text-[0.58rem] font-bold tracking-[0.08em] uppercase transition-colors duration-300 ${isActive ? "text-white font-extrabold" : "text-white/60"}`}>
-                                {item.key === "admins" ? "Admins" : item.label}
-                            </span>
-                        </button>
-                    );
-                })}
-            </nav>
+            <BottomBar items={menus.map(item => ({ label: item.key === "admins" ? "Admins" : item.label, href: `/dashboard/${item.key}`, isActive: activeMenu === item.key, onClick: () => setActiveMenu(item.key) }))} />
         </div>
     );
 }
