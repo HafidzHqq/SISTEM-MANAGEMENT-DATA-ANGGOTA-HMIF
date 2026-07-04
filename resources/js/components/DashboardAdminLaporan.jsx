@@ -626,7 +626,7 @@ export default function DashboardAdminLaporan() {
                             </div>
 
                             {/* Stats Cards */}
-                            <div className="order-1 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div className="order-1 grid w-full grid-cols-2 gap-3 sm:grid-cols-3">
                                 <div className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200/70 flex flex-col justify-center">
                                     <div className="flex items-center gap-2 mb-3">
                                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50">
@@ -649,7 +649,7 @@ export default function DashboardAdminLaporan() {
                                             {isLoading ? "-" : totalTidak.toLocaleString()}
                                     </p>
                                 </div>
-                                <div className="rounded-xl bg-[#1f7a2c] p-5 shadow-sm flex items-center justify-between">
+                                <div className="rounded-xl bg-[#1f7a2c] p-5 shadow-sm flex items-center justify-between col-span-2 sm:col-span-1">
                                     <div>
                                         <p className="text-[0.7rem] font-bold uppercase tracking-wider text-white/70">Persentase Kehadiran</p>
                                         <p className="text-[2.2rem] font-extrabold text-white leading-none mt-1">

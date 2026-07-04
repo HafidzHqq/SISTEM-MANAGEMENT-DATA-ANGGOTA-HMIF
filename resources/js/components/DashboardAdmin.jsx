@@ -355,7 +355,7 @@ export default function DashboardAdmin() {
                             </div>
                         </div>
 
-                        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             {summaryCards.map((card) => (
                                 <div key={card.label} className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] md:p-6">
                                     <div className={`h-1 w-16 rounded-full ${card.accent}`} />

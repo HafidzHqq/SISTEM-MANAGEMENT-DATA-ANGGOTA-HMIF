@@ -767,7 +767,7 @@ function DashboardContent({ stats, logs, loading, error, onViewLogs }) {
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {cards.map((card) => (
                     <div key={card.label} className="min-h-[112px] rounded-[10px] bg-white p-4 shadow-sm">
                         <div className="flex items-start justify-between">
@@ -1113,7 +1113,7 @@ function AdminManagementContent({
                 </div>
             )}
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-green-100 text-[#003f17]">
                         <Icon name="suitcase" className="h-5 w-5" />
@@ -1138,7 +1138,7 @@ function AdminManagementContent({
                     </h3>
                 </div>
 
-                <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
+                <div className="min-h-[110px] rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] col-span-2 md:col-span-1">
                     <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md bg-slate-100 text-slate-700">
                         <Icon name="timer" className="h-5 w-5" />
                     </div>
