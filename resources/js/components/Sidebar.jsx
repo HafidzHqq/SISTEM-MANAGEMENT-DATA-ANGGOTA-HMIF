@@ -172,30 +172,30 @@ export default function Sidebar({
                         <button
                             type="button"
                             onClick={() => {
-                                navigate("/dashboard/admin-overview");
-                                setIsSidebarOpen(false);
-                            }}
-                            title={isSidebarCollapsed ? "Admin Dashboard" : ""}
-                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
-                            }`}
-                        >
-                            {renderIcon("admin")}
-                            {!isSidebarCollapsed && <span className="truncate">Admin Dashboard</span>}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
                                 navigate("/dashboard/member");
                                 setIsSidebarOpen(false);
                             }}
-                            title={isSidebarCollapsed ? "Absen Saya" : ""}
+                            title={isSidebarCollapsed ? "Dashboard Anggota" : ""}
                             className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
                                 isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
                             }`}
                         >
                             {renderIcon("user")}
-                            {!isSidebarCollapsed && <span className="truncate">Absen Saya</span>}
+                            {!isSidebarCollapsed && <span className="truncate">Dashboard Anggota</span>}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                navigate("/dashboard/admin-overview");
+                                setIsSidebarOpen(false);
+                            }}
+                            title={isSidebarCollapsed ? "Dashboard Admin" : ""}
+                            className={`flex items-center rounded-xl text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full text-left"
+                            }`}
+                        >
+                            {renderIcon("admin")}
+                            {!isSidebarCollapsed && <span className="truncate">Dashboard Admin</span>}
                         </button>
                     </nav>
 
@@ -223,14 +223,20 @@ export default function Sidebar({
         );
     }
 
+    const isUserSuperAdmin = localStorage.getItem("role") === "super_admin";
+    const isUserAdmin = localStorage.getItem("role") === "admin";
+
     if (role === "admin") {
         sidebarItems = [
             { label: "Dashboard", icon: "dashboard", to: "/dashboard/admin-overview" },
             { label: "Anggota", icon: "anggota", to: "/dashboard/anggota" },
             { label: "Acara", icon: "acara", to: "/dashboard/acara" },
             { label: "Laporan", icon: "laporan", to: "/dashboard/laporan" },
-            { label: "Absen Saya", icon: "user", to: "/dashboard/member" },
+            { label: "Dashboard Anggota", icon: "user", to: "/dashboard/member" },
         ];
+        if (isUserSuperAdmin) {
+            sidebarItems.push({ label: "Dashboard Super Admin", icon: "dashboard", to: "/dashboard" });
+        }
     } else {
         sidebarItems = [
             { label: "Dashboard", icon: "dashboard", to: "/dashboard/member" },
@@ -238,9 +244,6 @@ export default function Sidebar({
             { label: "Profile", icon: "profile", to: "/dashboard/profile" },
         ];
     }
-
-    const isUserSuperAdmin = localStorage.getItem("role") === "super_admin";
-    const isUserAdmin = localStorage.getItem("role") === "admin";
 
     return (
         <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
@@ -296,38 +299,42 @@ export default function Sidebar({
                         );
                     })}
 
-                    {isUserSuperAdmin && role !== "super_admin" && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                navigate("/dashboard");
-                                setIsSidebarOpen(false);
-                            }}
-                            title={isSidebarCollapsed ? "Super Admin Dashboard" : ""}
-                            className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                            }`}
-                        >
-                            {renderIcon("dashboard")}
-                            {!isSidebarCollapsed && <span className="truncate">Super Admin Dashboard</span>}
-                        </button>
-                    )}
+                    {role === "anggota" && (
+                        <>
+                            {(isUserAdmin || isUserSuperAdmin) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigate("/dashboard/admin-overview");
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    title={isSidebarCollapsed ? "Dashboard Admin" : ""}
+                                    className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                        isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full"
+                                    }`}
+                                >
+                                    {renderIcon("admin")}
+                                    {!isSidebarCollapsed && <span className="truncate">Dashboard Admin</span>}
+                                </button>
+                            )}
 
-                    {isUserAdmin && role !== "admin" && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                navigate("/dashboard/admin-overview");
-                                setIsSidebarOpen(false);
-                            }}
-                            title={isSidebarCollapsed ? "Admin Dashboard" : ""}
-                            className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
-                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
-                            }`}
-                        >
-                            {renderIcon("dashboard")}
-                            {!isSidebarCollapsed && <span className="truncate">Admin Dashboard</span>}
-                        </button>
+                            {isUserSuperAdmin && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigate("/dashboard");
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    title={isSidebarCollapsed ? "Dashboard Super Admin" : ""}
+                                    className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                        isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3 w-full"
+                                    }`}
+                                >
+                                    {renderIcon("dashboard")}
+                                    {!isSidebarCollapsed && <span className="truncate">Dashboard Super Admin</span>}
+                                </button>
+                            )}
+                        </>
                     )}
                 </nav>
 

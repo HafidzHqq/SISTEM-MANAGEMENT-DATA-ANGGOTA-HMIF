@@ -11,7 +11,7 @@ import iconArchive from "../assets/icon-archive.png";
 import NotificationBell from "./NotificationBell";
 
 const NAV_ITEMS = [
-    { label: "Dashboard", icon: iconDashboard, to: "/dashboard" },
+    { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
     { label: "Anggota", icon: iconProfile, to: "/dashboard/anggota" },
     { label: "Acara", icon: iconKegiatan, to: "/dashboard/acara" },
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
