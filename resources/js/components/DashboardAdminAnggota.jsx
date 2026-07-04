@@ -163,7 +163,7 @@ const toEditableJabatan = (value) => {
     return JABATAN_OPTIONS.includes(normalized) ? normalized : "-";
 };
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 const getPaginationPages = (currentPage, totalPages) => {
     if (totalPages <= 5) {

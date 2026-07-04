@@ -18,7 +18,7 @@ const NAV_ITEMS = [
     { label: "Laporan", icon: iconArchive, to: "/dashboard/laporan" },
 ];
 
-const PER_PAGE = 5;
+const PER_PAGE = 10;
 const DEPARTMENT_OPTIONS = ["KEPROF", "PSDA", "INTERNAL", "EXTERNAL", "KOMINFO", "KESEKJENAN"];
 const normalizeDepartment = (value) => {
     const normalized = String(value ?? "").trim();
