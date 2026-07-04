@@ -730,10 +730,14 @@ export default function DashboardHistory() {
                                                 <td className="px-2 py-4 text-gray-600">{item.date}</td>
                                                 <td className="px-2 py-4 text-gray-600">{item.time}</td>
                                                 <td className="px-2 py-4 text-gray-500">
-                                                    <span className="flex items-center gap-1.5">
-                                                        <img src={item.method === "QR Scan" ? iconQrscan : iconManual} alt="" className="h-4 w-4 object-contain" />
-                                                        {item.method}
-                                                    </span>
+                                                    {item.status === "hadir" ? (
+                                                        <span className="flex items-center gap-1.5">
+                                                            <img src={item.method === "QR Scan" ? iconQrscan : iconManual} alt="" className="h-4 w-4 object-contain" />
+                                                            {item.method}
+                                                        </span>
+                                                    ) : (
+                                                        <span>-</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-2 py-4">
                                                     <StatusBadge status={item.status} />
@@ -776,7 +780,9 @@ export default function DashboardHistory() {
                                             <span>{item.date}</span>
                                             <span>{item.time}</span>
                                         </div>
-                                        <p className="mt-3 text-[0.75rem] text-gray-400">Metode: {item.method}</p>
+                                        {item.status === "hadir" && (
+                                            <p className="mt-3 text-[0.75rem] text-gray-400">Metode: {item.method}</p>
+                                        )}
                                     </button>
                                 ))
                             )}

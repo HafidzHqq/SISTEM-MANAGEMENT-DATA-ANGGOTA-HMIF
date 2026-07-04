@@ -399,34 +399,46 @@ public function myHistory(Request $request)
 {
     $user = $request->user();
 
-    $attendances = Attendance::with(['event', 'archive'])
+    // Get user's checkins first
+    $attendances = Attendance::with('archive')
         ->where('user_id', $user->user_id)
-        ->orderByDesc('checkin_time')
         ->get()
-        ->map(function ($attendance) {
-            $event = $attendance->event;
-            $eventDate = $event?->date_time ? Carbon::parse($event->date_time) : null;
-            $checkinTime = $attendance->checkin_time ? Carbon::parse($attendance->checkin_time) : null;
-            $eventTimeLabel = $eventDate ? $eventDate->format('H:i') . ' WIB' : null;
-            $checkinTimeLabel = $checkinTime ? $checkinTime->format('H:i') . ' WIB' : null;
+        ->keyBy('event_id');
 
-            return [
-                'attendance_id' => $attendance->attendance_id,
-                'event_id'      => $event?->event_id,
-                'event_name'    => $event?->title,
-                'description'   => $event?->description,
-                'location'      => $this->eventLocation($event),
-                'date'          => $eventDate?->format('d M Y') ?? $checkinTime?->format('d M Y'),
-                'time'          => $eventTimeLabel ?? $checkinTimeLabel,
-                'checkin_time'  => $checkinTimeLabel,
-                'method'        => $attendance->method ?? 'QR Scan',
-                'status'        => $attendance->status === 'present' ? 'hadir' : 'tidak_hadir',
-                'is_archived'   => (bool) $attendance->archive,
-                'archived_at'   => $attendance->archive?->archived_at,
-            ];
-        });
+    // Get event IDs the user checked in to
+    $userEventIds = $attendances->keys()->all();
 
-    return response()->json($attendances);
+    // Get all events that have already started, or whose window opened, or which the user checked in to
+    $events = Event::where('date_time', '<=', now())
+        ->orWhere('attendance_window_start', '<=', now())
+        ->orWhereIn('event_id', $userEventIds)
+        ->orderByDesc('date_time')
+        ->get();
+
+    $history = $events->map(function ($event) use ($attendances) {
+        $attendance = $attendances->get($event->event_id);
+        $eventDate = $event->date_time ? Carbon::parse($event->date_time) : null;
+        $checkinTime = $attendance?->checkin_time ? Carbon::parse($attendance->checkin_time) : null;
+        $eventTimeLabel = $eventDate ? $eventDate->format('H:i') . ' WIB' : null;
+        $checkinTimeLabel = $checkinTime ? $checkinTime->format('H:i') . ' WIB' : null;
+
+        return [
+            'attendance_id' => $attendance?->attendance_id,
+            'event_id'      => $event->event_id,
+            'event_name'    => $event->title,
+            'description'   => $event->description,
+            'location'      => $this->eventLocation($event),
+            'date'          => $eventDate?->format('d M Y') ?? $checkinTime?->format('d M Y'),
+            'time'          => $eventTimeLabel ?? $checkinTimeLabel,
+            'checkin_time'  => $checkinTimeLabel,
+            'method'        => $attendance?->method ?? 'QR Scan',
+            'status'        => ($attendance && $attendance->status === 'present') ? 'hadir' : 'tidak_hadir',
+            'is_archived'   => $attendance ? (bool) $attendance->archive : false,
+            'archived_at'   => $attendance?->archive?->archived_at,
+        ];
+    });
+
+    return response()->json($history);
 }
 
 public function archiveOldForUser(Request $request)
