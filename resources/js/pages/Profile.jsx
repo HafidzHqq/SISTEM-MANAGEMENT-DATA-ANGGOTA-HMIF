@@ -467,49 +467,50 @@ export default function Profile() {
                     </div>
                 )}
 
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ PROFILE HEADER CARD Ã¢â€â‚¬Ã¢â€â‚¬ */}
-                    <div className="bg-white rounded-2xl p-6 shadow-sm">
-                        <div className="flex flex-col items-center md:hidden mb-2">
-                            <div className="relative mb-3">
-                                <img
-                                    src={displayFoto}
-                                    alt="Profile"
-                                    className="h-24 w-24 rounded-2xl object-cover shadow"
-                                    onError={() => setFotoLoadFailed(true)}
-                                />
-                                <label className={`absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer ${uploadingFoto ? "opacity-50" : ""}`}>
-                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <input type="file" accept="image/jpg,image/jpeg,image/png" onChange={handleFotoChange} className="hidden" disabled={uploadingFoto} />
-                                </label>
-                            </div>
-                            <h2 className="text-xl font-extrabold text-gray-900">{name}</h2>
-                            <span className="mt-2 bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-4 py-1 rounded-full uppercase tracking-wide">{statusLabel}</span>
+                    {/* ── PROFILE HEADER CARD ── */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                        {/* Profile Photo */}
+                        <div className="relative shrink-0">
+                            <img
+                                src={displayFoto}
+                                alt="Profile"
+                                className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl object-cover shadow-sm border border-slate-100"
+                                onError={() => setFotoLoadFailed(true)}
+                            />
+                            <label className={`absolute -bottom-1 -right-1 bg-green-600 text-white rounded-full p-2 shadow-md cursor-pointer hover:bg-green-700 active:scale-95 transition-all duration-200 ${uploadingFoto ? "opacity-50" : ""}`}>
+                                <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <input type="file" accept="image/jpg,image/jpeg,image/png" onChange={handleFotoChange} className="hidden" disabled={uploadingFoto} />
+                            </label>
                         </div>
-                        <div className="hidden md:flex items-center gap-6">
-                            <div className="relative">
-                                <img src={displayFoto} alt="Profile" className="h-24 w-24 rounded-2xl object-cover shadow" onError={() => setFotoLoadFailed(true)} />
-                                <label className={`absolute bottom-1 right-1 bg-white rounded-full p-1 shadow cursor-pointer ${uploadingFoto ? "opacity-50" : ""}`}>
-                                    <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <input type="file" accept="image/jpg,image/jpeg,image/png" onChange={handleFotoChange} className="hidden" disabled={uploadingFoto} />
-                                </label>
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <h2 className="text-2xl font-extrabold text-gray-900">{name}</h2>
-                                    <span className="bg-yellow-400 text-yellow-900 text-[0.72rem] font-bold px-3 py-0.5 rounded-full">{statusLabel}</span>
+
+                        {/* Profile Details */}
+                        <div className="flex-1 text-center sm:text-left flex flex-col items-center sm:items-start w-full">
+                            <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-1">
+                                Member Profile
+                            </p>
+                            <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-3">
+                                {statusLabel}
+                            </span>
+                            <h2 className="text-2xl font-black text-gray-900 leading-tight mb-1">{name}</h2>
+                            <p className="text-sm text-gray-400 font-semibold mb-4">{form.departemen || "-"}</p>
+
+                            {/* NIM Tag */}
+                            <div className="flex w-full max-w-[250px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-2.5">
+                                <div>
+                                    <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white/70 leading-none mb-0.5">NIM</p>
+                                    <p className="text-[0.95rem] font-bold text-white tracking-widest leading-none">{nim}</p>
                                 </div>
-                                <p className="text-gray-400 text-sm">{nim}</p>
+                                <svg className="h-4.5 w-4.5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
                             </div>
                         </div>
                     </div>
 
-                    {/* Ã¢â€â‚¬Ã¢â€â‚¬ MOBILE: FORM Ã¢â€â‚¬Ã¢â€â‚¬ */}
+                    {/* ─── MOBILE: FORM ─── */}
                     <div className="md:hidden space-y-3">
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400">Informasi Identitas</p>
                         {[["Nama Lengkap", name], ["NIM", nim], ["Angkatan", angkatan]].map(([label, val]) => (

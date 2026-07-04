@@ -161,44 +161,46 @@ const attendanceLabel =
                         Welcome, {firstName}.
                     </h1>
 
-                    {/* ROW 1 Ã¢â‚¬â€ Member Card + QR Card */}
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] xl:grid-cols-[1fr_450px] gap-4 mb-5">
+                    {/* ROW 1 — Member Card + QR Card */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
 
                         {/* Member Status Card */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm relative text-center md:text-left">
-                            {/* Photo Ã¢â‚¬â€ pinned to top-right corner */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 md:col-span-2">
+                            {/* Photo */}
                             <img
                                 src={fotoUrl || fotoProfile}
                                 alt="Profile"
-                                className="mx-auto mb-4 h-24 w-24 rounded-2xl object-cover shadow md:absolute md:right-4 md:top-4 md:mx-0 md:mb-0 md:h-14 md:w-14 md:rounded-xl"
+                                className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover shadow-sm border border-slate-100 flex-shrink-0"
                             />
 
-                            {/* Label + Badge */}
-                            <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-2">
-                                Member Status
-                            </p>
-                            <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-4">
-                                {statusLabel}
-                            </span>
+                            {/* Details */}
+                            <div className="flex-1 text-center sm:text-left flex flex-col items-center sm:items-start w-full">
+                                <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-1">
+                                    Member Status
+                                </p>
+                                <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-3">
+                                    {statusLabel}
+                                </span>
 
-                            {/* Name & Division */}
-                            <h3 className="text-lg font-extrabold text-gray-900 md:pr-16">{name}</h3>
-                            <p className="text-sm text-gray-400 mt-0.5 mb-4">{division}</p>
+                                {/* Name & Division */}
+                                <h3 className="text-xl font-extrabold text-gray-900 leading-tight mb-1">{name}</h3>
+                                <p className="text-sm text-gray-400 font-semibold mb-4">{division}</p>
 
-                            {/* NIM Ã¢â‚¬â€ full width */}
-                            <div className="mx-auto flex max-w-[250px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-3 text-left md:mx-0">
-                                <div>
-                                    <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white">NIM</p>
-                                    <p className="text-[1rem] font-bold text-white tracking-widest">{nim}</p>
+                                {/* NIM Tag */}
+                                <div className="flex w-full max-w-[240px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-2.5">
+                                    <div>
+                                        <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white/70 leading-none mb-0.5">NIM</p>
+                                        <p className="text-[0.95rem] font-bold text-white tracking-widest leading-none">{nim}</p>
+                                    </div>
+                                    <img src={lockIcon} alt="lock" className="h-4.5 w-4.5 object-contain brightness-[10] opacity-60" />
                                 </div>
-                                <img src={lockIcon} alt="lock" className="h-5 w-5 object-contain brightness-[10] opacity-60" />
                             </div>
                         </div>
 
                         {/* Scan QR Card */}
                         <button
                             onClick={() => navigate(isAdminView ? "/scan?mode=user" : "/scan")}
-                            className="flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-white text-center w-full cursor-pointer hover:opacity-90 active:scale-95 transition-all duration-200"
+                            className="flex flex-col items-center justify-center gap-3 rounded-2xl p-6 text-white text-center w-full cursor-pointer hover:opacity-90 active:scale-95 transition-all duration-200 md:col-span-1"
                             style={{ background: "linear-gradient(160deg, #3db53d 0%, #228b22 100%)" }}
                         >
                             <img src={sqanQr} alt="QR" className="h-12 w-12 object-contain brightness-[10]" />
@@ -209,12 +211,12 @@ const attendanceLabel =
                         </button>
                     </div>
 
-                    {/* ROW 2 Ã¢â‚¬â€ Recent Activity + Right Column */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-[1fr_600px] gap-4">
+                    {/* ROW 2 — Recent Activity + Right Column */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
                         {/* Recent Activity */}
-                        <div className="bg-white rounded-2xl p-5 shadow-sm">
-                            <div className="flex items-center justify-between mb-3">
+                        <div className="bg-white rounded-2xl p-6 shadow-sm md:col-span-2">
+                            <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-base font-bold text-gray-900">Recent Activity</h3>
                                 <Link to="/dashboard/history" className="text-sm font-semibold text-green-600 hover:text-green-700 transition">
                                     View All
@@ -253,10 +255,10 @@ const attendanceLabel =
                         </div>
 
                         {/* Right Column */}
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 md:col-span-1">
 
                             {/* Overall Attendance */}
-                            <div className="bg-white rounded-2xl p-5 shadow-sm">
+                            <div className="bg-white rounded-2xl p-6 shadow-sm">
                                 <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-7">
                                     Overall Attendance
                                 </p>
@@ -273,8 +275,6 @@ const attendanceLabel =
                                     />
                                 </div>
                             </div>
-
-
 
                         </div>
                     </div>
