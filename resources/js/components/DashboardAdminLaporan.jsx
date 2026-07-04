@@ -333,13 +333,17 @@ export default function DashboardAdminLaporan() {
             .catch(() => null);
     }, []);
 
-    // Fetch events untuk dropdown
+    // Fetch events untuk dropdown (hanya tampilkan yang sudah dimulai)
     useEffect(() => {
         fetch("/api/events", { headers: getAuthHeaders() })
             .then(res => res.json())
             .then(data => {
                 const list = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
-                setEvents(list);
+                const startedEvents = list.filter(e => {
+                    const startTime = new Date(e.attendance_window_start || e.date_time);
+                    return startTime <= new Date();
+                });
+                setEvents(startedEvents);
             })
             .catch(() => setEvents([]));
     }, []);

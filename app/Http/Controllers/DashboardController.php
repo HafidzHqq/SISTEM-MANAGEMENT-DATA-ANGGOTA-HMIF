@@ -19,7 +19,10 @@ class DashboardController extends Controller
         $totalMembers = User::whereIn('role', ['anggota', 'admin', 'super_admin'])->where('status', 'aktif')->count();
         $totalAdmins = User::whereIn('role', ['admin', 'super_admin'])->where('status', 'aktif')->count();
         $totalAttendanceParticipants = $eligibleUserIds->count();
-        $totalEvents = Event::count();
+        $totalEvents = Event::where(function($query) {
+            $query->where('date_time', '<=', now())
+                  ->orWhere('attendance_window_start', '<=', now());
+        })->count();
         $activeEvents = Event::where('date_time', '>=', now())->count();
         $eventsThisMonth = Event::whereYear('date_time', now()->year)
             ->whereMonth('date_time', now()->month)
@@ -97,7 +100,11 @@ class DashboardController extends Controller
             })
             ->values();
 
-        $attendanceTrendByEvent = Event::orderBy('date_time')
+        $attendanceTrendByEvent = Event::where(function($query) {
+                $query->where('date_time', '<=', now())
+                      ->orWhere('attendance_window_start', '<=', now());
+            })
+            ->orderBy('date_time')
             ->get()
             ->map(function ($event) use ($eligibleUserIds) {
                 return [
