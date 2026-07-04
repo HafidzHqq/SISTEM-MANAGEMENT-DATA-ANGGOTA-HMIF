@@ -101,7 +101,7 @@ function SocialChip({ label, href }) {
     );
 }
 
-function MobileHamburgerMenu() {
+function MobileHamburgerMenu({ isLoggedIn, scrollToSection }) {
     const [isOpen, setIsOpen] = useState(false);
     const name = localStorage.getItem("name") || "User";
 
@@ -133,25 +133,57 @@ function MobileHamburgerMenu() {
 
             {isOpen && (
                 <div className="absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/30 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <div className="px-4 py-3 border-b border-slate-100">
-                        <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-700">Akun Aktif</p>
-                        <p className="text-sm font-extrabold text-slate-800 truncate mt-0.5">{name}</p>
-                    </div>
+                    {isLoggedIn && (
+                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                            <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-700">Akun Aktif</p>
+                            <p className="text-sm font-extrabold text-slate-800 truncate mt-0.5">{name}</p>
+                        </div>
+                    )}
                     <div className="p-2 space-y-1">
-                        <Link
-                            to="/dashboard"
-                            className="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            <span>Dashboard</span>
-                        </Link>
                         <button
                             type="button"
-                            onClick={handleLogout}
-                            className="flex w-full items-center gap-2.5 rounded-xl bg-red-50 hover:bg-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition"
+                            onClick={() => {
+                                setIsOpen(false);
+                                scrollToSection("guide");
+                            }}
+                            className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
                         >
-                            Logout
+                            Guide
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsOpen(false);
+                                scrollToSection("faq");
+                            }}
+                            className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+                        >
+                            FAQ
+                        </button>
+                        <Link
+                            to="/dashboard"
+                            className="flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-800"
+                            onClick={() => setIsOpen(false)}
+                        >
+                            Dashboard
+                        </Link>
+                        {isLoggedIn ? (
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="flex w-full items-center rounded-xl bg-red-50 hover:bg-red-100 px-4 py-2.5 text-sm font-bold text-red-600 transition"
+                            >
+                                Logout
+                            </button>
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="flex items-center rounded-xl bg-amber-50 hover:bg-[#F4C44C]/20 px-4 py-2.5 text-sm font-bold text-amber-700 transition"
+                                onClick={() => setIsOpen(false)}
+                            >
+                                Login
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}
@@ -218,21 +250,22 @@ export default function Home() {
                         </Link>
                     </nav>
 
-                    {isLoggedIn ? (
-                        <>
-                            <div className="hidden md:block">
-                                <UserMenu />
-                            </div>
-                            <MobileHamburgerMenu />
-                        </>
-                    ) : (
-                        <Link
-                            to="/login"
-                            className="inline-flex items-center gap-2 rounded-full bg-[#F4C44C] px-6 py-2.5 text-[15px] font-extrabold text-slate-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-md"
-                        >
-                            <span>Login</span>
-                        </Link>
-                    )}
+                    {/* Desktop actions (hidden on mobile) */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {isLoggedIn ? (
+                            <UserMenu />
+                        ) : (
+                            <Link
+                                to="/login"
+                                className="inline-flex items-center gap-2 rounded-full bg-[#F4C44C] px-6 py-2.5 text-[15px] font-extrabold text-slate-900 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-md"
+                            >
+                                <span>Login</span>
+                            </Link>
+                        )}
+                    </div>
+
+                    {/* Mobile Hamburger Menu (hidden on desktop) */}
+                    <MobileHamburgerMenu isLoggedIn={isLoggedIn} scrollToSection={scrollToSection} />
                 </div>
             </header>
 
