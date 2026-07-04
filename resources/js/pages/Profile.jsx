@@ -407,7 +407,7 @@ export default function Profile() {
             )}
 
             <Sidebar
-                role={role}
+                role="anggota"
                 userName={name}
                 nim={nim}
                 isSidebarOpen={isSidebarOpen}

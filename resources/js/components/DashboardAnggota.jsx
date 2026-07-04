@@ -109,7 +109,7 @@ const attendanceLabel =
     return (
         <div className="min-h-screen bg-[#f0f2ee] font-sans flex">
             <Sidebar
-                role={role}
+                role="anggota"
                 userName={name}
                 nim={nim}
                 isSidebarOpen={isSidebarOpen}

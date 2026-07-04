@@ -47,8 +47,8 @@ const STATUS_FILTER_OPTIONS = ["Semua Status", "TETAP", "MUDA", "LUAR BIASA"];
 const METRIC_CONFIG = [
     {
         label: "Total Anggota",
-        value: "1,248",
-        help: "+12% peningkatan",
+        key: "total",
+        help: "",
         icon: iconTotalAnggota,
         valueClass: "text-[#1f5e22]",
         accentClass: "bg-[#1f5e22]",

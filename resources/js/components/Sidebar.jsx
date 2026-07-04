@@ -240,6 +240,7 @@ export default function Sidebar({
     }
 
     const isUserSuperAdmin = localStorage.getItem("role") === "super_admin";
+    const isUserAdmin = localStorage.getItem("role") === "admin";
 
     return (
         <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
@@ -309,6 +310,23 @@ export default function Sidebar({
                         >
                             {renderIcon("dashboard")}
                             {!isSidebarCollapsed && <span className="truncate">Super Admin Dashboard</span>}
+                        </button>
+                    )}
+
+                    {isUserAdmin && role !== "admin" && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                navigate("/dashboard/admin-overview");
+                                setIsSidebarOpen(false);
+                            }}
+                            title={isSidebarCollapsed ? "Admin Dashboard" : ""}
+                            className={`flex items-center rounded-xl text-left text-[0.92rem] font-semibold text-white/65 transition-all duration-150 hover:bg-white/8 hover:text-white ${
+                                isSidebarCollapsed ? "justify-center px-0 py-3 h-11 w-11 mx-auto" : "gap-3.5 px-4.5 py-3"
+                            }`}
+                        >
+                            {renderIcon("dashboard")}
+                            {!isSidebarCollapsed && <span className="truncate">Admin Dashboard</span>}
                         </button>
                     )}
                 </nav>

@@ -411,7 +411,7 @@ export default function DashboardHistory() {
 
     const renderSidebar = () => (
         <Sidebar
-            role={role}
+            role="anggota"
             userName={name}
             nim={nim}
             isSidebarOpen={isSidebarOpen}
