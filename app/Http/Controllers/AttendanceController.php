@@ -32,6 +32,7 @@ class AttendanceController extends Controller
         }
 
         $now = Carbon::now();
+        $enforceWindow = true;
 
         if ($enforceWindow && $now->lt($event->attendance_window_start)) {
             return response()->json([

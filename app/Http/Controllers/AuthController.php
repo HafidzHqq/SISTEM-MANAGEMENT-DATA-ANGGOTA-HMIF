@@ -60,7 +60,7 @@ class AuthController extends Controller
 
         // Cek angkatan (digit 2-3)
         $angkatan = substr($nimDigits, 1, 2);
-        if (!in_array($angkatan, ['22', '23', '24', '25'])) {
+        if (!in_array($angkatan, ['22', '23', '24', '25', '26'])) {
             return $this->redirectToFrontend('/login', [
                 'error' => 'angkatan_tidak_valid',
             ]);
@@ -83,9 +83,6 @@ class AuthController extends Controller
         }
 
         $targetRole = $existingUser?->role ?? 'anggota';
-        if (strtolower($email) === 'hafidz.124140016@student.itera.ac.id') {
-            $targetRole = 'super_admin';
-        }
 
         $user = User::updateOrCreate(
             ['nim' => $nim],
