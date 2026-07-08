@@ -142,6 +142,17 @@ const JABATAN_OPTIONS = [
     "Staf"
 ];
 
+const JABATAN_BY_DEPARTEMEN = {
+    "Kesekjenan": ["Ketua Himpunan", "Sekretaris Jenderal", "Sekretaris Umum", "Bendahara Umum"],
+    "Senator": ["Senator", "Sekretaris Umum", "Staff"],
+    "DPA": ["Koordinator DPA", "Sekretaris Jenderal", "Sekretaris Umum", "Ketua Komisi", "Staff Ahli", "Staff"],
+    "Eksternal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "PSDA": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Internal": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi","Staff Ahli", "Staff"],
+    "Keprofesian": ["Kepala Departemen", "Sekretaris Departemen", "Kepala Divisi", "Staff Ahli", "Staff"],
+    "Kominfo": ["Kepala Departemen", "Sekretaris Departemen","Kepala Divisi", "Staff Ahli", "Staff"],
+};
+
 const STATUS_OPTIONS = [
     { value: "Muda", label: "Anggota Muda" },
     { value: "Tetap", label: "Anggota Tetap" },
@@ -737,10 +748,16 @@ export default function DashboardAdminAnggota() {
     const handleEditMemberChange = (event) => {
         const { name, value } = event.target;
         setIsMemberSaved(false);
-        setEditMemberForm((current) => ({
-            ...current,
-            [name]: value,
-        }));
+        setEditMemberForm((current) => {
+            const next = {
+                ...current,
+                [name]: value,
+            };
+            if (name === "departemen") {
+                next.jabatan = JABATAN_BY_DEPARTEMEN[value]?.[0] || "-";
+            }
+            return next;
+        });
     };
 
     const handleSaveMember = async () => {
@@ -1231,9 +1248,16 @@ export default function DashboardAdminAnggota() {
                                                 onChange={handleEditMemberChange}
                                                 className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
                                             >
-                                                {JABATAN_OPTIONS.map((option) => (
-                                                    <option key={option} value={option}>{option}</option>
-                                                ))}
+                                                <option value="-">-</option>
+                                                {editMemberForm.departemen && JABATAN_BY_DEPARTEMEN[editMemberForm.departemen] ? (
+                                                    JABATAN_BY_DEPARTEMEN[editMemberForm.departemen].map((option) => (
+                                                        <option key={option} value={option}>{option}</option>
+                                                    ))
+                                                ) : (
+                                                    JABATAN_OPTIONS.map((option) => (
+                                                        <option key={option} value={option}>{option}</option>
+                                                    ))
+                                                )}
                                             </select>
                                         </label>
 
