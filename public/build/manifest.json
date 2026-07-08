@@ -1,0 +1,141 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-Dj9XsbDB.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.jsx": {
+    "file": "assets/app-CYTdMOj8.js",
+    "name": "app",
+    "src": "resources/js/app.jsx",
+    "isEntry": true,
+    "css": [
+      "assets/app-Dj9XsbDB.css"
+    ],
+    "assets": [
+      "assets/logo-hmif-BOS7H6jb.png",
+      "assets/logo-google-CBGyVc5G.png",
+      "assets/fotoprofile-BqtSX_PV.png",
+      "assets/lock-BYfNwP2r.png",
+      "assets/sqanqr-Dj-vjh21.png",
+      "assets/icon-dashboard-BztDNiJa.png",
+      "assets/icon-history-BTwltO3s.png",
+      "assets/icon-profile-ByJ5pTk7.png",
+      "assets/Icon-totalanggota-D5KAPz3i.png",
+      "assets/Icon-acaraaktif-C6NykOXA.png",
+      "assets/Icon-hadirhariini-D5kUyQ0p.png",
+      "assets/Icon-persentasekeaktifan-DSc5aseU.png",
+      "assets/Icon-livehadir-DzYe5kl5.png",
+      "assets/Icon-grafiktotalanggota-C0NpJJ2K.png",
+      "assets/icon-kegiatan-BUcrPgoY.png",
+      "assets/icon-archive-BeC7pWhU.png",
+      "assets/icon-qrscan-YvvSbCqj.png",
+      "assets/icon-manual-Bd4tXDqK.png",
+      "assets/icon-grafikkehadiran-B027t7mV.png",
+      "assets/icon-hadir-CKn8raZQ.png",
+      "assets/icon-tidakhadir-QNQpOkQ7.png",
+      "assets/icon-print-B-rZ2a5s.png",
+      "assets/icon-search-AVL7e83Z.png"
+    ]
+  },
+  "resources/js/assets/assets dash admin/Icon-acaraaktif.png": {
+    "file": "assets/Icon-acaraaktif-C6NykOXA.png",
+    "src": "resources/js/assets/assets dash admin/Icon-acaraaktif.png"
+  },
+  "resources/js/assets/assets dash admin/Icon-grafiktotalanggota.png": {
+    "file": "assets/Icon-grafiktotalanggota-C0NpJJ2K.png",
+    "src": "resources/js/assets/assets dash admin/Icon-grafiktotalanggota.png"
+  },
+  "resources/js/assets/assets dash admin/Icon-hadirhariini.png": {
+    "file": "assets/Icon-hadirhariini-D5kUyQ0p.png",
+    "src": "resources/js/assets/assets dash admin/Icon-hadirhariini.png"
+  },
+  "resources/js/assets/assets dash admin/Icon-livehadir.png": {
+    "file": "assets/Icon-livehadir-DzYe5kl5.png",
+    "src": "resources/js/assets/assets dash admin/Icon-livehadir.png"
+  },
+  "resources/js/assets/assets dash admin/Icon-persentasekeaktifan.png": {
+    "file": "assets/Icon-persentasekeaktifan-DSc5aseU.png",
+    "src": "resources/js/assets/assets dash admin/Icon-persentasekeaktifan.png"
+  },
+  "resources/js/assets/assets dash admin/Icon-totalanggota.png": {
+    "file": "assets/Icon-totalanggota-D5KAPz3i.png",
+    "src": "resources/js/assets/assets dash admin/Icon-totalanggota.png"
+  },
+  "resources/js/assets/fotoprofile.png": {
+    "file": "assets/fotoprofile-BqtSX_PV.png",
+    "src": "resources/js/assets/fotoprofile.png"
+  },
+  "resources/js/assets/icon-archive.png": {
+    "file": "assets/icon-archive-BeC7pWhU.png",
+    "src": "resources/js/assets/icon-archive.png"
+  },
+  "resources/js/assets/icon-dashboard.png": {
+    "file": "assets/icon-dashboard-BztDNiJa.png",
+    "src": "resources/js/assets/icon-dashboard.png"
+  },
+  "resources/js/assets/icon-grafikkehadiran.png": {
+    "file": "assets/icon-grafikkehadiran-B027t7mV.png",
+    "src": "resources/js/assets/icon-grafikkehadiran.png"
+  },
+  "resources/js/assets/icon-hadir.png": {
+    "file": "assets/icon-hadir-CKn8raZQ.png",
+    "src": "resources/js/assets/icon-hadir.png"
+  },
+  "resources/js/assets/icon-history.png": {
+    "file": "assets/icon-history-BTwltO3s.png",
+    "src": "resources/js/assets/icon-history.png"
+  },
+  "resources/js/assets/icon-kegiatan.png": {
+    "file": "assets/icon-kegiatan-BUcrPgoY.png",
+    "src": "resources/js/assets/icon-kegiatan.png"
+  },
+  "resources/js/assets/icon-manual.png": {
+    "file": "assets/icon-manual-Bd4tXDqK.png",
+    "src": "resources/js/assets/icon-manual.png"
+  },
+  "resources/js/assets/icon-print.png": {
+    "file": "assets/icon-print-B-rZ2a5s.png",
+    "src": "resources/js/assets/icon-print.png"
+  },
+  "resources/js/assets/icon-profile.png": {
+    "file": "assets/icon-profile-ByJ5pTk7.png",
+    "src": "resources/js/assets/icon-profile.png"
+  },
+  "resources/js/assets/icon-qrscan.png": {
+    "file": "assets/icon-qrscan-YvvSbCqj.png",
+    "src": "resources/js/assets/icon-qrscan.png"
+  },
+  "resources/js/assets/icon-ringkasan.png": {
+    "file": "assets/icon-ringkasan-wcRC2hif.png",
+    "src": "resources/js/assets/icon-ringkasan.png"
+  },
+  "resources/js/assets/icon-search.png": {
+    "file": "assets/icon-search-AVL7e83Z.png",
+    "src": "resources/js/assets/icon-search.png"
+  },
+  "resources/js/assets/icon-tidakhadir.png": {
+    "file": "assets/icon-tidakhadir-QNQpOkQ7.png",
+    "src": "resources/js/assets/icon-tidakhadir.png"
+  },
+  "resources/js/assets/lock.png": {
+    "file": "assets/lock-BYfNwP2r.png",
+    "src": "resources/js/assets/lock.png"
+  },
+  "resources/js/assets/logo-google.png": {
+    "file": "assets/logo-google-CBGyVc5G.png",
+    "src": "resources/js/assets/logo-google.png"
+  },
+  "resources/js/assets/logo-hmif.png": {
+    "file": "assets/logo-hmif-BOS7H6jb.png",
+    "src": "resources/js/assets/logo-hmif.png"
+  },
+  "resources/js/assets/sqanqr.png": {
+    "file": "assets/sqanqr-Dj-vjh21.png",
+    "src": "resources/js/assets/sqanqr.png"
+  }
+}
