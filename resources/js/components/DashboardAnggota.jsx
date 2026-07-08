@@ -168,30 +168,51 @@ const attendanceLabel =
                         {/* Member Status Card */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6 md:col-span-2">
                             {/* Photo */}
-                            <img
-                                src={fotoUrl || fotoProfile}
-                                alt="Profile"
-                                className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover shadow-sm border border-slate-100 flex-shrink-0"
-                            />
+                            {!user ? (
+                                <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl bg-gray-200 animate-pulse flex-shrink-0 shadow-sm border border-slate-100" />
+                            ) : (
+                                <img
+                                    src={fotoUrl || fotoProfile}
+                                    alt="Profile"
+                                    className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover shadow-sm border border-slate-100 flex-shrink-0"
+                                />
+                            )}
 
                             {/* Details */}
                             <div className="flex-1 text-center sm:text-left flex flex-col items-center sm:items-start w-full">
                                 <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 mb-1">
                                     Member Status
                                 </p>
-                                <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-3">
-                                    {statusLabel}
-                                </span>
+                                {!user ? (
+                                    <div className="h-5 w-24 bg-gray-200 rounded-full animate-pulse mb-3" />
+                                ) : (
+                                    <span className="inline-block bg-yellow-400 text-yellow-900 text-[0.7rem] font-bold px-3 py-0.5 rounded-full mb-3">
+                                        {statusLabel}
+                                    </span>
+                                )}
 
                                 {/* Name & Division */}
-                                <h3 className="text-xl font-extrabold text-gray-900 leading-tight mb-1">{name}</h3>
-                                <p className="text-sm text-gray-400 font-semibold mb-4">{division}</p>
+                                {!user ? (
+                                    <div className="space-y-2 mb-4 w-full flex flex-col items-center sm:items-start animate-pulse">
+                                        <div className="h-6 w-48 bg-gray-200 rounded" />
+                                        <div className="h-4 w-32 bg-gray-200 rounded" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <h3 className="text-xl font-extrabold text-gray-900 leading-tight mb-1">{name}</h3>
+                                        <p className="text-sm text-gray-400 font-semibold mb-4">{division}</p>
+                                    </>
+                                )}
 
                                 {/* NIM Tag */}
                                 <div className="flex w-full max-w-[240px] items-center justify-between rounded-xl bg-[#1c5e22] px-4 py-2.5">
                                     <div>
                                         <p className="text-[0.55rem] font-bold tracking-[0.18em] uppercase text-white/70 leading-none mb-0.5">NIM</p>
-                                        <p className="text-[0.95rem] font-bold text-white tracking-widest leading-none">{nim}</p>
+                                        {!user ? (
+                                            <div className="h-4 w-28 bg-white/20 rounded animate-pulse mt-1" />
+                                        ) : (
+                                            <p className="text-[0.95rem] font-bold text-white tracking-widest leading-none mt-1">{nim}</p>
+                                        )}
                                     </div>
                                     <img src={lockIcon} alt="lock" className="h-4.5 w-4.5 object-contain brightness-[10] opacity-60" />
                                 </div>
@@ -225,7 +246,23 @@ const attendanceLabel =
                             </div>
                             <div className="divide-y divide-gray-100">
                                 {isHistoryLoading ? (
-                                    <div className="py-8 text-center text-sm text-gray-400">Memuat riwayat kehadiran...</div>
+                                    <div className="space-y-3">
+                                        {[1, 2, 3].map((n) => (
+                                            <div key={n} className="flex items-center justify-between py-3 animate-pulse">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-10 w-10 rounded-xl bg-gray-100" />
+                                                    <div className="space-y-2">
+                                                        <div className="h-4.5 w-32 rounded bg-gray-100" />
+                                                        <div className="h-3 w-20 rounded bg-gray-100" />
+                                                    </div>
+                                                </div>
+                                                <div className="text-right space-y-1.5 flex flex-col items-end">
+                                                    <div className="h-4.5 w-16 rounded bg-gray-100" />
+                                                    <div className="h-3 w-12 rounded bg-gray-100" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 ) : recentActivities.length === 0 ? (
                                     <div className="py-8 text-center text-sm text-gray-400">Belum ada riwayat kehadiran.</div>
                                 ) : recentActivities.map((a) => (
