@@ -246,7 +246,8 @@ export default function DashboardAdmin() {
             return diffDays <= rangeDays;
         })
         .slice(-8);
-    const trendMax = Math.max(...trendItems.map((item) => Number(item.total_present || 0)), 1);
+    const totalMembersVal = Number(summary.total_attendance_participants || 1);
+    const trendMax = Math.max(...trendItems.map((item) => Number(item.total_present || 0)), totalMembersVal, 1);
 
 
     const handleLogout = () => {
