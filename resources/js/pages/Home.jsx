@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import UserMenu from "../components/UserMenu";
+import ScrollReveal from "../components/ScrollReveal";
 import logoHmif from "../assets/logo-hmif.png";
 
 const steps = [
@@ -293,123 +294,149 @@ export default function Home() {
                     </div>
 
                     <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-24">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[#0a220c] border border-white/5 px-4.5 py-1.5 text-xs font-bold tracking-[0.24em] text-white uppercase">
-                            <span className="h-2 w-2 rounded-full bg-[#F4C44C] animate-pulse" />
-                            <span>Sistem Management Data</span>
-                        </div>
+                        <ScrollReveal direction="fade" duration={700}>
+                            <div className="inline-flex items-center gap-2 rounded-full bg-[#0a220c] border border-white/5 px-4.5 py-1.5 text-xs font-bold tracking-[0.24em] text-white uppercase">
+                                <span className="h-2 w-2 rounded-full bg-[#F4C44C] animate-pulse" />
+                                <span>Sistem Management Data</span>
+                            </div>
+                        </ScrollReveal>
  
-                        <h1 className="mt-8 max-w-4xl text-3xl font-serif font-bold leading-[1.25] tracking-normal text-white sm:text-5xl lg:text-[3.8rem]">
-                            Sistem Management
-                            <span className="block mt-2.5 text-[#F4C44C]">Data Anggota HMIF</span>
-                        </h1>
+                        <ScrollReveal direction="up" delay={150} duration={700}>
+                            <h1 className="mt-8 max-w-4xl text-3xl font-serif font-bold leading-[1.25] tracking-normal text-white sm:text-5xl lg:text-[3.8rem]">
+                                Sistem Management
+                                <span className="block mt-2.5 text-[#F4C44C]">Data Anggota HMIF</span>
+                            </h1>
+                        </ScrollReveal>
  
-                        <p className="mt-6 max-w-2xl text-[1.05rem] sm:text-lg leading-relaxed text-emerald-100/75">
-                            Ikuti langkah-langkah mudah di bawah ini untuk mengakses dashboard anggota HMIF dengan akun Google ITERA secara aman, cepat, dan efisien.
-                        </p>
+                        <ScrollReveal direction="up" delay={300} duration={700}>
+                            <p className="mt-6 max-w-2xl text-[1.05rem] sm:text-lg leading-relaxed text-emerald-100/75">
+                                Ikuti langkah-langkah mudah di bawah ini untuk mengakses dashboard anggota HMIF dengan akun Google ITERA secara aman, cepat, dan efisien.
+                            </p>
+                        </ScrollReveal>
  
-                        <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row justify-center w-full max-w-md sm:max-w-none">
-                            <a
-                                href="#steps"
-                                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#F4C44C] px-8 py-4 text-base font-extrabold text-slate-900 shadow-[0_16px_28px_rgba(244,196,76,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-[0_20px_35px_rgba(244,196,76,0.28)] active:translate-y-0"
-                            >
-                                <span>Mulai Panduan</span>
-                                <IconArrowDown />
-                            </a>
-                            <Link
-                                to="/login"
-                                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/20 active:translate-y-0"
-                            >
-                                Portal Utama
-                            </Link>
-                        </div>
+                        <ScrollReveal direction="up" delay={450} duration={700}>
+                            <div className="mt-10 flex flex-col items-stretch gap-4 sm:flex-row justify-center w-full max-w-md sm:max-w-none">
+                                <a
+                                    href="#steps"
+                                    className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#F4C44C] px-8 py-4 text-base font-extrabold text-slate-900 shadow-[0_16px_28px_rgba(244,196,76,0.18)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#e0b23b] hover:shadow-[0_20px_35px_rgba(244,196,76,0.28)] active:translate-y-0"
+                                >
+                                    <span>Mulai Panduan</span>
+                                    <IconArrowDown />
+                                </a>
+                                <Link
+                                    to="/login"
+                                    className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/20 active:translate-y-0"
+                                >
+                                    Portal Utama
+                                </Link>
+                            </div>
+                        </ScrollReveal>
                     </div>
                 </section>
 
                 <section id="steps" className="scroll-mt-24 bg-[#eef3ff] px-4 py-20 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl">
-                        <div className="text-center">
-                            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                                Langkah-Langkah Login
-                            </h2>
-                            <div className="mx-auto mt-5 h-1.5 w-20 rounded-full bg-[#22c55e]" />
-                        </div>
+                        <ScrollReveal direction="up">
+                            <div className="text-center">
+                                <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                                    Langkah-Langkah Login
+                                </h2>
+                                <div className="mx-auto mt-5 h-1.5 w-20 rounded-full bg-[#22c55e]" />
+                            </div>
+                        </ScrollReveal>
 
                         <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-5">
-                            {steps.map((step) => (
-                                <article
+                            {steps.map((step, index) => (
+                                <ScrollReveal
                                     key={step.number}
-                                    className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_2px_10px_rgba(15,23,42,0.04)]"
+                                    direction="up"
+                                    delay={index * 100}
+                                    duration={600}
                                 >
-                                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#dbe7ff] text-2xl font-bold text-slate-700">
-                                        {step.number}
-                                    </div>
-                                    <h3 className="mt-8 text-xl font-medium text-slate-800">{step.title}</h3>
-                                    <p className="mt-3 text-[15px] leading-7 text-slate-500">
-                                        {step.description}
-                                    </p>
-                                </article>
+                                    <article
+                                        className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_2px_10px_rgba(15,23,42,0.04)] h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+                                    >
+                                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#dbe7ff] text-2xl font-bold text-slate-700">
+                                            {step.number}
+                                        </div>
+                                        <h3 className="mt-8 text-xl font-medium text-slate-800">{step.title}</h3>
+                                        <p className="mt-3 text-[15px] leading-7 text-slate-500">
+                                            {step.description}
+                                        </p>
+                                    </article>
+                                </ScrollReveal>
                             ))}
                         </div>
 
-                        <div className="mt-12 rounded-[1.5rem] border border-emerald-200 bg-[#dcf2ef] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
-                            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#22c55e] text-white">
-                                    <IconLightbulb />
-                                </div>
-                                <div>
-                                    <h3 className="text-2xl font-bold text-[#22c55e]">Tips Penting</h3>
-                                    <p className="mt-1 max-w-5xl text-[15px] leading-7 text-slate-600 sm:text-lg">
-                                        Selalu gunakan jaringan internet yang stabil dan pastikan browser Anda dalam versi terbaru untuk pengalaman terbaik saat mengakses Dashboard Anggota.
-                                    </p>
+                        <ScrollReveal direction="left" delay={200} duration={700}>
+                            <div className="mt-12 rounded-[1.5rem] border border-emerald-200 bg-[#dcf2ef] px-6 py-6 shadow-sm sm:px-8 sm:py-7">
+                                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#22c55e] text-white">
+                                        <IconLightbulb />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-[#22c55e]">Tips Penting</h3>
+                                        <p className="mt-1 max-w-5xl text-[15px] leading-7 text-slate-600 sm:text-lg">
+                                            Selalu gunakan jaringan internet yang stabil dan pastikan browser Anda dalam versi terbaru untuk pengalaman terbaik saat mengakses Dashboard Anggota.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </ScrollReveal>
                     </div>
                 </section>
 
                 <section id="faq" className="scroll-mt-24 bg-[#f8f9ff] px-4 py-20 sm:px-6 lg:px-8">
                     <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.95fr_1.55fr] lg:items-start">
-                        <div>
-                            <h2 className="max-w-lg text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-                                FAQ - Pertanyaan Sering Diajukan
-                            </h2>
-                            <p className="mt-6 max-w-md text-lg leading-8 text-slate-500">
-                                Temukan jawaban cepat untuk kendala yang mungkin Anda hadapi saat proses login.
-                            </p>
-                        </div>
+                        <ScrollReveal direction="right" duration={700}>
+                            <div>
+                                <h2 className="max-w-lg text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
+                                    FAQ - Pertanyaan Sering Diajukan
+                                </h2>
+                                <p className="mt-6 max-w-md text-lg leading-8 text-slate-500">
+                                    Temukan jawaban cepat untuk kendala yang mungkin Anda hadapi saat proses login.
+                                </p>
+                            </div>
+                        </ScrollReveal>
 
                         <div className="space-y-4">
                             {faqs.map((faq, index) => {
                                 const open = activeFaq === index;
 
                                 return (
-                                    <div
+                                    <ScrollReveal
                                         key={faq.question}
-                                        className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)]"
+                                        direction="up"
+                                        delay={index * 120}
+                                        duration={600}
                                     >
-                                        <button
-                                            type="button"
-                                            className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left"
-                                            onClick={() => setActiveFaq(open ? null : index)}
-                                            aria-expanded={open}
+                                        <div
+                                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition-all duration-200 hover:shadow-[0_4px_20px_rgba(15,23,42,0.08)]"
                                         >
-                                            <span className="text-[17px] font-semibold text-slate-800">
-                                                {faq.question}
-                                            </span>
-                                            <span
-                                                className={`shrink-0 text-slate-500 transition-transform duration-200 ${open ? "rotate-180" : ""
-                                                    }`}
+                                            <button
+                                                type="button"
+                                                className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left"
+                                                onClick={() => setActiveFaq(open ? null : index)}
+                                                aria-expanded={open}
                                             >
-                                                <IconChevron />
-                                            </span>
-                                        </button>
+                                                <span className="text-[17px] font-semibold text-slate-800">
+                                                    {faq.question}
+                                                </span>
+                                                <span
+                                                    className={`shrink-0 text-slate-500 transition-transform duration-300 ${open ? "rotate-180" : ""
+                                                        }`}
+                                                >
+                                                    <IconChevron />
+                                                </span>
+                                            </button>
 
-                                        {open && (
-                                            <div className="px-6 pb-6 text-[15px] leading-7 text-slate-500">
-                                                {faq.answer}
-                                            </div>
-                                        )}
-                                    </div>
+                                            {open && (
+                                                <div className="animate-faq-open px-6 pb-6 text-[15px] leading-7 text-slate-500">
+                                                    {faq.answer}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </ScrollReveal>
                                 );
                             })}
                         </div>
@@ -418,54 +445,60 @@ export default function Home() {
 
                 <section id="dashboard" className="bg-[#243449] px-4 py-16 text-white sm:px-6 lg:px-8">
                     <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.1fr_0.8fr_0.9fr]">
-                        <div>
-                            <div className="flex items-center gap-4">
-                                <img src={logoHmif} alt="HMIF ITERA" className="h-16 w-16 rounded-full object-cover" />
-                                <div>
-                                    <h3 className="text-3xl font-extrabold tracking-tight text-[#22c55e]">
-                                        HMIF ITERA
-                                    </h3>
-                                    <p className="mt-2 max-w-xl text-[15px] leading-7 text-slate-300">
-                                        Himpunan Mahasiswa Informatika Institut Teknologi Sumatera. Menjadi wadah kolaborasi dan inovasi mahasiswa informatika.
-                                    </p>
+                        <ScrollReveal direction="up" duration={700}>
+                            <div>
+                                <div className="flex items-center gap-4">
+                                    <img src={logoHmif} alt="HMIF ITERA" className="h-16 w-16 rounded-full object-cover" />
+                                    <div>
+                                        <h3 className="text-3xl font-extrabold tracking-tight text-[#22c55e]">
+                                            HMIF ITERA
+                                        </h3>
+                                        <p className="mt-2 max-w-xl text-[15px] leading-7 text-slate-300">
+                                            Himpunan Mahasiswa Informatika Institut Teknologi Sumatera. Menjadi wadah kolaborasi dan inovasi mahasiswa informatika.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 flex items-center gap-3">
+                                    <SocialChip label="IG" href="https://www.instagram.com/hmif.itera?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" />
+                                    <SocialChip label="IN" href="https://www.linkedin.com/company/hmif-itera" />
                                 </div>
                             </div>
+                        </ScrollReveal>
 
-                            <div className="mt-8 flex items-center gap-3">
-                                <SocialChip label="IG" href="https://www.instagram.com/hmif.itera?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" />
-                                <SocialChip label="IN" href="https://www.linkedin.com/company/hmif-itera" />
+                        <ScrollReveal direction="up" delay={150} duration={700}>
+                            <div>
+                                <h4 className="text-3xl font-bold tracking-tight text-white">Quick Links</h4>
+                                <ul className="mt-6 space-y-4 text-[15px] text-slate-300">
+                                    <li>
+                                        <a className="transition hover:text-white" href="#guide">
+                                            Guide
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a className="transition hover:text-white" href="#faq">
+                                            FAQ
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <Link className="transition hover:text-white" to="/dashboard">
+                                            Dashboard
+                                        </Link>
+                                    </li>
+                                </ul>
                             </div>
-                        </div>
+                        </ScrollReveal>
 
-                        <div>
-                            <h4 className="text-3xl font-bold tracking-tight text-white">Quick Links</h4>
-                            <ul className="mt-6 space-y-4 text-[15px] text-slate-300">
-                                <li>
-                                    <a className="transition hover:text-white" href="#guide">
-                                        Guide
-                                    </a>
-                                </li>
-                                <li>
-                                    <a className="transition hover:text-white" href="#faq">
-                                        FAQ
-                                    </a>
-                                </li>
-                                <li>
-                                    <Link className="transition hover:text-white" to="/dashboard">
-                                        Dashboard
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 className="text-3xl font-bold tracking-tight text-white">Hubungi Kami</h4>
-                            <p className="mt-6 max-w-md text-[15px] leading-7 text-slate-300"></p>
-                            <div className="mt-8 h-px bg-white/10" />
-                            <p className="mt-4 text-sm leading-6 text-slate-400">
-                                (c) 2026 HMIF (Himpunan Mahasiswa Informatika). All rights reserved.
-                            </p>
-                        </div>
+                        <ScrollReveal direction="up" delay={300} duration={700}>
+                            <div>
+                                <h4 className="text-3xl font-bold tracking-tight text-white">Hubungi Kami</h4>
+                                <p className="mt-6 max-w-md text-[15px] leading-7 text-slate-300"></p>
+                                <div className="mt-8 h-px bg-white/10" />
+                                <p className="mt-4 text-sm leading-6 text-slate-400">
+                                    (c) 2026 HMIF (Himpunan Mahasiswa Informatika). All rights reserved.
+                                </p>
+                            </div>
+                        </ScrollReveal>
                     </div>
                 </section>
             </main>

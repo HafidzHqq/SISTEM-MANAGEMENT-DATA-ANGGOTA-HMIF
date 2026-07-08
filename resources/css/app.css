@@ -16,3 +16,88 @@
     from { width: 100%; }
     to   { width: 0%; }
 }
+
+/* ── Global Smooth Scroll ── */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── Page Transition Animations ── */
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pageExit {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+.page-transition {
+    will-change: opacity, transform;
+}
+
+.page-transition--enter {
+    animation: pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.page-transition--exit {
+    animation: pageExit 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ── Staggered children animation for lists/grids ── */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-slide-up {
+    animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── FAQ smooth open/close ── */
+@keyframes faqOpen {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        max-height: 200px;
+        transform: translateY(0);
+    }
+}
+
+.animate-faq-open {
+    animation: faqOpen 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: hidden;
+}
+
+/* ── Subtle float animation for hero elements ── */
+@keyframes subtleFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
+
+.animate-subtle-float {
+    animation: subtleFloat 4s ease-in-out infinite;
+}

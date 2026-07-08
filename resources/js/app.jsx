@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PageTransition from "./components/PageTransition";
 import Profile from "./pages/Profile";
 import History from "./pages/History";
 import QrScanner from "./components/QrScanner";
@@ -21,6 +22,7 @@ import DashboardAnggota from "./components/DashboardAnggota";
 function App() {
     return (
         <BrowserRouter>
+            <PageTransition>
             <Routes>
                 <Route path="/" element={<MainLayout><Home /></MainLayout>} />
                 <Route path="/login" element={<Login />} />
@@ -76,6 +78,7 @@ function App() {
                     </ProtectedRoute>
                 } />
             </Routes>
+            </PageTransition>
         </BrowserRouter>
     );
 }
