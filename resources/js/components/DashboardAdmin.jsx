@@ -228,7 +228,7 @@ export default function DashboardAdmin() {
         help: isDashboardLoading ? "Memuat" : card.help,
     }));
     const attendanceByDepartment = charts.attendance_by_department || [];
-    const departmentStats = attendanceByDepartment.slice(0, 5).map((item) => ({
+    const departmentStats = attendanceByDepartment.map((item) => ({
         label: normalizeDepartment(item.departemen),
         value: Math.round(Number(item.attendance_rate || 0)),
         total: Number(item.total_present || 0),
