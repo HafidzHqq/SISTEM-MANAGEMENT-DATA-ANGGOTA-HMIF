@@ -228,10 +228,9 @@ export default function DashboardAdmin() {
         help: isDashboardLoading ? "Memuat" : card.help,
     }));
     const attendanceByDepartment = charts.attendance_by_department || [];
-    const departmentTotal = attendanceByDepartment.reduce((total, item) => total + Number(item.total_present || 0), 0);
     const departmentStats = attendanceByDepartment.slice(0, 5).map((item) => ({
         label: normalizeDepartment(item.departemen),
-        value: departmentTotal > 0 ? Math.round((Number(item.total_present || 0) / departmentTotal) * 100) : 0,
+        value: Math.round(Number(item.attendance_rate || 0)),
         total: Number(item.total_present || 0),
     }));
     const trendItems = (charts.attendance_trend_by_event || [])

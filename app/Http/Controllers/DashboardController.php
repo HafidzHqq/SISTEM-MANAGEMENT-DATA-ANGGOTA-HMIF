@@ -68,7 +68,22 @@ class DashboardController extends Controller
             ? 'departemen'
             : 'Departemen';
 
-        $attendanceByDepartment = Attendance::query()
+        $departments = User::query()
+            ->leftJoin('member_profiles', 'users.user_id', '=', 'member_profiles.user_id')
+            ->whereIn('users.role', ['anggota', 'admin', 'super_admin'])
+            ->where('users.status', 'aktif')
+            ->select(
+                "member_profiles.{$departmentColumn} as departemen",
+                DB::raw("COUNT(users.user_id) as total_members")
+            )
+            ->groupBy("member_profiles.{$departmentColumn}")
+            ->get()
+            ->map(function ($item) {
+                $item->departemen = $item->departemen ?: 'Belum Ditentukan';
+                return $item;
+            });
+
+        $presentsByDept = Attendance::query()
             ->join('users', 'attendances.user_id', '=', 'users.user_id')
             ->leftJoin('member_profiles', 'users.user_id', '=', 'member_profiles.user_id')
             ->where('attendances.status', 'present')
@@ -80,12 +95,24 @@ class DashboardController extends Controller
                 DB::raw("COUNT(DISTINCT {$uniquePresentExpression}) as total_present")
             )
             ->groupBy("member_profiles.{$departmentColumn}")
-            ->orderByDesc('total_present')
             ->get()
-            ->map(function ($item) {
-                $item->departemen = $item->departemen ?: 'Belum Ditentukan';
-                return $item;
+            ->pluck('total_present', 'departemen')
+            ->mapWithKeys(function ($value, $key) {
+                return [$key ?: 'Belum Ditentukan' => $value];
             });
+
+        $attendanceByDepartment = $departments->map(function ($dept) use ($presentsByDept, $totalEvents) {
+            $totalPresent = $presentsByDept->get($dept->departemen, 0);
+            $capacity = $dept->total_members * $totalEvents;
+            $rate = $capacity > 0 ? round(($totalPresent / $capacity) * 100, 2) : 0;
+
+            return [
+                'departemen' => $dept->departemen,
+                'total_members' => $dept->total_members,
+                'total_present' => $totalPresent,
+                'attendance_rate' => $rate,
+            ];
+        })->sortByDesc('attendance_rate')->values();
 
         $attendanceByGeneration = Attendance::where('status', 'present')
             ->whereIn('user_id', $eligibleUserIds)
