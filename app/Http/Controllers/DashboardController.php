@@ -30,7 +30,11 @@ class DashboardController extends Controller
 
         $presentAttendancesQuery = Attendance::where('status', 'present')
             ->whereIn('user_id', $eligibleUserIds);
-        $uniquePresentExpression = "attendances.user_id || '-' || attendances.event_id";
+
+        $driver = DB::connection()->getDriverName();
+        $uniquePresentExpression = $driver === 'mysql'
+            ? "CONCAT(attendances.user_id, '-', attendances.event_id)"
+            : "attendances.user_id || '-' || attendances.event_id";
 
         $totalAttendances = (clone $presentAttendancesQuery)
             ->get(['user_id', 'event_id'])
