@@ -324,10 +324,10 @@ export default function Home() {
                                     <IconArrowDown />
                                 </a>
                                 <Link
-                                    to="/login"
+                                    to={isLoggedIn ? "/dashboard" : "/login"}
                                     className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 backdrop-blur-md px-8 py-4 text-base font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:border-white/20 active:translate-y-0"
                                 >
-                                    Portal Utama
+                                    {isLoggedIn ? "Dashboard" : "Login"}
                                 </Link>
                             </div>
                         </ScrollReveal>

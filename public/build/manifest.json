@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-GELHLflA.css",
+    "file": "assets/app-Dj9XsbDB.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,12 +9,12 @@
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-GRXSOJYY.js",
+    "file": "assets/app-DSrtXTnO.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
     "css": [
-      "assets/app-GELHLflA.css"
+      "assets/app-Dj9XsbDB.css"
     ],
     "assets": [
       "assets/logo-hmif-BOS7H6jb.png",
