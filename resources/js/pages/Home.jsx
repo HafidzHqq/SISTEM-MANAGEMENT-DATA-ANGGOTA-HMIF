@@ -4,31 +4,81 @@ import UserMenu from "../components/UserMenu";
 import ScrollReveal from "../components/ScrollReveal";
 import logoHmif from "../assets/logo-hmif.png";
 
+function IconWebsite() {
+    return (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9-9c1.657 0 3 4.03 3 9s-1.343 9-3 9m0-18c-1.657 0-3 4.03-3 9s1.343 9 3 9m-9-9a9 9 0 019-9" />
+        </svg>
+    );
+}
+
+function IconClick() {
+    return (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+        </svg>
+    );
+}
+
+function IconGoogleSSO() {
+    return (
+        <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.59 5.59 0 0 1 8.4 12.915a5.59 5.59 0 0 1 5.59-5.59c2.464 0 4.453 1.623 5.093 3.824l3.966-3.08A9.972 9.972 0 0 0 13.99 3c-5.523 0-10 4.477-10 10s4.477 10 10 10c5.523 0 10-4.477 10-10 0-.776-.088-1.53-.25-2.285H12.24Z" />
+        </svg>
+    );
+}
+
+function IconDashboardLink() {
+    return (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+        </svg>
+    );
+}
+
+function IconSuccess() {
+    return (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+    );
+}
+
 const steps = [
     {
         number: "1",
         title: "Akses Website",
         description: "Pastikan berada di website Sistem Management Data Anggota.",
+        icon: <IconWebsite />,
+        bgColor: "bg-emerald-50 text-emerald-600 border-emerald-100/50",
     },
     {
         number: "2",
         title: "Temukan Login",
         description: "Klik tombol Login yang berada pada pojok kanan atas halaman website.",
+        icon: <IconClick />,
+        bgColor: "bg-amber-50 text-amber-600 border-amber-100/50",
     },
     {
         number: "3",
         title: "Google SSO",
         description: "Login menggunakan akun Google ITERA resmi Anda.",
+        icon: <IconGoogleSSO />,
+        bgColor: "bg-rose-50 text-rose-600 border-rose-100/50",
     },
     {
         number: "4",
         title: "Masuk Dashboard",
         description: "Klik menu atau tombol Dashboard pada dropdown akun di kanan atas.",
+        icon: <IconDashboardLink />,
+        bgColor: "bg-blue-50 text-blue-600 border-blue-100/50",
     },
     {
         number: "5",
         title: "Siap Digunakan",
         description: "Anda akan diarahkan ke Dashboard Anggota HMIF untuk menggunakan fitur.",
+        icon: <IconSuccess />,
+        bgColor: "bg-emerald-50 text-emerald-600 border-emerald-100/50",
     },
 ];
 
@@ -240,14 +290,17 @@ export default function Home() {
                     </Link>
 
                     <nav className="hidden items-center gap-9 text-[15px] font-semibold text-slate-600 md:flex">
-                        <a className="transition hover:text-emerald-700" href="#guide">
+                        <a className="relative py-1 transition hover:text-emerald-700 group" href="#guide">
                             Guide
+                            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-emerald-600 transition-all duration-300 group-hover:w-full" />
                         </a>
-                        <a className="transition hover:text-emerald-700" href="#faq">
+                        <a className="relative py-1 transition hover:text-emerald-700 group" href="#faq">
                             FAQ
+                            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-emerald-600 transition-all duration-300 group-hover:w-full" />
                         </a>
-                        <Link className="transition hover:text-emerald-700" to="/dashboard">
+                        <Link className="relative py-1 transition hover:text-emerald-700 group" to="/dashboard">
                             Dashboard
+                            <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-emerald-600 transition-all duration-300 group-hover:w-full" />
                         </Link>
                     </nav>
 
@@ -291,6 +344,9 @@ export default function Home() {
                                 backgroundSize: "24px 24px"
                             }}
                         />
+                        {/* Modern Ambient Glow Blobs */}
+                        <div className="absolute top-1/4 left-10 h-80 w-80 rounded-full bg-emerald-500/12 blur-[90px] pointer-events-none" />
+                        <div className="absolute bottom-1/4 right-10 h-80 w-80 rounded-full bg-[#F4C44C]/12 blur-[90px] pointer-events-none" />
                     </div>
 
                     <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center py-16 sm:py-24">
@@ -354,15 +410,27 @@ export default function Home() {
                                     duration={600}
                                 >
                                     <article
-                                        className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-[0_2px_10px_rgba(15,23,42,0.04)] h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+                                        className="group relative rounded-3xl border border-slate-200/80 bg-white/80 backdrop-blur-md p-7 shadow-[0_4px_20px_rgba(15,23,42,0.02)] h-full transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(16,185,129,0.08)] hover:border-emerald-300"
                                     >
-                                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#dbe7ff] text-2xl font-bold text-slate-700">
-                                            {step.number}
+                                        <span className="absolute -top-2.5 -right-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 border border-slate-800 text-[10px] font-black text-white shadow-sm select-none">
+                                            0{step.number}
+                                        </span>
+                                        <div className={`inline-flex h-14 w-14 items-center justify-center rounded-2xl border ${step.bgColor} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
+                                            {step.icon}
                                         </div>
-                                        <h3 className="mt-8 text-xl font-medium text-slate-800">{step.title}</h3>
-                                        <p className="mt-3 text-[15px] leading-7 text-slate-500">
+                                        <h3 className="mt-6 text-lg font-extrabold text-slate-800 group-hover:text-emerald-800 transition-colors duration-200">
+                                            {step.title}
+                                        </h3>
+                                        <p className="mt-3 text-[14.5px] leading-relaxed text-slate-500/95">
                                             {step.description}
                                         </p>
+                                        {index < steps.length - 1 && (
+                                            <div className="hidden xl:flex absolute top-1/2 -right-3.5 z-10 -translate-y-1/2 translate-x-1/2 text-slate-300 pointer-events-none transition-transform duration-300 group-hover:translate-x-1/3">
+                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        )}
                                     </article>
                                 </ScrollReveal>
                             ))}
@@ -411,27 +479,34 @@ export default function Home() {
                                         duration={600}
                                     >
                                         <div
-                                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.04)] transition-all duration-200 hover:shadow-[0_4px_20px_rgba(15,23,42,0.08)]"
+                                            className={`overflow-hidden rounded-3xl border transition-all duration-300 ${
+                                                open 
+                                                    ? "bg-emerald-50/20 border-emerald-200/80 shadow-[0_8px_30px_rgba(16,185,129,0.03)]" 
+                                                    : "bg-white border-slate-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.01)] hover:border-slate-300 hover:shadow-[0_4px_25px_rgba(15,23,42,0.03)]"
+                                            }`}
                                         >
                                             <button
                                                 type="button"
-                                                className="flex w-full items-center justify-between gap-4 px-6 py-6 text-left"
+                                                className="group flex w-full items-center justify-between gap-4 px-7 py-6 text-left focus:outline-none"
                                                 onClick={() => setActiveFaq(open ? null : index)}
                                                 aria-expanded={open}
                                             >
-                                                <span className="text-[17px] font-semibold text-slate-800">
+                                                <span className={`text-[16.5px] font-extrabold transition-colors duration-200 ${open ? "text-emerald-900" : "text-slate-800 group-hover:text-emerald-800"}`}>
                                                     {faq.question}
                                                 </span>
                                                 <span
-                                                    className={`shrink-0 text-slate-500 transition-transform duration-300 ${open ? "rotate-180" : ""
-                                                        }`}
+                                                    className={`shrink-0 transition-all duration-300 ${
+                                                        open 
+                                                            ? "rotate-180 text-emerald-600 scale-110" 
+                                                            : "text-slate-400 group-hover:text-slate-600"
+                                                    }`}
                                                 >
                                                     <IconChevron />
                                                 </span>
                                             </button>
 
                                             {open && (
-                                                <div className="animate-faq-open px-6 pb-6 text-[15px] leading-7 text-slate-500">
+                                                <div className="animate-faq-open px-7 pb-6 text-[14.5px] leading-relaxed text-slate-500/90 border-t border-emerald-100/20 pt-4">
                                                     {faq.answer}
                                                 </div>
                                             )}
