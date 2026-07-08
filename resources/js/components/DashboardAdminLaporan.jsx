@@ -10,6 +10,7 @@ import iconArchive from "../assets/icon-archive.png";
 
 import NotificationBell from "./NotificationBell";
 import BottomBar from "./buttombar";
+import ProfileDropdown from "./ProfileDropdown";
 
 const NAV_ITEMS = [
     { label: "Dashboard", icon: iconDashboard, to: "/dashboard/admin-overview" },
@@ -527,10 +528,10 @@ export default function DashboardAdminLaporan() {
                             <span className="text-[0.7rem] font-bold tracking-[0.18em] uppercase text-gray-400">{userDivision}</span>
                             <div className="h-5 w-px bg-gray-200" />
                             <NotificationBell />
-                            <img
-                                src={fotoUrl || fotoProfile}
-                                alt="Foto profil"
-                                className="h-9 w-9 rounded-full border-2 border-gray-200 object-cover"
+                            <ProfileDropdown 
+                                displayFoto={fotoUrl} 
+                                handleLogout={handleLogout} 
+                                className="h-9 w-9"
                             />
                         </div>
                     </header>

@@ -11,6 +11,7 @@ import iconProfile from "../assets/icon-profile.png";
 import { calculateAttendanceSummary } from "../utils/attendanceHistory";
 import NotificationBell from "./NotificationBell";
 import BottomBar from "./buttombar";
+import ProfileDropdown from "./ProfileDropdown";
 
 
 
@@ -147,7 +148,11 @@ const attendanceLabel =
                         </span>
                         <div className="h-5 w-px bg-gray-200" />
                         <NotificationBell />
-                        <img src={fotoUrl || fotoProfile} alt="avatar" className="h-9 w-9 rounded-full object-cover border-2 border-gray-200" />
+                        <ProfileDropdown 
+                            displayFoto={fotoUrl} 
+                            handleLogout={handleLogout} 
+                            className="h-9 w-9"
+                        />
                     </div>
                 </header>
 

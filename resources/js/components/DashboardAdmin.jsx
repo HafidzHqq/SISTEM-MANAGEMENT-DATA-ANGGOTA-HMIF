@@ -16,6 +16,7 @@ import iconArchive from "../assets/icon-archive.png";
 
 import NotificationBell from "./NotificationBell";
 import BottomBar from "./buttombar";
+import ProfileDropdown from "./ProfileDropdown";
 
 const SUMMARY_CARD_CONFIG = [
     {
@@ -315,11 +316,10 @@ export default function DashboardAdmin() {
                             </span>
                             <div className="h-5 w-px bg-gray-200" />
                             <NotificationBell />
-                            <img
-                                src={displayFoto}
-                                alt="Foto profil"
-                                className="h-10 w-10 rounded-full border-2 border-emerald-100 object-cover shadow-sm"
-                                onError={() => setFotoLoadFailed(true)}
+                            <ProfileDropdown 
+                                displayFoto={displayFoto} 
+                                handleLogout={handleLogout} 
+                                className="h-10 w-10"
                             />
                         </div>
                     </header>
