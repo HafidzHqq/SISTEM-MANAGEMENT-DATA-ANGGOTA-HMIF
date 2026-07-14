@@ -7,6 +7,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Setup route untuk Hostinger (memperbaiki gambar tidak terload)
+Route::get('/setup-hostinger', function () {
+    try {
+        // Hapus symlink lama jika ada
+        if (file_exists(public_path('storage'))) {
+            unlink(public_path('storage'));
+        }
+        
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        return "Berhasil: " . $output;
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
+
 // Login page
 Route::get('/login', function () {
     return view('welcome');

@@ -58,15 +58,13 @@ class ProfileController extends Controller
     public function uploadFoto(Request $request)
     {
         $request->validate([
-            'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+            // Foto sudah dikompres di sisi browser (maks ~200KB), batas 2MB untuk keamanan
+            'foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $user = $request->user();
         $path = $request->file('foto')->store('profile-photos', 'public');
-        $absolutePath = storage_path('app/public/' . $path);
-
-        // Kompres foto sebelum disimpan
-        $this->compressImage($absolutePath);
+        // Kompresi sudah dilakukan di sisi browser sebelum upload
 
         $user->memberProfile()->updateOrCreate(
             ['user_id' => $user->user_id],

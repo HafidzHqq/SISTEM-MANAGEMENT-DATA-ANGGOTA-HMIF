@@ -264,16 +264,17 @@ export default function Profile() {
     const handleCropSave = () => {
         const img = new Image();
         img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = 300;
-            canvas.height = 300;
-            const ctx = canvas.getContext("2d");
+            // --- Langkah 1: Crop ke 300x300 ---
+            const cropCanvas = document.createElement("canvas");
+            cropCanvas.width = 300;
+            cropCanvas.height = 300;
+            const ctx = cropCanvas.getContext("2d");
 
             ctx.clearRect(0, 0, 300, 300);
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = "high";
 
-            const scale = 1.5; // ratio of output canvas (300) to crop frame (200)
+            const scale = 1.5;
             const canvasImageWidth = imageDimensions.width * zoom * scale;
             const canvasImageHeight = imageDimensions.height * zoom * scale;
             const canvasImageCenterX = 150 + offset.x * scale;
@@ -284,16 +285,36 @@ export default function Profile() {
 
             ctx.drawImage(img, drawX, drawY, canvasImageWidth, canvasImageHeight);
 
-            canvas.toBlob((blob) => {
+            // --- Langkah 2: Kompresi otomatis (resize + convert ke JPEG) ---
+            const MAX_SIZE = 600; // px — cukup untuk foto profil
+            const srcW = cropCanvas.width;
+            const srcH = cropCanvas.height;
+            const ratio = Math.min(MAX_SIZE / srcW, MAX_SIZE / srcH, 1); // tidak pernah memperbesar
+            const outW = Math.round(srcW * ratio);
+            const outH = Math.round(srcH * ratio);
+
+            const compCanvas = document.createElement("canvas");
+            compCanvas.width = outW;
+            compCanvas.height = outH;
+            const compCtx = compCanvas.getContext("2d");
+            compCtx.imageSmoothingEnabled = true;
+            compCtx.imageSmoothingQuality = "high";
+            compCtx.drawImage(cropCanvas, 0, 0, outW, outH);
+
+            // Export sebagai JPEG kualitas 80% — jauh lebih kecil dari PNG
+            compCanvas.toBlob((blob) => {
                 if (!blob) return;
-                const file = new File([blob], "profile_cropped.png", { type: "image/png" });
+                // Tampilkan ukuran file ke console untuk debugging
+                console.log(`[Foto] Ukuran setelah kompresi: ${(blob.size / 1024).toFixed(1)} KB`);
+                const file = new File([blob], "profile_photo.jpg", { type: "image/jpeg" });
                 setFotoFile(file);
                 setFotoPreview(URL.createObjectURL(file));
                 setCropModalOpen(false);
-            }, "image/png");
+            }, "image/jpeg", 0.80); // kualitas 80%
         };
         img.src = cropImageSrc;
     };
+
 
     const handleSave = async () => {
         if (!hasChanges || saving) return;

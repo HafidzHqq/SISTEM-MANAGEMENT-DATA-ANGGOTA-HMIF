@@ -32,6 +32,7 @@ class AttendanceController extends Controller
         }
 
         $now = Carbon::now();
+        /** @var bool $enforceWindow Selalu true untuk self-check-in, hanya admin yang bisa bypass */
         $enforceWindow = true;
 
         if ($enforceWindow && $now->lt($event->attendance_window_start)) {
@@ -45,6 +46,7 @@ class AttendanceController extends Controller
                 'message' => 'Presensi sudah ditutup'
             ], 403);
         }
+
 
         $alreadyCheckedIn = Attendance::where('user_id', $user->user_id)
             ->where('event_id', $event->event_id)

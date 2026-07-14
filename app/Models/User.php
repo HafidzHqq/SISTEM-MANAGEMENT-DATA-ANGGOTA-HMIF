@@ -9,6 +9,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Attendance;
 
+/**
+ * @property int    $user_id
+ * @property string|null $google_id
+ * @property string $email
+ * @property string|null $nim
+ * @property string $name
+ * @property string $role
+ * @property string $status
+ * @property string|null $remember_token
+ * @property \App\Models\MemberProfile|null $memberProfile
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
