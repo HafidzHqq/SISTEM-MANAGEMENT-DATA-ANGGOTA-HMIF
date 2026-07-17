@@ -115,6 +115,8 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        \App\Models\AuditLog::catat($user->user_id, 'login', 'user', $user->user_id, 'Login melalui Google Workspace ITERA');
+
         return $this->redirectToFrontend('/auth/callback', [
             'token' => $token,
             'role' => $user->role,
@@ -126,8 +128,10 @@ class AuthController extends Controller
     // Logout - hapus semua token Sanctum user
     public function logout(Request $request)
     {
-        // deleteCurrentToken() hapus token yang sedang dipakai
-        $request->user()->currentAccessToken()->delete();
+        if ($request->user()) {
+            \App\Models\AuditLog::catat($request->user()->user_id, 'logout', 'user', $request->user()->user_id, 'User melakukan logout');
+            $request->user()->currentAccessToken()->delete();
+        }
 
         return response()->json([
             'message' => 'Logout berhasil'
@@ -141,5 +145,34 @@ class AuthController extends Controller
         $queryString = $query ? '?' . http_build_query($query) : '';
 
         return redirect($frontendUrl . $path . $queryString);
+    }
+
+    // Bypass Login khusus untuk Development Local
+    public function devLogin($role = 'super_admin')
+    {
+        if (!app()->environment('local')) {
+            abort(403, 'Hanya untuk local development');
+        }
+
+        $user = User::firstOrCreate(
+            ['email' => 'dev@hmif.com'],
+            [
+                'nim' => '14111111',
+                'name' => 'Developer Mode',
+                'role' => $role,
+                'status' => 'aktif',
+            ]
+        );
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        \App\Models\AuditLog::catat($user->user_id, 'login', 'user', $user->user_id, 'Login melalui Mode Developer');
+
+        return $this->redirectToFrontend('/auth/callback', [
+            'token' => $token,
+            'role' => $user->role,
+            'email' => $user->email,
+            'name' => $user->name,
+        ]);
     }
 }

@@ -360,7 +360,7 @@ export default function DashboardSuperAdmin() {
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <BottomBar items={menus.map(item => ({ label: item.key === "admins" ? "Admins" : item.label, href: `/dashboard/${item.key}`, isActive: activeMenu === item.key, onClick: () => setActiveMenu(item.key) }))} />
+            <BottomBar isHidden={isSidebarOpen} items={menus.map(item => ({ label: item.key === "admins" ? "Admins" : item.label, href: `/dashboard/${item.key}`, isActive: activeMenu === item.key, onClick: () => setActiveMenu(item.key) }))} />
         </div>
     );
 }
@@ -628,6 +628,8 @@ const ACTION_FRIENDLY_NAMES = {
     import: "Import Excel",
     store: "Tambah Acara",
     manual_checkin: "Hadir Manual",
+    login: "Login Sistem",
+    logout: "Logout",
 };
 
 function buildDashboardLogs(logs) {

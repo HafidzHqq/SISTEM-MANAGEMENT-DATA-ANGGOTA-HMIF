@@ -32,6 +32,9 @@ Route::get('/login', function () {
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 
+// Dev Login (Local Only)
+Route::get('/dev-login/{role?}', [AuthController::class, 'devLogin']);
+
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
