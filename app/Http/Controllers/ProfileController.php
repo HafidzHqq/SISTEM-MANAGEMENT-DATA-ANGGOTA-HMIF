@@ -14,7 +14,7 @@ class ProfileController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|string|max:100',
             'jabatan'            => 'nullable|string|max:100',
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non Anggota',
             'no_telepon'         => 'nullable|string|max:20'
         ]);
 
@@ -39,7 +39,14 @@ class ProfileController extends Controller
         $departemenColumn = Schema::hasColumn('member_profiles', 'departemen')
             ? 'departemen'
             : 'Departemen';
-        $profileData[$departemenColumn] = $request->input('departemen');
+            
+        if ($request->input('status_keanggotaan') === 'Non Anggota') {
+            $profileData[$departemenColumn] = null;
+            $profileData['jabatan'] = null;
+        } else {
+            $profileData[$departemenColumn] = $request->input('departemen');
+        }
+        
         $profileData['angkatan'] = $angkatan;
 
         $user->memberProfile()->updateOrCreate(

@@ -31,7 +31,10 @@ class MemberController extends Controller
     public function index(Request $request)
     {
         $query = User::with('memberProfile')
-            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES);
+            ->whereIn('role', self::MEMBER_DIRECTORY_ROLES)
+            ->whereDoesntHave('memberProfile', function ($q) {
+                $q->where('status_keanggotaan', 'Non Anggota');
+            });
 
         // Filter by departemen
         if ($request->filled('departemen')) {
@@ -94,7 +97,7 @@ class MemberController extends Controller
         $validator = Validator::make($request->all(), [
             'departemen'         => 'nullable|in:' . implode(',', self::DEPARTMENT_OPTIONS),
             'jabatan'            => 'nullable|in:' . implode(',', self::POSITION_OPTIONS),
-            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa',
+            'status_keanggotaan' => 'nullable|in:Muda,Tetap,Luar Biasa,Non Anggota',
             'no_telepon'         => 'nullable|string|max:20',
         ]);
 
@@ -109,7 +112,13 @@ class MemberController extends Controller
         $departemenColumn = Schema::hasColumn('member_profiles', 'departemen')
             ? 'departemen'
             : 'Departemen';
-        $profileData[$departemenColumn] = $request->input('departemen') ?: null;
+            
+        if ($request->input('status_keanggotaan') === 'Non Anggota') {
+            $profileData[$departemenColumn] = null;
+            $profileData['jabatan'] = null;
+        } else {
+            $profileData[$departemenColumn] = $request->input('departemen') ?: null;
+        }
 
         $profile = $user->memberProfile ?: new \App\Models\MemberProfile();
         $dirty = [];

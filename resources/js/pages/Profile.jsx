@@ -35,6 +35,7 @@ const normalizeProfileForm = (data) => {
     const profile = data?.profile || {};
 
     return {
+        status_keanggotaan: profile.status_keanggotaan || "Muda",
         departemen: profile.departemen || profile.Departemen || "",
         jabatan: normalizeJabatan(profile.jabatan),
         no_telepon: profile.no_telepon || "",
@@ -98,6 +99,7 @@ export default function Profile() {
 
     // Form state
     const [form, setForm] = React.useState({
+        status_keanggotaan: "Muda",
         departemen: "",
         jabatan: "",
         no_telepon: "",
@@ -182,14 +184,17 @@ export default function Profile() {
 
     const name = profile?.name || localStorage.getItem("name") || "Anggota HMIF";
     const nim = profile?.nim || "-";
-    const statusKeanggotaan = profile?.profile?.status_keanggotaan || "Anggota Muda";
-    const statusLabel = statusKeanggotaan.toLowerCase().startsWith("anggota")
-        ? statusKeanggotaan
-        : `Anggota ${statusKeanggotaan}`;
+    const statusKeanggotaan = profile?.profile?.status_keanggotaan || "Muda";
+    const statusLabel = statusKeanggotaan === "Non Anggota" 
+        ? "Non Anggota" 
+        : (statusKeanggotaan.toLowerCase().startsWith("anggota")
+            ? statusKeanggotaan
+            : `Anggota ${statusKeanggotaan}`);
     const email = profile?.email || "-";
     const angkatan = nim.length >= 3 ? "20" + nim.replace(/\D/g, "").substring(1, 3) : "-";
 
     const hasChanges =
+        form.status_keanggotaan !== savedForm.status_keanggotaan ||
         form.departemen !== savedForm.departemen ||
         form.jabatan !== savedForm.jabatan ||
         form.no_telepon !== savedForm.no_telepon ||
@@ -208,6 +213,14 @@ export default function Profile() {
                 return;
             }
             setPhoneError("");
+        }
+        if (name === "status_keanggotaan") {
+            if (value === "Non Anggota") {
+                setForm(prev => ({ ...prev, status_keanggotaan: value, departemen: "", jabatan: "" }));
+            } else {
+                setForm(prev => ({ ...prev, status_keanggotaan: value }));
+            }
+            return;
         }
         if (name === "departemen") {
             const firstJabatan = JABATAN_BY_DEPARTEMEN[value]?.[0] || "";
@@ -359,6 +372,7 @@ export default function Profile() {
             }
 
             const nextForm = {
+            status_keanggotaan: form.status_keanggotaan,
             departemen: form.departemen,
             jabatan: form.jabatan,
             no_telepon: form.no_telepon,
@@ -371,6 +385,7 @@ export default function Profile() {
                 profile: {
                     ...(current?.profile || {}),
                     ...(data.profile || {}),
+                    status_keanggotaan: nextForm.status_keanggotaan,
                     departemen: nextForm.departemen,
                     jabatan: nextForm.jabatan,
                     no_telepon: nextForm.no_telepon,
@@ -542,10 +557,23 @@ export default function Profile() {
                             </div>
                         ))}
                         <p className="text-[0.6rem] font-bold tracking-[0.2em] uppercase text-gray-400 pt-1">Informasi Organisasi</p>
+                        
+                        <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
+                            <p className="text-[0.65rem] text-gray-400 mb-1">Jenis Keanggotaan</p>
+                            <select name="status_keanggotaan" value={form.status_keanggotaan} onChange={handleChange}
+                                className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none">
+                                <option value="Muda">Anggota Muda</option>
+                                <option value="Tetap">Anggota Tetap</option>
+                                <option value="Luar Biasa">Anggota Luar Biasa</option>
+                                <option value="Non Anggota">Non Anggota</option>
+                            </select>
+                        </div>
+
                         <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
                             <p className="text-[0.65rem] text-gray-400 mb-1">Departemen</p>
                             <select name="departemen" value={form.departemen} onChange={handleChange}
-                                className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none">
+                                disabled={form.status_keanggotaan === "Non Anggota"}
+                                className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400 disabled:opacity-50">
                                 <option value="">-- Pilih Departemen --</option>
                                 {DEPARTEMEN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
                             </select>
@@ -556,11 +584,11 @@ export default function Profile() {
                             name="jabatan"
                             value={form.jabatan}
                             onChange={handleChange}
-                            disabled={!form.departemen}
-                            className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
+                            disabled={!form.departemen || form.status_keanggotaan === "Non Anggota"}
+                            className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400 disabled:opacity-50"
                         >
-                            {!form.departemen
-                            ? <option value="">Pilih departemen dulu</option>
+                            {!form.departemen || form.status_keanggotaan === "Non Anggota"
+                            ? <option value="">-</option>
                             : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
                                 <option key={j} value={j}>{j}</option>
                             ))
@@ -601,11 +629,25 @@ export default function Profile() {
                                 <Field label="Nama Lengkap" value={name} />
                                 <Field label="NIM" value={nim} half />
                                 <Field label="Angkatan" value={angkatan} half />
+                                
+                                {/* Status Keanggotaan */}
+                                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 col-span-2 md:col-span-1">
+                                    <p className="text-[0.6rem] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1">Jenis Keanggotaan</p>
+                                    <select name="status_keanggotaan" value={form.status_keanggotaan} onChange={handleChange}
+                                        className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none">
+                                        <option value="Muda">Anggota Muda</option>
+                                        <option value="Tetap">Anggota Tetap</option>
+                                        <option value="Luar Biasa">Anggota Luar Biasa</option>
+                                        <option value="Non Anggota">Non Anggota</option>
+                                    </select>
+                                </div>
+                                
                                 {/* Departemen dropdown */}
-                                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                                <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 col-span-2 md:col-span-1">
                                     <p className="text-[0.6rem] font-bold tracking-[0.14em] uppercase text-gray-400 mb-1">Departemen</p>
                                     <select name="departemen" value={form.departemen} onChange={handleChange}
-                                        className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none">
+                                        disabled={form.status_keanggotaan === "Non Anggota"}
+                                        className="w-full text-[0.92rem] font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400 disabled:opacity-50">
                                         <option value="">-- Pilih --</option>
                                         {DEPARTEMEN_LIST.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
@@ -617,11 +659,11 @@ export default function Profile() {
                                     name="jabatan"
                                     value={form.jabatan}
                                     onChange={handleChange}
-                                    disabled={!form.departemen}
-                                    className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400"
+                                    disabled={!form.departemen || form.status_keanggotaan === "Non Anggota"}
+                                    className="w-full text-sm font-semibold text-gray-800 bg-transparent outline-none disabled:text-gray-400 disabled:opacity-50"
                                 >
-                                    {!form.departemen
-                                    ? <option value="">Pilih departemen dulu</option>
+                                    {!form.departemen || form.status_keanggotaan === "Non Anggota"
+                                    ? <option value="">-</option>
                                     : (JABATAN_BY_DEPARTEMEN[form.departemen] || []).map(j => (
                                         <option key={j} value={j}>{j}</option>
                                     ))
