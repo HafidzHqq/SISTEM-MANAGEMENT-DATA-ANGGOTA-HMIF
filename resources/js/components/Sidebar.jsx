@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import hmifLogo from "../assets/logo-hmif.png";
 import profilePhoto from "../assets/fotoprofile.png";
 
@@ -109,7 +110,7 @@ export default function Sidebar({
 
         const activeKey = pathname === "/dashboard" ? (activeMenu || localStorage.getItem("superadmin_active_menu") || "dashboard") : "";
 
-        return (
+        return createPortal(
             <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
                 {/* Toggle button placed OUTSIDE scrollable area to prevent cutting off */}
                 <button
@@ -123,7 +124,7 @@ export default function Sidebar({
                     </svg>
                 </button>
 
-                <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden w-full h-full scrollbar-none">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden w-full scrollbar-none pb-4">
                     <div className="flex flex-col items-center pt-8 pb-6 px-4">
                         <img
                             src={hmifLogo}
@@ -198,28 +199,38 @@ export default function Sidebar({
                             {!isSidebarCollapsed && <span className="truncate">Dashboard Admin</span>}
                         </button>
                     </nav>
+                </div>
 
-                    <div className="p-4 mt-auto">
-                        {isSidebarCollapsed ? (
-                            <div className="flex flex-col items-center gap-3">
-                                <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="rounded-2xl border border-white/8 bg-white/10 p-3.5 backdrop-blur-sm flex items-center gap-3">
+                <div className="p-4 border-t border-white/10 shrink-0 w-full bg-[#1c5e22] relative z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                    {isSidebarCollapsed ? (
+                        <div className="flex flex-col items-center gap-3">
+                            <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
+                            <div className="flex items-center gap-3">
                                 <img src={profilePhoto} alt="Super Admin" className="h-9 w-9 rounded-full object-cover border border-white/15" />
                                 <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-bold text-white">Super Admin</p>
+                                    <p className="truncate text-[0.9rem] font-bold text-white">Super Admin</p>
                                     <p className="truncate text-[0.72rem] text-white/55 font-medium">admin@hmif.com</p>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                            <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
+                                </svg>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </aside>
+            </aside>,
+            document.body
         );
     }
 
@@ -245,7 +256,7 @@ export default function Sidebar({
         ];
     }
 
-    return (
+    return createPortal(
         <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#1c5e22] text-white transition-all duration-300 md:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:flex-col ${isSidebarCollapsed ? "w-[76px]" : "w-[240px]"}`}>
             {/* Toggle button placed OUTSIDE scrollable area to prevent cutting off */}
             <button
@@ -259,7 +270,7 @@ export default function Sidebar({
                 </svg>
             </button>
 
-            <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden w-full h-full scrollbar-none">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden w-full scrollbar-none pb-4">
                 <div className="flex flex-col items-center pt-8 pb-6 px-4">
                     <img
                         src={hmifLogo}
@@ -337,31 +348,32 @@ export default function Sidebar({
                         </>
                     )}
                 </nav>
-
-                <div className="p-4 mt-auto">
-                    {isSidebarCollapsed ? (
-                        <div className="flex flex-col items-center gap-3">
-                            <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
-                            <p className="truncate text-[0.9rem] font-bold text-white">{userName}</p>
-                            <p className="mt-0.5 truncate text-[0.72rem] text-white/55 font-medium">{nim}</p>
-                            <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
-                                </svg>
-                                <span>Logout</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
             </div>
-        </aside>
+
+            <div className="p-4 border-t border-white/10 shrink-0 w-full bg-[#1c5e22] relative z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                {isSidebarCollapsed ? (
+                    <div className="flex flex-col items-center gap-3">
+                        <button onClick={handleLogout} className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-red-300 hover:bg-white/20 transition-all border border-white/10" title="Logout">
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                        </button>
+                    </div>
+                ) : (
+                    <div className="rounded-2xl border border-white/8 bg-white/10 px-4 py-3.5 backdrop-blur-sm">
+                        <p className="truncate text-[0.9rem] font-bold text-white">{userName}</p>
+                        <p className="mt-0.5 truncate text-[0.72rem] text-white/55 font-medium">{nim}</p>
+                        <button onClick={handleLogout} className="mt-3.5 inline-flex items-center gap-1.5 text-[0.78rem] font-bold text-red-300 transition-all hover:text-red-200 active:scale-95">
+                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 17l5-5-5-5M15 12H3" />
+                            </svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                )}
+            </div>
+        </aside>,
+        document.body
     );
 }

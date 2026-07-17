@@ -30,7 +30,7 @@ html {
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: none;
     }
 }
 
@@ -46,7 +46,7 @@ html {
 }
 
 .page-transition {
-    will-change: opacity, transform;
+    /* Removed will-change to prevent position: fixed breakage */
 }
 
 .page-transition--enter {

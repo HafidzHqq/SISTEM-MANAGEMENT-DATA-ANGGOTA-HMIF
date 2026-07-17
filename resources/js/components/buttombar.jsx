@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
+import { createPortal } from 'react-dom';
 
 const BottomBar = ({
   items = [],
@@ -11,7 +12,8 @@ const BottomBar = ({
   hoveredPillTextColor = '#003f17',
   pillTextColor = '#ffffff',
   className = '',
-  initialLoadAnimation = false
+  initialLoadAnimation = false,
+  isHidden = false
 }) => {
   const resolvedPillTextColor = pillTextColor ?? '#ffffff';
   const circleRefs = useRef([]);
@@ -113,9 +115,9 @@ const BottomBar = ({
     ['--pill-gap']: '6px'
   };
 
-  return (
+  return createPortal(
     <div 
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#1c5e22] border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.16)] flex items-center justify-center py-2 px-3"
+      className={`md:hidden fixed bottom-0 left-0 right-0 z-[999] bg-[#1c5e22]/90 backdrop-blur-2xl border-t border-white/20 shadow-[0_-8px_32px_rgba(0,0,0,0.35)] flex items-center justify-center py-2 px-3 rounded-t-3xl transition-all duration-300 ${isHidden ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}`}
       style={{ margin: 0, paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
     >
       <nav
@@ -223,7 +225,8 @@ const BottomBar = ({
           </ul>
         </div>
       </nav>
-    </div>
+    </div>,
+    document.body
   );
 };
 
