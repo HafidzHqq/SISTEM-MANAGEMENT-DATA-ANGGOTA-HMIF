@@ -11,6 +11,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app" class="w-full overflow-x-hidden"></div>
 </body>
 </html>

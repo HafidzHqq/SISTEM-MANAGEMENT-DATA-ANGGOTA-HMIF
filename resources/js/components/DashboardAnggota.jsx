@@ -325,7 +325,7 @@ const attendanceLabel =
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <BottomBar items={navItems.map(item => ({ label: item.label, href: item.to }))} activeHref="/dashboard/member" />
+            <BottomBar isHidden={isSidebarOpen} items={navItems.map(item => ({ label: item.label, href: item.to }))} activeHref="/dashboard/member" />
         </div>
     );
 }

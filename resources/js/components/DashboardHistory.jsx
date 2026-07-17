@@ -872,7 +872,7 @@ export default function DashboardHistory() {
                 </main>
             </div>
 
-            <BottomBar items={navItems.map(item => ({ label: item.label, href: item.to }))} activeHref="/dashboard/history" />
+            <BottomBar isHidden={isSidebarOpen} items={navItems.map(item => ({ label: item.label, href: item.to }))} activeHref="/dashboard/history" />
         </div>
     );
 }

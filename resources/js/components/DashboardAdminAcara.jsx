@@ -1121,7 +1121,7 @@ export default function DashboardAdminAcara() {
             />
 
             {/* MOBILE NAV */}
-            <BottomBar items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname} />
+            <BottomBar isHidden={isSidebarOpen} items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname} />
         </div>
     );
 }
