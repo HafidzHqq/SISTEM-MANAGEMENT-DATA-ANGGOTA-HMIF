@@ -75,14 +75,21 @@ class AuthController extends Controller
         }
 
         // Cek status akun
-        $existingUser = User::where('nim', $nim)->first();
+        $existingUser = User::with('memberProfile')->where('nim', $nim)->first();
         if ($existingUser && $existingUser->status === 'non-aktif') {
+            $isLuarBiasa = $existingUser->memberProfile?->status_keanggotaan === 'Luar Biasa';
             return $this->redirectToFrontend('/login', [
-                'error' => 'akun_nonaktif',
+                'error' => $isLuarBiasa ? 'menunggu_validasi' : 'akun_nonaktif',
             ]);
         }
 
         $targetRole = $existingUser?->role ?? 'anggota';
+
+        $statusKeanggotaan = in_array($angkatan, ['22', '23'], true)
+            ? 'Tetap'
+            : ($angkatan === '24' ? 'Muda' : 'Luar Biasa');
+
+        $isNewLuarBiasa = !$existingUser && $statusKeanggotaan === 'Luar Biasa';
 
         $user = User::updateOrCreate(
             ['nim' => $nim],
@@ -91,17 +98,13 @@ class AuthController extends Controller
                 'name'      => $googleUser->getName(),
                 'email'     => $email,
                 'role'      => $targetRole,
-                'status'    => 'aktif',
+                'status'    => $isNewLuarBiasa ? 'non-aktif' : 'aktif',
             ]
         );
 
         $departemenColumn = Schema::hasColumn('member_profiles', 'departemen')
             ? 'departemen'
             : 'Departemen';
-
-        $statusKeanggotaan = in_array($angkatan, ['22', '23'], true)
-            ? 'Tetap'
-            : ($angkatan === '24' ? 'Muda' : 'Luar Biasa');
 
         $user->memberProfile()->firstOrCreate(
             ['user_id' => $user->user_id],
@@ -112,6 +115,12 @@ class AuthController extends Controller
                 'status_keanggotaan' => $statusKeanggotaan,
             ]
         );
+
+        if ($isNewLuarBiasa) {
+            return $this->redirectToFrontend('/login', [
+                'error' => 'menunggu_validasi',
+            ]);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

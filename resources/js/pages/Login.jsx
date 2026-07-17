@@ -18,6 +18,8 @@ const ERROR_LABEL = {
         "Login hanya tersedia untuk mahasiswa Informatika.",
     akun_nonaktif:
         "Akun Anda sedang nonaktif. Hubungi admin HMIF.",
+    menunggu_validasi:
+        "Pendaftaran berhasil. Akun Anggota Luar Biasa Anda sedang menunggu validasi dari Admin.",
 };
 
 export default function Login() {

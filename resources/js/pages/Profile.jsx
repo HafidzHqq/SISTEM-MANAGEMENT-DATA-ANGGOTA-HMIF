@@ -371,6 +371,15 @@ export default function Profile() {
                 throw new Error(data.message || "Gagal menyimpan");
             }
 
+            if (data.logout) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
+                localStorage.removeItem("email");
+                localStorage.removeItem("name");
+                window.location.href = "/login?error=menunggu_validasi";
+                return;
+            }
+
             const nextForm = {
             status_keanggotaan: form.status_keanggotaan,
             departemen: form.departemen,

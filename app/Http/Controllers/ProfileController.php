@@ -54,10 +54,19 @@ class ProfileController extends Controller
             $profileData
         );
 
+        $isPendingValidation = false;
+        if ($request->input('status_keanggotaan') === 'Luar Biasa' && $user->status !== 'non-aktif') {
+            $user->status = 'non-aktif';
+            $user->save();
+            $user->tokens()->delete();
+            $isPendingValidation = true;
+        }
+
         $profile = $user->fresh()->memberProfile;
 
         return response()->json([
-            'message' => 'Profil berhasil diperbarui',
+            'message' => $isPendingValidation ? 'Profil diperbarui. Akun Anda menunggu validasi Admin.' : 'Profil berhasil diperbarui',
+            'logout'  => $isPendingValidation,
             'profile' => $profile,
         ]);
     }
