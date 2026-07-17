@@ -466,14 +466,45 @@ export default function DashboardAdminLaporan() {
     const safePage = Math.min(page, totalPages);
     const paginated = rows.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE);
 
-    // Export uses backend CSV for one event, or manual CSV for all events.
-    const downloadCsv = (content, filename) => {
-        const blob = content instanceof Blob
-            ? content
-            : new Blob([content], { type: "text/csv;charset=utf-8;" });
+    const handleExportExcel = () => {
+        const headers = ["ID Anggota", "Nama Lengkap", "Departemen", "Acara", "Waktu Presensi", "Status"];
+        
+        const html = `
+        <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+        <head>
+            <meta charset="utf-8">
+            <style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #10b981; color: white; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <table>
+                <thead>
+                    <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                </thead>
+                <tbody>
+                    ${rows.map(r => `
+                        <tr>
+                            <td>${r.id}</td>
+                            <td>${r.nama}</td>
+                            <td>${r.divisi}</td>
+                            <td>${r.acara}</td>
+                            <td>${r.waktu}</td>
+                            <td>${r.status}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </body>
+        </html>`;
+
+        const blob = new Blob([html], { type: "application/vnd.ms-excel" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
+        const filename = filterEventId === "semua" ? "laporan-kehadiran.xls" : `rekap-kehadiran-event-${filterEventId}.xls`;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
@@ -489,29 +520,6 @@ export default function DashboardAdminLaporan() {
         setDateEnd("");
         setPage(1);
         setOpenFilterPicker(null);
-    };
-
-    const handleExportCsv = async () => {
-        if (filterEventId !== "semua") {
-            try {
-                const response = await fetch(`/api/events/${filterEventId}/attendances/export-csv`, {
-                    headers: getAuthHeaders(),
-                });
-
-                if (!response.ok) throw new Error("Gagal export CSV");
-
-                downloadCsv(await response.blob(), `rekap-kehadiran-event-${filterEventId}.csv`);
-            } catch (err) {
-                setError(err.message || "Gagal export CSV");
-            }
-            return;
-        }
-
-        const h = ["ID Anggota", "Nama Lengkap", "Departemen", "Acara", "Waktu Presensi", "Status"];
-        const lines = [h.map(csvEscape).join(","), ...rows.map(r =>
-            [r.id, r.nama, r.divisi, r.acara, r.waktu, r.status].map(csvEscape).join(",")
-        )];
-        downloadCsv(lines.join("\n"), "laporan-kehadiran.csv");
     };
 
     // SVG circular progress
@@ -593,9 +601,11 @@ export default function DashboardAdminLaporan() {
                                 <p className="mt-1.5 text-[0.82rem] leading-relaxed text-slate-600 sm:text-[1rem]">Analisis kehadiran anggota HMIF secara komprehensif.</p>
                             </div>
                             <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-end">
-                                <button onClick={handleExportCsv} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                    Export CSV
+                                <button onClick={handleExportExcel} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-500 bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600">
+                                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Export Excel
                                 </button>
                                 <button onClick={handleResetFilters} className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-lg bg-[#1f7a2c] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#186322]">
                                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v6h6M20 20v-6h-6M5.5 18.5A8 8 0 0118.5 5.5M18.5 5.5H14M18.5 5.5V10" /></svg>

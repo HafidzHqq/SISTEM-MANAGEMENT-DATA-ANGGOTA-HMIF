@@ -617,30 +617,49 @@ export default function DashboardAdminAnggota() {
         });
     };
 
-    const handleExportCsv = () => {
+    const handleExportExcel = () => {
         const headers = ["No", "NIM", "Nama", "Kontak", "Email", "Angkatan", "Departemen", "Jabatan", "Status", "Akses Sistem"];
-        const csvRows = [
-            headers.map(csvEscape).join(","),
-            ...filteredRows.map((row, index) =>
-                [
-                    index + 1,
-                    row.nim,
-                    row.nama,
-                    row.kontak,
-                    row.email,
-                    row.angkatan,
-                    row.divisi,
-                    row.jabatan,
-                    row.status,
-                    row.roleLabel,
-                ].map(csvEscape).join(",")
-            ),
-        ];
-        const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        
+        const html = `
+        <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+        <head>
+            <meta charset="utf-8">
+            <style>
+                table { border-collapse: collapse; width: 100%; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #10b981; color: white; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <table>
+                <thead>
+                    <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                </thead>
+                <tbody>
+                    ${filteredRows.map((row, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${row.nim}</td>
+                            <td>${row.nama}</td>
+                            <td>${row.kontak}</td>
+                            <td>${row.email}</td>
+                            <td>${row.angkatan}</td>
+                            <td>${row.divisi}</td>
+                            <td>${row.jabatan}</td>
+                            <td>${row.status}</td>
+                            <td>${row.roleLabel}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </body>
+        </html>`;
+
+        const blob = new Blob([html], { type: "application/vnd.ms-excel" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "data-anggota-hmif.csv";
+        link.download = "data-anggota-hmif.xls";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -984,14 +1003,14 @@ export default function DashboardAdminAnggota() {
                             <div className="flex items-center gap-3">
                                 <button
                                     type="button"
-                                    onClick={handleExportCsv}
+                                    onClick={handleExportExcel}
                                     disabled={isLoadingMembers || filteredRows.length === 0}
-                                    className="inline-flex items-center gap-2 rounded-[6px] border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-[6px] border border-emerald-500 bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M6 11v6m6-6v6m6-6v6M5 19h14" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
-                                    Export CSV
+                                    Export Excel
                                 </button>
                                 <button
                                     type="button"
