@@ -310,6 +310,7 @@ export default function DashboardAdminLaporan() {
     // Filter state
     const [filterEventId, setFilterEventId] = useState("semua");
     const [filterDivisi, setFilterDivisi] = useState("Semua Departemen");
+    const [filterKeanggotaan, setFilterKeanggotaan] = useState("Semua Keanggotaan");
     const [dateStart, setDateStart] = useState("");
     const [dateEnd, setDateEnd] = useState("");
     const [page, setPage] = useState(1);
@@ -390,7 +391,7 @@ export default function DashboardAdminLaporan() {
 
     }, [filterEventId, events]);
 
-    useEffect(() => { setPage(1); }, [filterEventId, filterDivisi, dateStart, dateEnd]);
+    useEffect(() => { setPage(1); }, [filterEventId, filterDivisi, filterKeanggotaan, dateStart, dateEnd]);
 
     // Normalisasi & filter di FE (divisi + date range)
     const rows = useMemo(() => {
@@ -408,15 +409,24 @@ export default function DashboardAdminLaporan() {
                     waktu: formatDateTimeDisplay(checkinValue),
                     status: (r.status === "present" || r.status === "HADIR") ? "HADIR" : "TIDAK HADIR",
                     rawDate: toDateKey(checkinValue) || toDateKey(event?.date_time),
+                    statusKeanggotaan: r.status_keanggotaan ?? r.member?.status_keanggotaan ?? r.user?.profile?.status_keanggotaan ?? "-",
                 };
             })
             .filter(r => {
                 const matchDivisi = filterDivisi === "Semua Departemen" || r.divisi === filterDivisi;
                 const matchDateStart = !dateStart || !r.rawDate || r.rawDate >= dateStart;
                 const matchDateEnd = !dateEnd || !r.rawDate || r.rawDate <= dateEnd;
-                return matchDivisi && matchDateStart && matchDateEnd;
+                
+                let matchKeanggotaan = true;
+                if (filterKeanggotaan === "Anggota") {
+                    matchKeanggotaan = r.statusKeanggotaan !== "Non Anggota";
+                } else if (filterKeanggotaan === "Non Anggota") {
+                    matchKeanggotaan = r.statusKeanggotaan === "Non Anggota";
+                }
+
+                return matchDivisi && matchDateStart && matchDateEnd && matchKeanggotaan;
             });
-    }, [attendances, filterDivisi, dateStart, dateEnd, events]);
+    }, [attendances, filterDivisi, filterKeanggotaan, dateStart, dateEnd, events]);
 
     // Departemen unik dari data
     const divisions = useMemo(() => {
@@ -436,10 +446,21 @@ export default function DashboardAdminLaporan() {
         ...Array.from(new Set([...DEPARTMENT_OPTIONS, ...divisions])).map(division => ({ value: division, label: division })),
     ], [divisions]);
 
+    const keanggotaanFilterOptions = [
+        { value: "Semua Keanggotaan", label: "Semua Keanggotaan" },
+        { value: "Anggota", label: "Anggota" },
+        { value: "Non Anggota", label: "Non Anggota" },
+    ];
+
+    const isNonAnggotaOnly = filterKeanggotaan === "Non Anggota";
+    const validStatsRows = rows.filter(r => !(r.statusKeanggotaan === "Non Anggota" && r.status === "TIDAK Hadir")); // Exclude absent non-members from denominator
+
     const totalHadir = rows.filter(r => r.status === "HADIR").length;
-    const totalTidak = rows.filter(r => r.status === "TIDAK HADIR").length;
-    const persen = rows.length > 0 ? ((totalHadir / rows.length) * 100).toFixed(1) : "0.0";
-    const persenInt = Math.round(Number(persen));
+    const totalTidak = isNonAnggotaOnly ? "-" : rows.filter(r => r.status === "TIDAK HADIR" && r.statusKeanggotaan !== "Non Anggota").length;
+    
+    const statsDenominator = rows.filter(r => r.status === "HADIR" || (r.status === "TIDAK HADIR" && r.statusKeanggotaan !== "Non Anggota")).length;
+    const persen = isNonAnggotaOnly ? "-" : (statsDenominator > 0 ? ((totalHadir / statsDenominator) * 100).toFixed(1) : "0.0");
+    const persenInt = isNonAnggotaOnly ? 0 : Math.round(Number(persen));
 
     const totalPages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
     const safePage = Math.min(page, totalPages);
@@ -463,6 +484,7 @@ export default function DashboardAdminLaporan() {
     const handleResetFilters = () => {
         setFilterEventId("semua");
         setFilterDivisi("Semua Departemen");
+        setFilterKeanggotaan("Semua Keanggotaan");
         setDateStart("");
         setDateEnd("");
         setPage(1);
@@ -589,7 +611,7 @@ export default function DashboardAdminLaporan() {
                                     <svg className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
                                     <h3 className="text-lg font-bold text-slate-800">Parameter Laporan</h3>
                                 </div>
-                                <div className="grid gap-x-4 gap-y-4 md:grid-cols-2">
+                                <div className="grid gap-x-4 gap-y-4 md:grid-cols-2 lg:grid-cols-3">
                                     <div>
                                         <label className="mb-1 block text-xs font-semibold text-slate-500">Pilih Acara</label>
                                         <SelectPickerField
@@ -608,6 +630,16 @@ export default function DashboardAdminLaporan() {
                                             onChange={setFilterDivisi}
                                             isOpen={openFilterPicker === "division"}
                                             onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "division" : null)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-1 block text-xs font-semibold text-slate-500">Status Keanggotaan</label>
+                                        <SelectPickerField
+                                            value={filterKeanggotaan}
+                                            options={keanggotaanFilterOptions}
+                                            onChange={setFilterKeanggotaan}
+                                            isOpen={openFilterPicker === "keanggotaan"}
+                                            onOpenChange={(isOpen) => setOpenFilterPicker(isOpen ? "keanggotaan" : null)}
                                         />
                                     </div>
                                     <div>
@@ -659,7 +691,7 @@ export default function DashboardAdminLaporan() {
                                     <div>
                                         <p className="text-[0.7rem] font-bold uppercase tracking-wider text-white/70">Persentase Kehadiran</p>
                                         <p className="text-[2.2rem] font-extrabold text-white leading-none mt-1">
-                                            {isLoading ? "-" : `${persen}%`}
+                                            {isLoading ? "-" : (persen === "-" ? "-" : `${persen}%`)}
                                         </p>
                                     </div>
                                     <div className="relative flex items-center justify-center shrink-0">
@@ -667,7 +699,9 @@ export default function DashboardAdminLaporan() {
                                             <circle cx="45" cy="45" r={radius} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth={stroke} />
                                             <circle cx="45" cy="45" r={radius} fill="none" stroke="#f5bf17" strokeWidth={stroke} strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} transform="rotate(-90 45 45)" style={{ transition: "stroke-dashoffset 0.6s ease" }} />
                                         </svg>
-                                        <span className="absolute text-xs font-bold text-white">{persenInt}%</span>
+                                        <span className="absolute text-xs font-bold text-white">
+                                            {isNonAnggotaOnly ? "-" : `${persenInt}%`}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -742,7 +776,7 @@ export default function DashboardAdminLaporan() {
             </div>
 
             {/* MOBILE BOTTOM NAV */}
-            <BottomBar items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname} />
+            <BottomBar isHidden={isSidebarOpen} items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname} />
         </div>
     );
 }

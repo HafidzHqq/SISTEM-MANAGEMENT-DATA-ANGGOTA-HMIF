@@ -148,6 +148,7 @@ export default function DashboardAdmin() {
     const location = useLocation();
     const pathname = location.pathname;
     const [trendRange, setTrendRange] = React.useState("30D");
+    const [trendKeanggotaan, setTrendKeanggotaan] = React.useState("Anggota");
     const [dashboardData, setDashboardData] = React.useState(null);
     const [dashboardError, setDashboardError] = React.useState("");
     const [isDashboardLoading, setIsDashboardLoading] = React.useState(false);
@@ -247,7 +248,16 @@ export default function DashboardAdmin() {
         })
         .slice(-8);
     const totalMembersVal = Number(summary.total_attendance_participants || 1);
-    const trendMax = Math.max(...trendItems.map((item) => Number(item.total_present || 0)), totalMembersVal, 1);
+    const trendMax = Math.max(
+        ...trendItems.flatMap((item) => {
+            const vals = [];
+            if (trendKeanggotaan === "Anggota" || trendKeanggotaan === "Semua") vals.push(Number(item.total_present || 0));
+            if (trendKeanggotaan === "Non Anggota" || trendKeanggotaan === "Semua") vals.push(Number(item.total_present_non_anggota || 0));
+            return vals;
+        }),
+        totalMembersVal,
+        1
+    );
 
 
     const handleLogout = () => {
@@ -385,40 +395,85 @@ export default function DashboardAdmin() {
                                             <img src={iconGrafikTotal} alt="" className="h-5 w-5 object-contain " />
                                             <h3 className="text-[1.2rem] font-bold">Tren Partisipasi</h3>
                                         </div>
-                                        <div className="relative">
-                                            <select
-                                                value={trendRange}
-                                                onChange={(event) => setTrendRange(event.target.value)}
-                                                className="h-11 appearance-none rounded-[6px] border border-slate-200 bg-slate-100 pl-4 pr-10 text-sm font-semibold text-slate-700 outline-none transition hover:bg-slate-50 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
-                                            >
-                                                {TREND_RANGE_OPTIONS.map((option) => (
-                                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                                ))}
-                                            </select>
-                                            <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
+                                        <div className="flex items-center gap-2">
+                                            <div className="relative">
+                                                <select
+                                                    value={trendKeanggotaan}
+                                                    onChange={(event) => setTrendKeanggotaan(event.target.value)}
+                                                    className="h-11 appearance-none rounded-[6px] border border-slate-200 bg-slate-100 pl-4 pr-10 text-sm font-semibold text-slate-700 outline-none transition hover:bg-slate-50 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                                                >
+                                                    <option value="Anggota">Anggota HMIF</option>
+                                                    <option value="Non Anggota">Non Anggota</option>
+                                                    <option value="Semua">Semua Keanggotaan</option>
+                                                </select>
+                                                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                            <div className="relative">
+                                                <select
+                                                    value={trendRange}
+                                                    onChange={(event) => setTrendRange(event.target.value)}
+                                                    className="h-11 appearance-none rounded-[6px] border border-slate-200 bg-slate-100 pl-4 pr-10 text-sm font-semibold text-slate-700 outline-none transition hover:bg-slate-50 focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                                                >
+                                                    {TREND_RANGE_OPTIONS.map((option) => (
+                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                    ))}
+                                                </select>
+                                                <svg className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="mt-6 rounded-[8px] bg-slate-50 p-4 ring-1 ring-slate-100">
+                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 px-2">
+                                            <div className="flex items-center gap-4 text-xs font-bold text-slate-600">
+                                                {(trendKeanggotaan === "Anggota" || trendKeanggotaan === "Semua") && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="h-3 w-3 rounded-sm bg-[#1c5e22]" />
+                                                        <span>Anggota HMIF</span>
+                                                    </div>
+                                                )}
+                                                {(trendKeanggotaan === "Non Anggota" || trendKeanggotaan === "Semua") && (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="h-3 w-3 rounded-sm bg-emerald-400" />
+                                                        <span>Non Anggota</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                         <div className="h-[350px] rounded-[4px] bg-white px-4 pb-4 pt-6">
                                             {trendItems.length > 0 ? (
                                                 <div className="flex h-full items-end justify-start gap-3 sm:gap-4 overflow-x-auto pb-1.5 scrollbar-thin">
                                                     {trendItems.map((item) => {
                                                         const totalPresent = Number(item.total_present || 0);
-                                                        const barHeight = totalPresent > 0
+                                                        const totalPresentNon = Number(item.total_present_non_anggota || 0);
+                                                        const barHeightAnggota = totalPresent > 0
                                                             ? Math.max(6, Math.round((totalPresent / trendMax) * 100))
+                                                            : 0;
+                                                        const barHeightNonAnggota = totalPresentNon > 0
+                                                            ? Math.max(6, Math.round((totalPresentNon / trendMax) * 100))
                                                             : 0;
 
                                                         return (
                                                             <div key={item.event_id} className="flex h-full w-28 sm:w-32 shrink-0 flex-col items-center justify-end gap-2">
-                                                                <div className="flex w-full flex-1 items-end justify-center">
-                                                                    <div
-                                                                        className="w-16 sm:w-20 rounded-t-[8px] bg-[#1c5e22] shadow-sm transition-all hover:bg-emerald-600"
-                                                                        style={{ height: `${barHeight}%` }}
-                                                                        title={`${item.title}: ${formatNumber(item.total_present)} hadir`}
-                                                                    />
+                                                                <div className="flex w-full flex-1 items-end justify-center gap-1.5">
+                                                                    {(trendKeanggotaan === "Anggota" || trendKeanggotaan === "Semua") && (
+                                                                        <div
+                                                                            className={`${trendKeanggotaan === 'Semua' ? 'w-8 sm:w-10 rounded-t-[4px]' : 'w-16 sm:w-20 rounded-t-[8px]'} bg-[#1c5e22] shadow-sm transition-all hover:bg-emerald-700`}
+                                                                            style={{ height: `${barHeightAnggota}%` }}
+                                                                            title={`Anggota HMIF: ${formatNumber(item.total_present)} hadir`}
+                                                                        />
+                                                                    )}
+                                                                    {(trendKeanggotaan === "Non Anggota" || trendKeanggotaan === "Semua") && (
+                                                                        <div
+                                                                            className={`${trendKeanggotaan === 'Semua' ? 'w-8 sm:w-10 rounded-t-[4px]' : 'w-16 sm:w-20 rounded-t-[8px]'} bg-emerald-400 shadow-sm transition-all hover:bg-emerald-500`}
+                                                                            style={{ height: `${barHeightNonAnggota}%` }}
+                                                                            title={`Non Anggota: ${formatNumber(item.total_present_non_anggota)} hadir`}
+                                                                        />
+                                                                    )}
                                                                 </div>
                                                                 <div className="w-full text-center">
                                                                     <p className="text-[0.68rem] font-semibold text-slate-500">{formatShortDate(item.date_time)}</p>
@@ -515,7 +570,7 @@ export default function DashboardAdmin() {
                     </div>
                 </div>
 
-            <BottomBar items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname === "/dashboard" ? "/dashboard/admin-overview" : pathname} />
+            <BottomBar isHidden={isSidebarOpen} items={NAV_ITEMS.map(item => ({ label: item.label, href: item.to }))} activeHref={pathname === "/dashboard" ? "/dashboard/admin-overview" : pathname} />
         </div>
     );
 }

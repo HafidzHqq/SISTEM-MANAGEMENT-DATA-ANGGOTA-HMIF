@@ -12,13 +12,23 @@ class DashboardController extends Controller
 {
     public function attendanceStatistics()
     {
-        $eligibleUserIds = User::whereIn('role', ['anggota', 'admin', 'super_admin'])
-            ->where('status', 'aktif')
-            ->pluck('user_id');
+        $eligibleUserIds = User::whereIn('users.role', ['anggota', 'admin', 'super_admin'])
+            ->where('users.status', 'aktif')
+            ->whereDoesntHave('memberProfile', function($q) {
+                $q->where('status_keanggotaan', 'Non Anggota');
+            })
+            ->pluck('users.user_id');
 
-        $totalMembers = User::whereIn('role', ['anggota', 'admin', 'super_admin'])->where('status', 'aktif')->count();
+        $nonAnggotaUserIds = User::whereIn('users.role', ['anggota', 'admin', 'super_admin'])
+            ->where('users.status', 'aktif')
+            ->whereHas('memberProfile', function($q) {
+                $q->where('status_keanggotaan', 'Non Anggota');
+            })
+            ->pluck('users.user_id');
+
+        $totalMembers = $eligibleUserIds->count();
         $totalAdmins = User::whereIn('role', ['admin', 'super_admin'])->where('status', 'aktif')->count();
-        $totalAttendanceParticipants = $eligibleUserIds->count();
+        $totalAttendanceParticipants = $totalMembers;
         $totalEvents = Event::where(function($query) {
             $query->where('date_time', '<=', now())
                   ->orWhere('attendance_window_start', '<=', now());
@@ -137,7 +147,7 @@ class DashboardController extends Controller
             })
             ->orderBy('date_time')
             ->get()
-            ->map(function ($event) use ($eligibleUserIds) {
+            ->map(function ($event) use ($eligibleUserIds, $nonAnggotaUserIds) {
                 return [
                     'event_id' => $event->event_id,
                     'title' => $event->title,
@@ -147,8 +157,14 @@ class DashboardController extends Controller
                         ->whereIn('user_id', $eligibleUserIds)
                         ->distinct('user_id')
                         ->count('user_id'),
+                    'total_present_non_anggota' => Attendance::where('event_id', $event->event_id)
+                        ->where('status', 'present')
+                        ->whereIn('user_id', $nonAnggotaUserIds)
+                        ->distinct('user_id')
+                        ->count('user_id'),
                 ];
-            });
+            })
+            ->values();
 
         $recentAttendances = Attendance::where('status', 'present')
             ->whereIn('user_id', $eligibleUserIds)
