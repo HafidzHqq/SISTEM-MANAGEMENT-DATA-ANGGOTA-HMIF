@@ -240,17 +240,17 @@ const mapMemberRow = (member, index) => {
         id: member.user_id ?? member.id ?? index + 1,
         nim: member.nim ?? "-",
         nama: member.name ?? member.nama ?? "-",
+        email: member.email ?? "-",
         kontak: profile.no_telepon ?? profile.no_telp ?? profile.phone ?? member.no_telepon ?? "-",
         angkatan: profile.angkatan ?? member.angkatan ?? "-",
         divisi: normalizeDepartment(profile.departemen ?? profile.Departemen ?? profile.divisi ?? member.departemen ?? "-"),
         jabatan: normalizeJabatan(profile.jabatan ?? member.jabatan),
         status: normalizeMemberStatus(profile.status_keanggotaan ?? member.status_keanggotaan),
+        status_akun: member.status ?? "aktif",
         role,
         roleLabel: roleLabels[role] || role,
         canDelete: role === "anggota",
-        email: member.email ?? "-",
-        foto: profile.foto ?? member.foto ?? null,
-        lastUpdate: profile.updated_at ?? member.updated_at ?? null,
+        lastUpdate: member.updated_at ?? "-",
     };
 };
 
@@ -754,6 +754,7 @@ export default function DashboardAdminAnggota() {
             jabatan: toEditableJabatan(member.jabatan),
             no_telepon: member.kontak === "-" ? "" : member.kontak,
             status_keanggotaan: toApiMemberStatus(member.status),
+            status_akun: member.status_akun || "aktif",
         });
         setIsMemberSaved(false);
         setMemberActionError("");
@@ -791,6 +792,7 @@ export default function DashboardAdminAnggota() {
             jabatan: editMemberForm.jabatan.trim(),
             no_telepon: editMemberForm.no_telepon.trim(),
             status_keanggotaan: editMemberForm.status_keanggotaan,
+            status: editMemberForm.status_akun,
         };
 
         try {
@@ -1059,7 +1061,8 @@ export default function DashboardAdminAnggota() {
                                             <th className="w-[100px] py-4 px-4">ANGKATAN</th>
                                             <th className="w-[145px] py-4 px-4">DEPARTEMEN</th>
                                             <th className="w-[155px] py-4 px-4">JABATAN</th>
-                                            <th className="w-[135px] py-4 px-4">STATUS</th>
+                                            <th className="w-[135px] py-4 px-4">STATUS ANGGOTA</th>
+                                            <th className="w-[135px] py-4 px-4">STATUS AKUN</th>
                                             <th className="w-[90px] py-4 px-4 text-right">AKSI</th>
                                         </tr>
                                     </thead>
@@ -1104,6 +1107,11 @@ export default function DashboardAdminAnggota() {
                                                 <td className="py-5 px-4 align-middle">
                                                     <span className={`inline-flex rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] ${statusClasses[row.status]}`}>
                                                         {row.status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-5 px-4 align-middle">
+                                                    <span className={`inline-flex rounded-full px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.14em] ${row.status_akun === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                                        {row.status_akun === 'aktif' ? 'Aktif' : 'Nonaktif (Validasi)'}
                                                     </span>
                                                 </td>
                                                 <td className="py-5 px-4 align-middle">
@@ -1303,6 +1311,19 @@ export default function DashboardAdminAnggota() {
                                                 {STATUS_OPTIONS.map((option) => (
                                                     <option key={option.value} value={option.value}>{option.label}</option>
                                                 ))}
+                                            </select>
+                                        </label>
+
+                                        <label className="block rounded-[12px] bg-[#f5f5f5] px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+                                            <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-slate-500">STATUS AKUN (VALIDASI)</span>
+                                            <select
+                                                name="status_akun"
+                                                value={editMemberForm.status_akun}
+                                                onChange={handleEditMemberChange}
+                                                className="mt-3 h-[46px] w-full rounded-[8px] border border-slate-200 bg-white px-3 text-[0.95rem] text-slate-800 outline-none focus:border-[#1f5e22] focus:ring-2 focus:ring-emerald-100"
+                                            >
+                                                <option value="aktif">Aktif (Tervalidasi)</option>
+                                                <option value="non-aktif">Nonaktif (Menunggu Validasi)</option>
                                             </select>
                                         </label>
                                     </div>

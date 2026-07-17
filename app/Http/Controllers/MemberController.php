@@ -120,6 +120,11 @@ class MemberController extends Controller
             $profileData[$departemenColumn] = $request->input('departemen') ?: null;
         }
 
+        if ($request->has('status') && in_array($request->status, ['aktif', 'non-aktif'])) {
+            $user->status = $request->status;
+            $user->save();
+        }
+
         $profile = $user->memberProfile ?: new \App\Models\MemberProfile();
         $dirty = [];
         foreach ($profileData as $key => $value) {
@@ -146,6 +151,10 @@ class MemberController extends Controller
                 default => $field,
             };
             $detailsList[] = "$fieldName: \"{$change['old']}\" -> \"{$change['new']}\"";
+        }
+        
+        if ($request->has('status') && $user->wasChanged('status')) {
+             $detailsList[] = "Status Akun: -> \"{$user->status}\"";
         }
         $details = implode(', ', $detailsList);
 
